@@ -19,9 +19,8 @@ fn current() -> String {
 
 /*********🌟 print_prompt 🌟********/
 pub fn print_prompt() {
-  print!("{}", "~".bold().yellow());
-  print!("{}", current().bold().truecolor(199, 21, 133));
-  print!("{} ", "$".bold().yellow());
+  let begin = format!("{}{}{} ", "~".bold().yellow(), current().bold().truecolor(199, 21, 133), "$".bold().yellow());
+  print!("{}", begin);
   io::stdout().flush().unwrap();
 }
 
