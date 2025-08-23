@@ -3,8 +3,8 @@ use std::io::Write;
 
 /*********🌟 print_prompt 🌟********/
 pub fn print_prompt() {
-   let begin = "~$";
-
+  let begin = "$";
+  
   print!("{0} ", begin);
   io::stdout().flush().unwrap();
 }

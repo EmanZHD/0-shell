@@ -7,8 +7,8 @@ use consts::{ TITLE, GREEN, RESET };
 // use commands::echo::echo;
 use commands::pwd::pwd;
 use commands::exit::exit;
-use commands::man::man;
-// use commands::cd::cd;
+use commands::guide::guide;
+use commands::cd::cd;
 
 fn main() {
     println!("{GREEN}{}{RESET}", TITLE);
@@ -16,7 +16,8 @@ fn main() {
     let mut dispatcher: HashMap<&str, fn(Vec<&str>)> = HashMap::new();
     dispatcher.insert("pwd", pwd);
     dispatcher.insert("exit", exit);
-    dispatcher.insert("man", man);
+    dispatcher.insert("guide", guide);
+    dispatcher.insert("cd", cd);
     // println!("MAP {:?}", dispatcher);
     loop {
         print_prompt();
