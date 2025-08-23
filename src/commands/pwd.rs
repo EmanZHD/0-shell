@@ -8,7 +8,7 @@ pub fn initial_pwd() -> io::Result<()> {
     Ok(())
 }
 
-pub fn pwd(_args: Vec<&str>) {
+pub fn pwd(_args: Vec<String>) {
     if let Err(e) = initial_pwd() {
         eprintln!("⛔ Error running pwd command: {}", e);
     }
