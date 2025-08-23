@@ -4,13 +4,12 @@ use std::io::{ self };
 pub fn initial_pwd() -> io::Result<()> {
     let current_dir = env::current_dir()?;
     let path = current_dir.to_string_lossy();
-    println!("testtt{}", path);
+    println!("{}", path);
     Ok(())
 }
 
-pub fn pwd(_args: &mut Vec<&str>) {
-    // println!("testtt00");
+pub fn pwd(_args: Vec<String>) {
     if let Err(e) = initial_pwd() {
-        eprintln!("Erreur lors de l'exécution de la commande pwd : {}", e);
+        eprintln!("⛔ Error running pwd command: {}", e);
     }
 }

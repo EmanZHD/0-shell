@@ -7,8 +7,8 @@ use consts::{ TITLE, GREEN, RESET };
 // use commands::echo::echo;
 use commands::pwd::pwd;
 use commands::exit::exit;
-use commands::man::man;
-// use commands::cd::cd;
+use commands::guide::guide;
+use commands::cd::cd;
 use commands::ls::ls;
 
 fn main() {
@@ -16,26 +16,21 @@ fn main() {
 
     loop {
         print_prompt();
-        let cmd = read_input();
-        let cms: Vec<&str> = cmd.split_whitespace().collect();
-        handle_cmds(cms);
+        let (keyword, arguments) = read_input();
+        handle_cmds(keyword, arguments);
     }
 }
 
-pub fn handle_cmds(input: Vec<&str>) {
-    let mut dispatcher: HashMap<&str, fn(&mut Vec<&str>)> = HashMap::new();
+pub fn handle_cmds(keyword: String, arguments: Vec<String>) {
+    let mut dispatcher: HashMap<&str, fn(Vec<String>)> = HashMap::new();
     dispatcher.insert("pwd", pwd);
     dispatcher.insert("exit", exit);
-    dispatcher.insert("man", man);
-    dispatcher.insert("ls", ls);
-    // println!("MAP {:?}", dispatcher);
-    let keyword = input[0];
-    println!("✅ Verification: Keyword: {0}", keyword);
-    let mut arguments = input[1..].to_vec();
-    println!("✅ Verification: Number of arguments: {0:?}", arguments.len());
+    dispatcher.insert("guide", guide);
+    dispatcher.insert("cd", cd); 
+    dispatcher.insert("ls", ls); 
 
-    match dispatcher.get(keyword) {
-        Some(func) => func(&mut arguments),
+    match dispatcher.get(&keyword.as_str()) {
+        Some(func) => func(arguments),
         None => println!("0-shell: Command Not Found: {} ☹️", keyword),
     }
 }

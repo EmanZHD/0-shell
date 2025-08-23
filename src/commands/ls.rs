@@ -1,4 +1,4 @@
-use std::{ fs, thread::panicking };
+use std::{ fs, io };
 use colored::Colorize;
 use std::path::PathBuf;
 
@@ -14,7 +14,7 @@ pub fn ls_printer(list: &mut Vec<(String, bool)>) {
     println!();
 }
 
-pub fn ls_helper(path_name: &str) {
+pub fn ls_helper(path_name: &str) -> Result<(), io::Error> {
     let mut content: Vec<(String, bool)> = vec![];
 
     match fs::read_dir(path_name) {
@@ -40,64 +40,54 @@ pub fn ls_helper(path_name: &str) {
                 }
             }
             ls_printer(&mut content);
+            Ok(())
         }
+        // Err(_e) => { eprintln!("ls: cannot access '{}': No such file or directory", path_name) }
         Err(e) => {
-            eprintln!("can't read dir: {}", e)
-            // let path: PathBuf = PathBuf::from(path_name);
-            // if path.is_file() {
-            //     match path.to_str() {
-            //         Some(s) => { println!("{}", s) }
-            //         None => println!("Path is not valid UTF-8"),
-            //     }
-            // } else {
-            //     match path.to_str() {
-            //         Some(s) => { eprintln!("can't read {} dir: {}", s, e) }
-            //         None => println!("Path is not valid UTF-8"),
-            //     }
-            // }
+            eprintln!("ls: cannot access '{}': {}", path_name, e);
+            Err(e)
         }
     }
 }
 
-pub fn ls(args: &mut Vec<&str>) {
-    println!("LS args => {:?}", args);
-    let mut path_name = "./".to_owned();
+pub fn ls(args: Vec<String>) {
+    let mut new_args: Vec<String> = args.clone();
+    println!("LS args BEFORE=> {:?}", new_args);
+    let mut path_name = "./";
     if args.len() > 1 {
-        args.sort();
-        for (i, path_n) in args.iter().enumerate() {
+        new_args.sort();
+        println!("LS args AFTER=> {:?}", new_args);
+        for (i, path_n) in new_args.iter().enumerate() {
             let path: PathBuf = PathBuf::from(path_n);
             // println!("testt--- {}", path.is_file());
             if path.is_file() {
-                match path.to_str() {
-                    Some(s) => {
-                        path_n = s;
-                    }
-                    None => println!("Path not vqlid"),
+                if let Err(e) = ls_helper(path_n) {
+                    eprintln!("EROOR HERE'{}': {}", path_n, e);
                 }
+                println!("{}", path_n);
             } else {
                 println!("{}:", path_n);
+                if let Err(e) = ls_helper(path_n) {
+                    eprintln!("EROOR HERE'{}': {}", path_n, e);
+                }
             }
-            ls_helper(path_name);
-            if i != args.len() - 1 {
+            if i != new_args.len() - 1 {
                 println!();
             }
         }
     } else {
-        if args.len() == 1 {
-            path_name = args[0];
+        if new_args.len() == 1 {
+            path_name = &new_args[0];
             let path: PathBuf = PathBuf::from(path_name);
             // println!("testt--- {}", path.is_file());
             if path.is_file() {
-                match path.to_str() {
-                    Some(s) => {
-                        println!("{}", s);
-                        return;
-                    }
-                    None => println!("Path not vqlid"),
-                }
+                println!("{}", path_name);
+                return;
             }
         }
-        ls_helper(path_name);
+        if let Err(e) = ls_helper(path_name) {
+            eprintln!("EROOR HERE'{}': {}", path_name, e);
+        }
         // println!("check type-> ", path_name.path().is_file());
     }
 }

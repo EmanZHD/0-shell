@@ -1,10 +1,8 @@
-pub fn man(_args: &mut Vec<&str>) {
+pub fn guide(_args: Vec<String>) {
     println!("Commands:");
     println!("\t\x1b[1m\x1b[34mcd:\x1b[0m Changes the current directory.");
     println!("\t\x1b[1m\x1b[35mman:\x1b[0m Prints built in commands descriptions");
-    println!(
-        "\t\x1b[1m\x1b[31mexit:\x1b[0m Closes the minishell and all of it's processes.\x1b[0m"
-    );
+    println!("\t\x1b[1m\x1b[31mexit:\x1b[0m Closes the 0-shell and all of it's processes.\x1b[0m");
     println!("\t\x1b[1m\x1b[33mcat:\x1b[0m Displays the content of a file.");
     println!("\t\x1b[1m\x1b[36mecho:\x1b[0m Displays defined text.");
     println!("\t\x1b[1m\x1b[32mls:\x1b[0m Lists directory contents.");
