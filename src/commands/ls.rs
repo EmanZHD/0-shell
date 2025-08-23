@@ -24,8 +24,6 @@ pub fn ls_helper(path_name: &str) -> Result<(), io::Error> {
                 match entry {
                     Ok(dir_entry) => {
                         let p = dir_entry.path();
-                        // println!("DIR ENTRY -> {:?}", p.is_file());
-                        // if p.is_file() || p.is_dir() {
                         if let Some(filename) = dir_entry.file_name().to_str() {
                             if filename.len() >= 1 && filename.starts_with('.') {
                                 continue;
@@ -34,7 +32,6 @@ pub fn ls_helper(path_name: &str) -> Result<(), io::Error> {
                                 // print!("{}  ", filename);
                             }
                         }
-                        // }
                     }
                     Err(e) => eprintln!("err in reading this entry: {}", e),
                 }
@@ -42,7 +39,6 @@ pub fn ls_helper(path_name: &str) -> Result<(), io::Error> {
             ls_printer(&mut content);
             Ok(())
         }
-        // Err(_e) => { eprintln!("ls: cannot access '{}': No such file or directory", path_name) }
         Err(e) => {
             eprintln!("ls: cannot access '{}': {}", path_name, e);
             Err(e)
@@ -52,24 +48,20 @@ pub fn ls_helper(path_name: &str) -> Result<(), io::Error> {
 
 pub fn ls(args: Vec<String>) {
     let mut new_args: Vec<String> = args.clone();
-    println!("LS args BEFORE=> {:?}", new_args);
+    // println!("LS args BEFORE=> {:?}", new_args);
     let mut path_name = "./";
     if args.len() > 1 {
         new_args.sort();
-        println!("LS args AFTER=> {:?}", new_args);
         for (i, path_n) in new_args.iter().enumerate() {
             let path: PathBuf = PathBuf::from(path_n);
             // println!("testt--- {}", path.is_file());
             if path.is_file() {
-                if let Err(e) = ls_helper(path_n) {
-                    eprintln!("EROOR HERE'{}': {}", path_n, e);
-                }
                 println!("{}", path_n);
-            } else {
+            } else if path.is_dir() {
                 println!("{}:", path_n);
-                if let Err(e) = ls_helper(path_n) {
-                    eprintln!("EROOR HERE'{}': {}", path_n, e);
-                }
+                let _ = ls_helper(path_n);
+            } else {
+                eprintln!("ls: cannot access '{}': No such file or directory", path_n);
             }
             if i != new_args.len() - 1 {
                 println!();
@@ -85,9 +77,7 @@ pub fn ls(args: Vec<String>) {
                 return;
             }
         }
-        if let Err(e) = ls_helper(path_name) {
-            eprintln!("EROOR HERE'{}': {}", path_name, e);
-        }
+        let _ = ls_helper(path_name);
         // println!("check type-> ", path_name.path().is_file());
     }
 }
