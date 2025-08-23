@@ -1,6 +1,6 @@
 use std::{ fs, io };
 use colored::Colorize;
-use std::path::PathBuf;
+use std::path::Path;
 
 pub fn ls_printer(list: &mut Vec<(String, bool)>) {
     list.sort();
@@ -16,68 +16,53 @@ pub fn ls_printer(list: &mut Vec<(String, bool)>) {
 
 pub fn ls_helper(path_name: &str) -> Result<(), io::Error> {
     let mut content: Vec<(String, bool)> = vec![];
-
-    match fs::read_dir(path_name) {
-        Ok(entries) => {
-            // println!("track entries -> {:?}  ", entries);
-            for entry in entries {
-                match entry {
-                    Ok(dir_entry) => {
-                        let p = dir_entry.path();
-                        if let Some(filename) = dir_entry.file_name().to_str() {
-                            if filename.len() >= 1 && filename.starts_with('.') {
-                                continue;
-                            } else {
-                                content.push((filename.to_owned(), p.is_dir()));
-                                // print!("{}  ", filename);
-                            }
-                        }
+    // println!("🪄 track entries -> {:?}  ", content);
+    for entry in fs::read_dir(path_name)? {
+        match entry {
+            Ok(dir_entry) => {
+                let p = dir_entry.path();
+                if let Some(file_name) = dir_entry.file_name().to_str() {
+                    if !file_name.is_empty() && !file_name.starts_with('.') {
+                        content.push((file_name.to_owned(), p.is_dir()));
                     }
-                    Err(e) => eprintln!("err in reading this entry: {}", e),
                 }
             }
-            ls_printer(&mut content);
-            Ok(())
-        }
-        Err(e) => {
-            eprintln!("ls: cannot access '{}': {}", path_name, e);
-            Err(e)
+            Err(_e) => eprintln!("error in readinf '{}'", path_name),
         }
     }
+    ls_printer(&mut content);
+    Ok(())
 }
 
 pub fn ls(args: Vec<String>) {
-    let mut new_args: Vec<String> = args.clone();
-    // println!("LS args BEFORE=> {:?}", new_args);
-    let mut path_name = "./";
-    if args.len() > 1 {
-        new_args.sort();
-        for (i, path_n) in new_args.iter().enumerate() {
-            let path: PathBuf = PathBuf::from(path_n);
-            // println!("testt--- {}", path.is_file());
-            if path.is_file() {
-                println!("{}", path_n);
-            } else if path.is_dir() {
-                println!("{}:", path_n);
-                let _ = ls_helper(path_n);
-            } else {
-                eprintln!("ls: cannot access '{}': No such file or directory", path_n);
-            }
-            if i != new_args.len() - 1 {
-                println!();
-            }
-        }
+    let mut new_args: Vec<String> = if args.is_empty() {
+        vec!["./".to_string()]
     } else {
-        if new_args.len() == 1 {
-            path_name = &new_args[0];
-            let path: PathBuf = PathBuf::from(path_name);
-            // println!("testt--- {}", path.is_file());
-            if path.is_file() {
-                println!("{}", path_name);
-                return;
+        args.clone()
+    };
+    new_args.sort();
+    // println!("LS args BEFORE=> {:?}", new_args);
+
+    for (i, path_str) in new_args.iter().enumerate() {
+        let path_name = Path::new(path_str);
+        // println!("🪄 metaaDATA -> {:?}", path_name.metadata());
+        match path_name.metadata() {
+            Ok(path_data) => {
+                if path_data.is_file() {
+                    println!("{}", path_str);
+                } else if path_data.is_dir() {
+                    // print!("{}  ", path_data);
+                    if args.len() > 1 {
+                        println!("{}:", path_str);
+                    }
+                    let _ = ls_helper(path_str);
+                }
             }
+            Err(_) => eprintln!("ls: cannot access '{}': No such file or directory", path_str),
         }
-        let _ = ls_helper(path_name);
-        // println!("check type-> ", path_name.path().is_file());
+
+        if i != new_args.len() - 1 {
+            println!();
+        }
     }
 }
