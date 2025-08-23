@@ -1,4 +1,4 @@
-pub fn man(_args: Vec<&str>) {
+pub fn man(_args: &mut Vec<&str>) {
     println!("Commands:");
     println!("\t\x1b[1m\x1b[34mcd:\x1b[0m Changes the current directory.");
     println!("\t\x1b[1m\x1b[35mman:\x1b[0m Prints built in commands descriptions");

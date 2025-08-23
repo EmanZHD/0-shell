@@ -22,9 +22,8 @@ fn main() {
     }
 }
 
-
 pub fn handle_cmds(input: Vec<&str>) {
-    let mut dispatcher: HashMap<&str, fn(Vec<&str>)> = HashMap::new();
+    let mut dispatcher: HashMap<&str, fn(&mut Vec<&str>)> = HashMap::new();
     dispatcher.insert("pwd", pwd);
     dispatcher.insert("exit", exit);
     dispatcher.insert("man", man);
@@ -32,11 +31,11 @@ pub fn handle_cmds(input: Vec<&str>) {
     // println!("MAP {:?}", dispatcher);
     let keyword = input[0];
     println!("✅ Verification: Keyword: {0}", keyword);
-    let arguments = input[1..].to_vec();
+    let mut arguments = input[1..].to_vec();
     println!("✅ Verification: Number of arguments: {0:?}", arguments.len());
 
     match dispatcher.get(keyword) {
-        Some(func) => func(arguments),
+        Some(func) => func(&mut arguments),
         None => println!("0-shell: Command Not Found: {} ☹️", keyword),
     }
 }
