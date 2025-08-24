@@ -47,6 +47,34 @@ impl Files {
             _ => path_str.white(),
         }
     }
+
+    pub fn file_symbol(&self, path_str: &ColoredString) -> String {
+        // println!("INSIDE TYPES---> {:?}", self)
+        match self {
+            Files::Dir => {
+                path_str.to_string().push('/');
+                return path_str.to_string();
+            }
+            Files::Exec => {
+                path_str.to_string().push('*');
+                return path_str.to_string();
+            }
+            Files::Socket => {
+                path_str.to_string().push('=');
+                return path_str.to_string();
+            }
+            Files::Fifo => {
+                path_str.to_string().push('|');
+                return path_str.to_string();
+            }
+
+            Files::Symlink => {
+                path_str.to_string().push('@');
+                return path_str.to_string();
+            }
+            _ => path_str.to_string(),
+        }
+    }
 }
 
 pub fn ls_printer(list: &mut Vec<(String, Files)>) {
@@ -81,11 +109,16 @@ pub fn ls_helper(path_name: &str) -> Result<(), io::Error> {
 }
 
 pub fn ls(args: Vec<String>) {
+    let mut detect_flag = false;
     let mut new_args: Vec<String> = if args.is_empty() {
         vec!["./".to_string()]
     } else {
         args.clone()
     };
+    if new_args.len() >= 1 {
+        let flag = new_args.pop().unwrap_or(".".to_owned());
+        println!("CHECK FLAG -> {} . {}", flag, detect_flag);
+    }
     new_args.sort();
     // println!("LS args BEFORE=> {:?}", new_args);
     for (i, path_str) in new_args.iter().enumerate() {
