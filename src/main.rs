@@ -13,19 +13,20 @@ use commands::history::history;
 
 fn main() {
     println!("{GREEN}{}{RESET}", TITLE);
-    let mut historique: Vec<String> = Vec::new();
+    let mut historique: Vec<(i32 ,String)> = Vec::new();
     let mut count = 1;
 
     loop {
         print_prompt();
         let (keyword, arguments) = read_input();
-        historique.push(format!("{}  {} {}", count, keyword, arguments.join(" ")));
+        let valeur = format!("{} {}", keyword.clone(), arguments.join(" "));
+        historique.push((count, valeur));
         handle_cmds(keyword, arguments, &mut historique);
         count+=1;
     }
 }
 
-pub fn handle_cmds(keyword: String, arguments: Vec<String>, historique: &mut Vec<String>) {
+pub fn handle_cmds(keyword: String, arguments: Vec<String>, historique: &mut Vec<(i32, String)>) {
     if keyword == "history" {
         history(historique);
         return;
@@ -35,10 +36,17 @@ pub fn handle_cmds(keyword: String, arguments: Vec<String>, historique: &mut Vec
     dispatcher.insert("exit", exit);
     dispatcher.insert("guide", guide);
     dispatcher.insert("cd", cd); 
-    // dispatcher.insert("history", history); 
 
     match dispatcher.get(&keyword.as_str()) {
         Some(func) => func(arguments),
         None => println!("0-shell: Command Not Found: {} ☹️", keyword),
     }
 }
+
+// fn format(num: i32, str1: String, str2: String) -> String {
+//    if num < 10 {
+//      format!(" {}  {} {}", num, str1, str2)
+//    }else {
+//      format!("{}  {} {}", num, str1, str2)
+//    }
+// }
