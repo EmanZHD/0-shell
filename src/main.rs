@@ -9,6 +9,7 @@ use commands::pwd::pwd;
 use commands::exit::exit;
 use commands::guide::guide;
 use commands::cd::cd;
+use commands::history::history;
 
 fn main() {
     println!("{GREEN}{}{RESET}", TITLE);
@@ -26,6 +27,7 @@ pub fn handle_cmds(keyword: String, arguments: Vec<String>) {
     dispatcher.insert("exit", exit);
     dispatcher.insert("guide", guide);
     dispatcher.insert("cd", cd); 
+    dispatcher.insert("history", history); 
 
     match dispatcher.get(&keyword.as_str()) {
         Some(func) => func(arguments),

@@ -27,12 +27,24 @@ pub fn print_prompt() {
 /*********🌟 read_input 🌟********/
 pub fn read_input() -> (String, Vec<String>) {
     let mut cmd = String::new();
+    let histoire: Vec<String> = Vec::new();
     io::stdin().read_line(&mut cmd).expect("Failed to read in command");
     println!("✅ Verification: cmd: {:?}", cmd);
     let cms: Vec<String> = cmd.split_whitespace().map(|s| s.to_string()).collect();
+    append_his(histoire, cmd);
     let keyword = cms[0].to_string();
     let arguments = cms[1..].to_vec();
     println!("✅ Verification: keyword: {:?}", keyword);
     println!("✅ Verification: arguments: {:?}", arguments);
     (keyword, arguments)
+}
+
+fn append_his(mut histoire: Vec<String> ,cmd: String) -> Vec<String> {
+  if cmd == "exit" {
+     histoire = vec![];
+  }else {
+    histoire.push(cmd.trim().to_string());
+  }
+  println!("=> histoire: {:?}", histoire);
+  histoire
 }
