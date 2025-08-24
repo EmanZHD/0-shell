@@ -1,33 +1,41 @@
-use std::collections::HashMap;
 mod parser;
-mod commands;
 mod consts;
-use parser::{ read_input, print_prompt };
+mod commands;
+use std::collections::HashMap;
 use consts::{ TITLE, GREEN, RESET };
+use parser::{ read_input, print_prompt };
 // use commands::echo::echo;
+use commands::cd::cd;
 use commands::pwd::pwd;
 use commands::exit::exit;
 use commands::guide::guide;
-use commands::cd::cd;
 use commands::history::history;
 
 fn main() {
     println!("{GREEN}{}{RESET}", TITLE);
+    let mut historique: Vec<String> = Vec::new();
+    let mut count = 1;
 
     loop {
         print_prompt();
         let (keyword, arguments) = read_input();
-        handle_cmds(keyword, arguments);
+        historique.push(format!("{}  {} {}", count, keyword, arguments.join(" ")));
+        handle_cmds(keyword, arguments, &mut historique);
+        count+=1;
     }
 }
 
-pub fn handle_cmds(keyword: String, arguments: Vec<String>) {
+pub fn handle_cmds(keyword: String, arguments: Vec<String>, historique: &mut Vec<String>) {
+    if keyword == "history" {
+        history(historique);
+        return;
+    }
     let mut dispatcher: HashMap<&str, fn(Vec<String>)> = HashMap::new();
     dispatcher.insert("pwd", pwd);
     dispatcher.insert("exit", exit);
     dispatcher.insert("guide", guide);
     dispatcher.insert("cd", cd); 
-    dispatcher.insert("history", history); 
+    // dispatcher.insert("history", history); 
 
     match dispatcher.get(&keyword.as_str()) {
         Some(func) => func(arguments),
