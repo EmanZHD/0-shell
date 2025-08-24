@@ -1,4 +1,4 @@
-use std::{ fs, io, os::unix::fs::FileTypeExt };
+use std::{ fs, io, iter::FlatMap, os::unix::fs::FileTypeExt };
 use colored::{ ColoredString, Colorize };
 use std::path::Path;
 use is_executable::is_executable;
@@ -49,7 +49,7 @@ impl Files {
     }
 
     pub fn file_symbol(&self, path_str: &ColoredString) -> String {
-        // println!("INSIDE TYPES---> {:?}", self)
+        println!("INSIDE SYmbole---> {:?}", self);
         match self {
             Files::Dir => {
                 path_str.to_string().push('/');
@@ -67,7 +67,6 @@ impl Files {
                 path_str.to_string().push('|');
                 return path_str.to_string();
             }
-
             Files::Symlink => {
                 path_str.to_string().push('@');
                 return path_str.to_string();
@@ -77,15 +76,19 @@ impl Files {
     }
 }
 
-pub fn ls_printer(list: &mut Vec<(String, Files)>) {
+pub fn ls_printer(list: &mut Vec<(String, Files)>, flag: bool) {
     list.sort_by(|f1, f2| f1.0.cmp(&f2.0));
     for c in list {
-        print!("{} ", c.1.file_color(&c.0));
+        if !flag {
+            print!("{} ", c.1.file_color(&c.0));
+        } else {
+            print!("{} ", c.1.file_symbol(&c.1.file_color(&c.0)));
+        }
     }
     println!();
 }
 
-pub fn ls_helper(path_name: &str) -> Result<(), io::Error> {
+pub fn ls_helper(path_name: &str, flag: bool) -> Result<(), io::Error> {
     let mut content: Vec<(String, Files)> = vec![];
     // println!("🪄 track entries -> {:?}  ", content);
     for entry in fs::read_dir(path_name)? {
@@ -104,21 +107,25 @@ pub fn ls_helper(path_name: &str) -> Result<(), io::Error> {
     }
     // content.sort();
     // detect_file_type(&p);
-    ls_printer(&mut content);
+    ls_printer(&mut content, flag);
     Ok(())
 }
 
 pub fn ls(args: Vec<String>) {
     let mut detect_flag = false;
+    let mut arg = args.clone();
+
     let mut new_args: Vec<String> = if args.is_empty() {
         vec!["./".to_string()]
+    } else if args.len() == 1 && args[0] == "-F" {
+        detect_flag = true;
+        arg.pop();
+        vec!["./".to_string()]
     } else {
-        args.clone()
+        arg
     };
-    if new_args.len() >= 1 {
-        let flag = new_args.pop().unwrap_or(".".to_owned());
-        println!("CHECK FLAG -> {} . {}", flag, detect_flag);
-    }
+
+    println!("🏳️ CHECK FLAG {:?}", detect_flag);
     new_args.sort();
     // println!("LS args BEFORE=> {:?}", new_args);
     for (i, path_str) in new_args.iter().enumerate() {
@@ -133,7 +140,7 @@ pub fn ls(args: Vec<String>) {
                     if args.len() > 1 {
                         println!("{}:", path_str);
                     }
-                    let _ = ls_helper(path_str);
+                    let _ = ls_helper(path_str, detect_flag);
                 }
             }
             Err(_) => eprintln!("ls: cannot access '{}': No such file or directory", path_str),
