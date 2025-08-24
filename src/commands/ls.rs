@@ -49,35 +49,24 @@ impl Files {
     }
 
     pub fn file_symbol(&self, path_str: &ColoredString) -> String {
-        println!("INSIDE SYmbole---> {:?}", self);
+        // println!("INSIDE SYmbole---> {:?}", self);
+        let mut s = path_str.to_string();
         match self {
-            Files::Dir => {
-                path_str.to_string().push('/');
-                return path_str.to_string();
-            }
-            Files::Exec => {
-                path_str.to_string().push('*');
-                return path_str.to_string();
-            }
-            Files::Socket => {
-                path_str.to_string().push('=');
-                return path_str.to_string();
-            }
-            Files::Fifo => {
-                path_str.to_string().push('|');
-                return path_str.to_string();
-            }
-            Files::Symlink => {
-                path_str.to_string().push('@');
-                return path_str.to_string();
-            }
-            _ => path_str.to_string(),
+            Files::Dir => s.push('/'),
+            Files::Exec => s.push('*'),
+            Files::Socket => s.push('='),
+            Files::Fifo => s.push('|'),
+            Files::Symlink => s.push('@'),
+            _ => {}
         }
+        s
     }
 }
 
 pub fn ls_printer(list: &mut Vec<(String, Files)>, flag: bool) {
-    list.sort_by(|f1, f2| f1.0.cmp(&f2.0));
+    // list.sort_by(|f1, f2| f1.0.cmp(&f2.0));
+    list.sort_by(|f1, f2| f1.0.to_lowercase().cmp(&f2.0.to_lowercase()));
+
     for c in list {
         if !flag {
             print!("{} ", c.1.file_color(&c.0));
@@ -122,6 +111,12 @@ pub fn ls(args: Vec<String>) {
         arg.pop();
         vec!["./".to_string()]
     } else {
+        if let Some(last) = arg.last() {
+            if last == "-F" {
+                detect_flag = true;
+                arg.pop();
+            }
+        }
         arg
     };
 
