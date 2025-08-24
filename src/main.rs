@@ -1,5 +1,6 @@
 mod shell; // 👈 This tells Rust to look for `shell.rs`
 mod errors; // 👈 This tells Rust to look for `errors.rs`
+mod commands;  // This reads commands/mod.rs
 use shell::spawn_user_input_handler; // 👈 Import the function
 #[tokio::main]
 async fn main() {
