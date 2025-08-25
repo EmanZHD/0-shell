@@ -9,6 +9,7 @@ use commands::cd::cd;
 use commands::pwd::pwd;
 use commands::exit::exit;
 use commands::guide::guide;
+use commands::clear::clear;
 use commands::history::history;
 
 fn main() {
@@ -32,21 +33,14 @@ pub fn handle_cmds(keyword: String, arguments: Vec<String>, historique: &mut Vec
         return;
     }
     let mut dispatcher: HashMap<&str, fn(Vec<String>)> = HashMap::new();
+    dispatcher.insert("cd", cd); 
     dispatcher.insert("pwd", pwd);
     dispatcher.insert("exit", exit);
     dispatcher.insert("guide", guide);
-    dispatcher.insert("cd", cd); 
+    dispatcher.insert("clear", clear);
 
     match dispatcher.get(&keyword.as_str()) {
         Some(func) => func(arguments),
         None => println!("0-shell: Command Not Found: {} ☹️", keyword),
     }
 }
-
-// fn format(num: i32, str1: String, str2: String) -> String {
-//    if num < 10 {
-//      format!(" {}  {} {}", num, str1, str2)
-//    }else {
-//      format!("{}  {} {}", num, str1, str2)
-//    }
-// }

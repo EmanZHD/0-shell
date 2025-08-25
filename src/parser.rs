@@ -24,6 +24,12 @@ pub fn print_prompt() {
   io::stdout().flush().unwrap();
 }
 
+// /*********🌟 print_quote_prompt 🌟********/
+// pub fn print_quote_prompt() {
+//   print!("quote> ");
+//   io::stdout().flush().unwrap();
+// }
+
 /*********🌟 read_input 🌟********/
 pub fn read_input() -> (String, Vec<String>) {
     let mut cmd = String::new();
