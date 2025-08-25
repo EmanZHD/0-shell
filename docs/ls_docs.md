@@ -9,3 +9,14 @@
 | Socket          | =/ s   | python3 -c "import socket as s; sock=s.socket(s.AF_UNIX); sock.bind('mysocket')" | IPC endpoint           |
 | FIFO            | \|     | mkfifo myfifo                                                                    | Named pipe / queue     |
 | Door            | >/D    | Only Solaris: use door_create() + fattach()                                      | IPC (Solaris only)     |
+
+
+## TO DO
+- error cases to HAndle
+
+```
+ls --F
+ls: unrecognized option '--F'
+```
+```
+ls emty_Dir -> print /n
