@@ -24,10 +24,38 @@ pub fn print_prompt() {
   io::stdout().flush().unwrap();
 }
 
-// /*********🌟 print_quote_prompt 🌟********/
-// pub fn print_quote_prompt() {
-//   print!("quote> ");
-//   io::stdout().flush().unwrap();
+/*********🌟 print_quote_prompt 🌟********/
+pub fn print_quote_prompt() {
+  print!("quote> ");
+  io::stdout().flush().unwrap();
+}
+
+/*********🌟 print_quote_prompt 🌟********/
+// fn parsing(input: String) {
+//   let mut in_quotes = false;
+//   let mut new_input = String::new();
+//   let mut quote = ' '; // bach nchad lquote
+//     for c in input.chars() {
+//        match c {
+//           '\'' | '"' if !in_quotes => {
+//                 in_quotes = true;
+//                 quote = ch; // pour memoriser le type de quote
+//           }
+//           '\'' | '"' if in_quotes && ch == quote => {
+//               in_quotes = false; // fermeture de la quote du m type
+//           }
+//           ' ' | '\t' if !in_quotes => {
+//              if !new_input.is_empty() {
+//                 tokens.push(current_token);
+//                 new_input = String::new();
+//               }
+//           }
+//           _ => {
+//               new_input.push(ch);
+//           }
+//        }
+//     }
+
 // }
 
 /*********🌟 read_input 🌟********/
