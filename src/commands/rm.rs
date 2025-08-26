@@ -12,7 +12,6 @@ pub fn rm(path: &str) -> CrateResult<()> {
                         Err(_) => eprintln!("rm: cannot remove {}: No such file", split_value[0]),    
                        }  
                           Ok(())
-
       }else if  split_value.len() == 2 {
             match split_value[0] {
                   "-r" => {

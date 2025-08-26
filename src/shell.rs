@@ -22,8 +22,8 @@ impl TryFrom<&str> for Command {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         let split_value: Vec<&str> = value.split_whitespace().collect();
-// println!("====={:?}" , split_value);
-
+    // println!("====={:?}" , split_value);
+        
         match split_value[0] {
             "mkdir" => {
                 if split_value.len() != 2 {
