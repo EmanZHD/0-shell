@@ -20,3 +20,5 @@ ls: unrecognized option '--F'
 ```
 ```
 ls emty_Dir -> print /n
+
+delete new line paleaaase => assigned by the QUEEN hasnae elamrani

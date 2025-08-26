@@ -22,7 +22,10 @@ pub fn print_prompt() {
     print!("{}", "~".bold().yellow());
     print!("{}", current().bold().truecolor(199, 21, 133));
     print!("{} ", "$".bold().yellow());
-    io::stdout().flush().unwrap();
+    match io::stdout().flush() {
+        Ok(()) => return    ,
+        _ => eprintln!("broken pipe"),
+    }
 }
 
 /*********🌟 read_input 🌟********/
