@@ -1,4 +1,4 @@
-use std::env;
+use std::env::{self};
 use std::io::{ self };
 
 pub fn initial_pwd() -> io::Result<()> {
@@ -8,7 +8,11 @@ pub fn initial_pwd() -> io::Result<()> {
     Ok(())
 }
 
-pub fn pwd(_args: Vec<String>) {
+pub fn pwd(args: Vec<String>) {
+    if args.len() > 0 {
+       println!("pwd: too many arguments ‼️");
+       return;
+    }
     if let Err(e) = initial_pwd() {
         eprintln!("⛔ Error running pwd command: {}", e);
     }
