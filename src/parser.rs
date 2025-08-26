@@ -24,21 +24,89 @@ pub fn print_prompt() {
   io::stdout().flush().unwrap();
 }
 
+/*********🌟 print_quote_prompt 🌟********/
+pub fn print_quote_prompt() {
+  print!("> ");
+  io::stdout().flush().unwrap();
+}
+
+/***********🌟 parsing 🌟**********/
+fn parsing(input: &str) -> Result<Vec<String>, String> {
+  let mut in_quotes = false;
+  let mut new = Vec::new();
+  let mut new_input = String::new();
+  let mut quote = ' '; // bach nchad lquote
+    for c in input.chars() {
+       match c {
+          '\'' | '"' if !in_quotes => {
+                in_quotes = true;
+                quote = c; // pour memoriser le type de quote
+          }
+          '\'' | '"' if in_quotes && c == quote => {
+              in_quotes = false; // fermeture de la quote du m type
+          }
+          ' ' | '\t' if !in_quotes => {
+             if !new_input.is_empty() {
+                new.push(new_input);
+                new_input = String::new();
+              }
+          }
+          _ => {
+              new_input.push(c);
+          }
+        }
+      }
+      if in_quotes {
+         return Err("unclosed quotes 😓".to_string());
+      }
+
+      if !new_input.is_empty() {
+          new.push(new_input);
+      }
+      Ok(new)
+  } 
+
 /*********🌟 read_input 🌟********/
 pub fn read_input() -> (String, Vec<String>) {
     let mut cmd = String::new();
     
-    io::stdin().read_line(&mut cmd).expect("Failed to read in command");
-    println!("✅ Verification: cmd: {:?}", cmd);
-    let cms: Vec<String> = cmd.split_whitespace().map(|s| s.to_string()).collect();
-    if !cms.is_empty() {
-      let keyword = cms[0].to_string();
-      let arguments = cms[1..].to_vec();
-      println!("✅ Verification: keyword: {:?}", keyword);
-      println!("✅ Verification: arguments: {:?}", arguments);
-      (keyword, arguments)
-    } else {
-      println!("✅ Verification: Input is empty");
-      ("".to_string(), Vec::new())
-    }  
+    loop {
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).expect("Failed to read input");
+        
+        let input = input.trim_end();
+        println!("✅ Input: {:?}", input);
+        
+        if cmd.is_empty() {
+            cmd = input.to_string();
+        } else {
+            cmd = format!("{} {}", cmd, input); // wa9ila khas new line machy espace ⁉️ 
+            println!("👽 else 88: {:?}", cmd);
+        }
+        
+        println!("✅ Command line: {:?}", cmd);
+        
+        match parsing(&cmd) {
+            Ok(elements) => {
+                if elements.is_empty() {
+                    return (String::new(), Vec::new()); // je doix handler cette partie 😭
+                }
+                
+                let command = elements[0].clone();
+                let args = if elements.len() > 1 {
+                    elements[1..].to_vec()
+                } else {
+                    Vec::new()
+                };
+                
+                println!("✅ Command: {:?}", command);
+                println!("✅ Arguments: {:?}", args);
+                
+                return (command, args);
+            }
+            Err(_) => {
+                print_quote_prompt();
+            }
+        }
+    }
 }

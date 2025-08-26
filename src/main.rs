@@ -21,6 +21,7 @@ fn main() {
     loop {
         print_prompt();
         let (keyword, arguments) = read_input();
+        println!("{}, {:?}", keyword, arguments);
         let valeur = format!("{} {}", keyword.clone(), arguments.join(" "));
         historique.push((count, valeur));
         handle_cmds(keyword, arguments, &mut historique);
@@ -35,12 +36,11 @@ pub fn handle_cmds(keyword: String, arguments: Vec<String>, historique: &mut Vec
     }
     let mut dispatcher: HashMap<&str, fn(Vec<String>)> = HashMap::new();
     dispatcher.insert("cd", cd); 
+    dispatcher.insert("ls", ls); 
     dispatcher.insert("pwd", pwd);
     dispatcher.insert("exit", exit);
     dispatcher.insert("guide", guide);
     dispatcher.insert("clear", clear);
-    dispatcher.insert("cd", cd); 
-    dispatcher.insert("ls", ls); 
 
     match dispatcher.get(&keyword.as_str()) {
         Some(func) => func(arguments),
