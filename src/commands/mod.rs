@@ -7,3 +7,4 @@ pub mod clear;
 pub mod guide;
 pub mod history;
 pub mod cat;
+pub mod mv;

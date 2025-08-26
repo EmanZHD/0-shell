@@ -15,11 +15,12 @@ pub fn cat(args: Vec<String>) {
 }
 
 // 💁‍♀️​ handle only cat 💁‍♀️​
-fn only_cat() {
+fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
     println!("Reading from stdin (Ctrl+D to end) ☺️​:");
     let mut buffer = String::new();
     io::stdin().read_to_string(&mut buffer)?;
     print!("{}", buffer);
+    Ok(())
 }
 
 // 💁‍♀️​ handle cat + plusieurs arg(files) 💁‍♀️​
