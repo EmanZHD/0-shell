@@ -6,10 +6,11 @@ use consts::{ TITLE, GREEN, RESET };
 use parser::{ read_input, print_prompt };
 // use commands::echo::echo;
 use commands::cd::cd;
+use commands::ls::ls;
 use commands::pwd::pwd;
 use commands::exit::exit;
-use commands::guide::guide;
 use commands::clear::clear;
+use commands::guide::guide;
 use commands::history::history;
 
 fn main() {
@@ -38,6 +39,8 @@ pub fn handle_cmds(keyword: String, arguments: Vec<String>, historique: &mut Vec
     dispatcher.insert("exit", exit);
     dispatcher.insert("guide", guide);
     dispatcher.insert("clear", clear);
+    dispatcher.insert("cd", cd); 
+    dispatcher.insert("ls", ls); 
 
     match dispatcher.get(&keyword.as_str()) {
         Some(func) => func(arguments),
