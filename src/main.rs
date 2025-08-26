@@ -12,6 +12,7 @@ use commands::exit::exit;
 use commands::clear::clear;
 use commands::guide::guide;
 use commands::history::history;
+use commands::cat::cat;
 
 fn main() {
     println!("{GREEN}{}{RESET}", TITLE);
@@ -40,7 +41,8 @@ pub fn handle_cmds(keyword: String, arguments: Vec<String>, historique: &mut Vec
     dispatcher.insert("guide", guide);
     dispatcher.insert("clear", clear);
     dispatcher.insert("cd", cd); 
-    dispatcher.insert("ls", ls); 
+    dispatcher.insert("ls", ls);
+    dispatcher.insert("cat", cat); 
 
     match dispatcher.get(&keyword.as_str()) {
         Some(func) => func(arguments),
