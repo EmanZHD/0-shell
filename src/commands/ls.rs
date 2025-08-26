@@ -1,10 +1,10 @@
-use chrono::{DateTime, Local, TimeZone};
-use colored::{ColoredString, Colorize};
+use chrono::{ DateTime, Duration, Utc };
+use colored::{ ColoredString, Colorize };
 use is_executable::is_executable;
 use std::os::linux::fs::MetadataExt;
 use std::path::Path;
-use std::{fs, io, os::unix::fs::FileTypeExt};
-use users::{get_group_by_gid, get_user_by_uid};
+use std::{ fs, io, os::unix::fs::FileTypeExt };
+use users::{ get_group_by_gid, get_user_by_uid };
 #[derive(Debug, Default)]
 struct Flags {
     f_flag: bool,
@@ -23,15 +23,25 @@ fn file_permission(file_name: &str) -> (String, u64, String, String, u64, String
         let permissions = meta.permissions();
         num_links = meta.st_nlink();
         file_size = meta.len();
-        if let Some(name) = get_user_by_uid(meta.st_uid())
-            .and_then(|user| user.name().to_str().map(|s| s.to_owned()))
+        if
+            let Some(name) = get_user_by_uid(meta.st_uid()).and_then(|user|
+                user
+                    .name()
+                    .to_str()
+                    .map(|s| s.to_owned())
+            )
         {
             owner_id.push_str(&name);
         } else {
             println!("file not found");
         }
-        if let Some(name) = get_group_by_gid(meta.st_gid())
-            .and_then(|user| user.name().to_str().map(|s| s.to_owned()))
+        if
+            let Some(name) = get_group_by_gid(meta.st_gid()).and_then(|user|
+                user
+                    .name()
+                    .to_str()
+                    .map(|s| s.to_owned())
+            )
         {
             group_id.push_str(&name);
         } else {
@@ -39,37 +49,25 @@ fn file_permission(file_name: &str) -> (String, u64, String, String, u64, String
         }
         // let mode = permissions.mode();
         if let Ok(time) = meta.modified() {
-            let datetime: DateTime<Local> = DateTime::from(time);
-            format_time = datetime.format("%b %e %Y").to_string();
-            // println!("Last modification time of {}", format_time);
+            let datetime: DateTime<Utc> = DateTime::from(time) + Duration::hours(1);
+            format_time = datetime.format("%b %e %H:%M").to_string();
         }
 
         let str_prm: String = format!("{:?}", permissions.to_owned());
-        if let Some(i) = str_prm.find("mode:") {
-            file_permission.push_str(
-                &str_prm[i + 5..].chars().rev().collect::<String>()[4..14]
-                    .chars()
-                    .rev()
-                    .collect::<String>(),
-            );
-            // println!(
-            //     "file-> {} |||| PERMISSIONS-> {}",
-            //     file_name,
-            //     file_permission
-            // )
-        } else {
-            eprint!("not found");
-        }
+        file_permission.push_str(
+            &str_prm
+                .split_whitespace()
+                .collect::<Vec<&str>>()[4]
+                .trim_matches(|e| (e == '(' || e == ')'))
+        );
+        // println!(
+        //     "file-> {} |||| PERMISSIONS-> {:?}",
+        //     file_name,
+        //     &str_prm.split_whitespace().collect::<Vec<&str>>()
+        // );
     }
 
-    (
-        file_permission,
-        num_links,
-        owner_id,
-        group_id,
-        file_size,
-        format_time,
-    )
+    (file_permission, num_links, owner_id, group_id, file_size, format_time)
 }
 
 impl Flags {
@@ -252,10 +250,7 @@ pub fn ls(args: Vec<String>) {
                     let _ = ls_helper(path_str, &flags);
                 }
             }
-            Err(_) => eprintln!(
-                "ls: cannot access '{}': No such file or directory",
-                path_str
-            ),
+            Err(_) => eprintln!("ls: cannot access '{}': No such file or directory", path_str),
         }
 
         if i != new_args.len() - 1 {
