@@ -1,7 +1,6 @@
 use std::path::Path;
 use std::env;
 use std::env::set_current_dir;
-// use std::path::PathBuf;
 use crate::Params;
 
 pub fn cd(parameters: &mut Params) {
@@ -24,10 +23,7 @@ pub fn cd(parameters: &mut Params) {
                     println!("🚨 => {:?}", parameters.previous_path);
                 }
             } else {
-                // eprintln!("0-shell: cd: No previous directory recorded 🫤");
-                parameters.previous_path = env::current_dir()
-                .ok()
-                //.and_then(|path| path.parent().map(|p| p.to_path_buf()));
+                parameters.previous_path = env::current_dir().ok();
             }
             return;
         }
@@ -46,6 +42,6 @@ fn go_to_home() {
                 println!("⛔ 0-shell: No such file or directory");
             }
         }
-        None => println!("⛔ 0-shell: Impossible to get your home dir!"),
+        None => println!("⛔ 0-shell: Impossible to get your home dir! 🫤"),
     }
 }

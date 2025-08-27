@@ -1,7 +1,6 @@
 mod parser;
 mod consts;
 mod commands;
-use std::env;
 use std::path::PathBuf;
 use std::collections::HashMap;
 use consts::{ TITLE, GREEN, RESET };
@@ -28,8 +27,8 @@ impl Params {
             args: Vec::new(),
             archieve: Vec::new(),
             // previous_path: env::current_dir()
-            //     .ok()
-            //     .and_then(|path| path.parent().map(|p| p.to_path_buf())),
+            //     .ok(),
+                // .and_then(|path| path.parent().map(|p| p.to_path_buf())),
             previous_path: None,
         }
     }
@@ -52,8 +51,8 @@ fn main() {
 
 pub fn handle_cmds(params: &mut Params, keyword: String) {
     let mut dispatcher: HashMap<&str, fn(&mut Params)> = HashMap::new();
-    dispatcher.insert("cd", cd as fn(&mut Params)); 
     dispatcher.insert("ls", ls as fn(&mut Params)); 
+    dispatcher.insert("cd", cd as fn(&mut Params)); 
     dispatcher.insert("pwd", pwd as fn(&mut Params));
     dispatcher.insert("exit", exit as fn(&mut Params));
     dispatcher.insert("guide", guide as fn(&mut Params));
