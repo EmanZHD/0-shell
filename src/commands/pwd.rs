@@ -1,5 +1,6 @@
 use std::env::{self};
 use std::io::{ self };
+use crate::Params;
 
 pub fn initial_pwd() -> io::Result<()> {
     let current_dir = env::current_dir()?;
@@ -8,8 +9,8 @@ pub fn initial_pwd() -> io::Result<()> {
     Ok(())
 }
 
-pub fn pwd(args: Vec<String>) {
-    if args.len() > 0 {
+pub fn pwd(parameters: &mut Params) {
+    if parameters.args.len() > 0 {
        println!("pwd: too many arguments ‼️");
        return;
     }

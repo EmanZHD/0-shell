@@ -1,14 +1,16 @@
 use std::io;
 use std::io::Write;
 
+use crate::Params;
+
 fn prepare_clear() -> Result<(), String> {
     print!("\x1B[2J\x1B[1;1H");
     io::stdout().flush().map_err(|e| e.to_string())?;
     Ok(())
 }
 
-pub fn clear(args: Vec<String>) {
-    if args.len() > 0 {
+pub fn clear(parameters: &mut Params) {
+    if parameters.args.len() > 0 {
        println!("clear: too many arguments ‼️");
        return;
     }

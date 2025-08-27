@@ -4,7 +4,7 @@ use std::env;
 use colored::*;
 
 /*********🌟 Current Dir 🌟********/
-fn current() -> String {
+pub fn current() -> String {
     let result: String = match env::current_dir() {
         Ok(path) => {
             match path.file_name() {
