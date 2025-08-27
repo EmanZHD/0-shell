@@ -3,9 +3,7 @@ use crate::errors::CrateResult;
 use anyhow::anyhow;
 
 pub fn rm(path: &str) -> CrateResult<()> {
-
       let split_value: Vec<&str> = path.split_whitespace().collect();
-      
       if split_value.len() == 1 {
              match  fs::remove_file(path) {
                         Ok(_) => println!("File '{}' remove successfully.", split_value[0]),

@@ -14,25 +14,45 @@ pub fn cp(arg : &str) {
         ( _ , _ , false , _) => println!("cp: omitting directory '{}' " , files[0]),
 
 
+ 
 
 
 
-        ( _ , false , _, false) => {
+
+
+
+
+
+
+
+
+
+        ( _ , false , _, _) => {
             //hna dis hya file mkynch donc 5as n creah o ncopy fih source
             let parent =  Path::new(files[1]).parent();
             match (parent.expect("REASON").exists() , parent.expect("REASON").is_dir() ) {
-                (true , true) => {
-                     // Parent exists - can create new file OR new directory name
-                     fs::copy(files[0], files[1]);
-                     println!("File copied successfully from {} to {}===", files[0], files[1]);
-                },
-               ( _ , _) => println!("cp: cannot stat '{}': Not a directory" , files[1]),
+                (false , true) => println!("cp: cannot access '{}': No such file or directory" , files[1]),
+            //    (_ , false) => println!("cp: cannot access '{}': No such file or directory" , files[1]) ,
+               (false,false) => {
+                 fs::copy(files[0], files[1]);
+               },
+               (true , true) =>  {
+                 fs::copy(files[0], files[1]);
+               },
+               (true, false)=> println!("444444")
             }
         },
-         (true, false, true, true) =>{
-            fs::copy(files[0] , files[1]);
-                println!("File copied successfully from {} to {}", files[0], files[1]);
-        },  
+
+        
+
+
+
+
+
+
+
+
+
         ( _ , true , _, false) => {
             let finle_dis = Path::new(files[1]).join(files[0]);
             fs::copy(files[0] , finle_dis);
@@ -53,6 +73,8 @@ pub fn cp(arg : &str) {
 
 
 
+
+        
         ( true , true , true, true) => {
             fs::copy(files[0], files[1]);
             println!("File copied successfully from {} to {}", files[0], files[1]);

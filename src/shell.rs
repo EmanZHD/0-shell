@@ -22,7 +22,6 @@ impl TryFrom<&str> for Command {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         let split_value: Vec<&str> = value.split_whitespace().collect();
-    // println!("====={:?}" , split_value);
         
         match split_value[0] {
             "mkdir" => {
@@ -40,9 +39,11 @@ impl TryFrom<&str> for Command {
                 }
             },
             "cp" => {
-                if split_value.len() != 3 {
-                    Err(anyhow!("cp command requires two argument"))
-                } else  {
+                if split_value.len() < 2 {
+                    Err(anyhow!("cp: missing file operand"))
+                }else if split_value.len() < 3 {
+                    Err(anyhow!(" cp: missing destination file operand after {}" , split_value[1]))
+                } else {
                     Ok(Command::Cp(split_value[1..].join(" ")))
                 }
             }
