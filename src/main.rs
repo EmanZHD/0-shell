@@ -15,7 +15,7 @@ use commands::history::history;
 
 fn main() {
     println!("{GREEN}{}{RESET}", TITLE);
-    let mut historique: Vec<(i32 ,String)> = Vec::new();
+    let mut historique: Vec<(i32, String)> = Vec::new();
     let mut count = 1;
 
     loop {
@@ -24,7 +24,7 @@ fn main() {
         let valeur = format!("{} {}", keyword.clone(), arguments.join(" "));
         historique.push((count, valeur));
         handle_cmds(keyword, arguments, &mut historique);
-        count+=1;
+        count += 1;
     }
 }
 
@@ -34,13 +34,13 @@ pub fn handle_cmds(keyword: String, arguments: Vec<String>, historique: &mut Vec
         return;
     }
     let mut dispatcher: HashMap<&str, fn(Vec<String>)> = HashMap::new();
-    dispatcher.insert("cd", cd); 
+    dispatcher.insert("cd", cd);
     dispatcher.insert("pwd", pwd);
     dispatcher.insert("exit", exit);
     dispatcher.insert("guide", guide);
     dispatcher.insert("clear", clear);
-    dispatcher.insert("cd", cd); 
-    dispatcher.insert("ls", ls); 
+    dispatcher.insert("cd", cd);
+    dispatcher.insert("ls", ls);
 
     match dispatcher.get(&keyword.as_str()) {
         Some(func) => func(arguments),

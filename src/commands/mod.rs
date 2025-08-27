@@ -6,3 +6,4 @@ pub mod ls; //in progress
 pub mod clear;
 pub mod guide;
 pub mod history;
+// pub mod ls_tools;
