@@ -1,6 +1,7 @@
 mod parser;
 mod consts;
 mod commands;
+mod colors;
 use std::collections::HashMap;
 use consts::{ TITLE, GREEN, RESET };
 use parser::{ read_input, print_prompt };
