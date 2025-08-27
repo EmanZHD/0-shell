@@ -6,7 +6,7 @@ use consts::{ TITLE, GREEN, RESET };
 use parser::{ read_input, print_prompt };
 // use commands::echo::echo;
 use commands::cd::cd;
-use commands::ls::ls;
+use crate::commands::ls::ls::ls;
 use commands::pwd::pwd;
 use commands::exit::exit;
 use commands::clear::clear;
