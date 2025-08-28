@@ -26,9 +26,6 @@ impl Params {
         Params {
             args: Vec::new(),
             archieve: Vec::new(),
-            // previous_path: env::current_dir()
-            //     .ok(),
-                // .and_then(|path| path.parent().map(|p| p.to_path_buf())),
             previous_path: None,
         }
     }

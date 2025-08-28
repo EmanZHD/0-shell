@@ -35,7 +35,7 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
   let mut in_quotes = false;
   let mut new = Vec::new();
   let mut new_input = String::new();
-  let mut quote = ' '; // bach nchad lquote
+  let mut quote = ' '; // pour memoriser le quote
     for c in input.chars() {
        match c {
           '\'' | '"' if !in_quotes => {
