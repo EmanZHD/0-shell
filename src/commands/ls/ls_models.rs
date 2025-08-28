@@ -1,8 +1,9 @@
-use crate::commands::ls::ls_tools::{ file_permission };
+use crate::commands::ls::ls_tools::{ file_permission, find_symlink };
 use colored::{ ColoredString, Colorize };
 use is_executable::is_executable;
 use std::path::Path;
 use std::{ fs, os::unix::fs::FileTypeExt };
+
 #[derive(Debug, Default)]
 pub struct Flags {
     pub f_flag: bool,
@@ -15,6 +16,17 @@ impl Flags {
         self.a_flag || !name.starts_with('.')
     }
     pub fn format_output(&self, file_name: &str, file: &Files, path_name: &str) -> String {
+        // find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)));
+        // println!(
+        //     "here--> {} ||| {:?}",
+        //     Files::new_file(
+        //         &Path::new(&find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name))))
+        //     ).file_color(&find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)))),
+        //     find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)))
+        // );
+        // println!("OUTPUT--> {} {}", path_name.cyan(), file_name.cyan());
+        let s_link = &find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)));
+        let link_type = Files::new_file(&Path::new(&s_link));
         let format = if self.f_flag {
             file.file_symbol(&file.file_color(file_name))
         } else if self.l_flag {
@@ -26,7 +38,13 @@ impl Flags {
                 file_permission(file_name, path_name).3,
                 file_permission(file_name, path_name).4,
                 file_permission(file_name, path_name).5,
-                file.file_color(file_name).to_string()
+                if find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name))).is_empty() {
+                    file.file_color(file_name).to_string()
+                } else {
+                    file.file_color(file_name).to_string() +
+                        " -> " +
+                        &link_type.file_color(&s_link).to_string()
+                }
             )
         } else {
             file.file_color(file_name).to_string()
@@ -45,10 +63,6 @@ pub enum Files {
     Reg,
     Dev,
 }
-// if ftype.is_block_device() {
-//         println!("{:?} is a block device", path);
-//     } else if ftype.is_char_device() {
-//         println!("{:?} is a character device", path);
 
 impl Files {
     pub fn new_file(p_: &Path) -> Self {

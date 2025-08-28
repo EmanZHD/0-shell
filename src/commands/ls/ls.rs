@@ -1,5 +1,5 @@
 use crate::commands::ls::ls_tools::{ parse_args };
-use crate::commands::ls::ls_mod::{ Files, Flags };
+use crate::commands::ls::ls_models::{ Files, Flags };
 use std::path::Path;
 use std::{ fs, io };
 
