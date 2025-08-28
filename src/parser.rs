@@ -9,7 +9,7 @@ pub fn current() -> String {
         Ok(path) => {
             match path.file_name() {
                 Some(file_name) => file_name.to_string_lossy().into_owned(),
-                None => String::from("/"),
+                _none => String::from("/"),
             }
         }
         Err(_e) => "/".to_string(),
