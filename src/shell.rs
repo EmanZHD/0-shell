@@ -42,7 +42,7 @@ impl TryFrom<&str> for Command {
                 if split_value.len() < 2 {
                     Err(anyhow!("cp: missing file operand"))
                 }else if split_value.len() < 3 {
-                    Err(anyhow!(" cp: missing destination file operand after {}" , split_value[1]))
+                    Err(anyhow!("cp: missing destination file operand after {}" , split_value[1]))
                 } else {
                     Ok(Command::Cp(split_value[1..].join(" ")))
                 }
@@ -78,7 +78,7 @@ pub fn spawn_user_input_handler() -> JoinHandle<CrateResult<()>> {
                     _ => {}
                 }
             } else {
-                println!("Error parsing command: {}", command.err().unwrap()); 
+                println!("{}", command.err().unwrap()); 
             }
         }
         Ok(())
