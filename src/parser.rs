@@ -9,7 +9,7 @@ pub fn current() -> String {
         Ok(path) => {
             match path.file_name() {
                 Some(file_name) => file_name.to_string_lossy().into_owned(),
-                None => String::from("/"),
+                _none => String::from("/"),
             }
         }
         Err(_e) => "/".to_string(),
@@ -75,21 +75,21 @@ pub fn read_input() -> (String, Vec<String>) {
         io::stdin().read_line(&mut input).expect("Failed to read input");
         
         let input = input.trim_end();
-        println!("✅ Input: {:?}", input);
+        //println!("✅ Input: {:?}", input);
         
         if cmd.is_empty() {
             cmd = input.to_string();
         } else {
-            cmd = format!("{} {}", cmd, input); // wa9ila khas new line machy espace ⁉️ 
-            println!("👽 else 88: {:?}", cmd);
+            cmd = format!("{}\n{}", cmd, input);
+            // println!("👽 else 88: {:?}", cmd);
         }
         
-        println!("✅ Command line: {:?}", cmd);
+        //println!("✅ Command line: {:?}", cmd);
         
         match parsing(&cmd) {
             Ok(elements) => {
                 if elements.is_empty() {
-                    return (String::new(), Vec::new()); // je doix handler cette partie 😭
+                    return (String::new(), Vec::new());
                 }
                 
                 let command = elements[0].clone();
@@ -99,8 +99,8 @@ pub fn read_input() -> (String, Vec<String>) {
                     Vec::new()
                 };
                 
-                println!("✅ Command: {:?}", command);
-                println!("✅ Arguments: {:?}", args);
+                // println!("✅ Command: {:?}", command);
+                // println!("✅ Arguments: {:?}", args);
                 
                 return (command, args);
             }

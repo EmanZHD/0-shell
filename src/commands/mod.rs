@@ -1,4 +1,4 @@
-// pub mod echo; in progress
+pub mod echo; // in progress
 pub mod cd;
 pub mod pwd;
 pub mod exit;
