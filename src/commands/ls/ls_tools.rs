@@ -5,7 +5,21 @@ use std::{ fs, os::unix::fs::FileTypeExt };
 use users::{ get_group_by_gid, get_user_by_uid };
 use std::os::unix::fs::MetadataExt;
 use crate::commands::ls::ls_models::{ Flags };
-use libc::{ self, file_clone_range, uid_t };
+use libc::{ self, uid_t };
+
+pub fn col_width(lines: &Vec<Vec<String>>) -> Vec<usize> {
+    let mut col_width = Vec::new();
+    for line in lines {
+        for (i, elem) in line.iter().enumerate() {
+            if col_width.len() <= i {
+                col_width.push(elem.len());
+            } else if elem.len() > col_width[i] {
+                col_width[i] = elem.len();
+            }
+        }
+    }
+    col_width
+}
 // parse_args fn
 pub fn parse_args(args: Vec<String>) -> Result<(Flags, Vec<String>), ()> {
     let mut flags = Flags::default();
@@ -77,13 +91,14 @@ pub fn find_symlink(path: &Path) -> String {
 pub fn file_permission(
     file_name: &str,
     path_name: &str
-) -> (String, u64, String, String, String, String) {
+) -> (String, u64, String, String, String, String, String) {
     // println!("OUTPUT--> {} {}", path_name.cyan(), file_name.cyan());
     let mut file_permission = String::new();
     let mut num_links: u64 = 0;
     let mut owner_id = String::new();
     let mut group_id = String::new();
-    let mut file_size = String::new();
+    let mut f_major = String::new();
+    let mut f_minor = String::new();
     let mut format_time = String::new();
     let path = format!("{}/{}", path_name, file_name);
 
@@ -96,13 +111,14 @@ pub fn file_permission(
 
         match find_major_minor(&path) {
             Some((major, minor)) => {
-                file_size = format!("{},   {}", major, minor);
+                // file_size = format!("{},   {}", major, minor);
+                f_major.push_str(&format!("{},", &major.to_string()));
+                f_minor.push_str(&minor.to_string());
             }
             _ => {
-                file_size = format!("    {}", meta.len().to_string().on_bright_cyan());
+                f_minor.push_str(&meta.len().to_string());
             }
         }
-        // file_size = meta.len();
         owner_id.push_str(&find_group_owner((meta.uid(), true)));
         group_id.push_str(&find_group_owner((meta.gid(), false)));
 
@@ -120,11 +136,6 @@ pub fn file_permission(
                 .collect::<Vec<&str>>()[4]
                 .trim_matches(|e| (e == '(' || e == ')'))
         );
-        // println!(
-        //     "file-> {} |||| PERMISSIONS-> {:?}",
-        //     file_name,
-        //     &str_prm.split_whitespace().collect::<Vec<&str>>()
-        // );
     } else {
         // println!("CAtch it--> {}", path.on_bright_green());
         if let Ok(meta) = fs::symlink_metadata(Path::new(&path)) {
@@ -132,5 +143,5 @@ pub fn file_permission(
         }
     }
 
-    (file_permission, num_links, owner_id, group_id, file_size, format_time)
+    (file_permission, num_links, owner_id, group_id, f_major, f_minor, format_time)
 }

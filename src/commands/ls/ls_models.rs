@@ -15,7 +15,7 @@ impl Flags {
     pub fn hidden_file(&self, name: &str) -> bool {
         self.a_flag || !name.starts_with('.')
     }
-    pub fn format_output(&self, file_name: &str, file: &Files, path_name: &str) -> String {
+    pub fn format_output(&self, file_name: &str, file: &Files, path_name: &str) -> Vec<String> {
         // find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)));
         // println!(
         //     "here--> {} ||| {:?}",
@@ -25,31 +25,71 @@ impl Flags {
         //     find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)))
         // );
         // println!("OUTPUT--> {} {}", path_name.cyan(), file_name.cyan());
+        let mut Line = Vec::new();
+        let (file_perm, links, owner, group, major, minor, date) = file_permission(
+            file_name,
+            path_name
+        );
+
         let s_link = &find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)));
         let link_type = Files::new_file(&Path::new(&s_link));
-        let format = if self.f_flag {
-            file.file_symbol(&file.file_color(file_name))
+        if self.f_flag {
+            Line.push(file.file_symbol(&file.file_color(file_name)));
         } else if self.l_flag {
-            format!(
-                "{} {} {} {} {} {} {}",
-                file_permission(file_name, path_name).0,
-                file_permission(file_name, path_name).1,
-                file_permission(file_name, path_name).2,
-                file_permission(file_name, path_name).3,
-                file_permission(file_name, path_name).4,
-                file_permission(file_name, path_name).5,
-                if find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name))).is_empty() {
-                    file.file_color(file_name).to_string()
-                } else {
-                    file.file_color(file_name).to_string() +
-                        " -> " +
-                        &link_type.file_color(&s_link).to_string()
-                }
-            )
+            Line.extend(vec![file_perm, links.to_string(), owner, group, major, minor, date]);
+            // Line[0] = &file_perm;
+            // Line[1] = &links.to_string();
+            // Line[2] = &owner;
+            // Line[3] = &group;
+            // Line[4] = &major;
+            // Line[5] = &minor;
+            // Line[6] = &date;
+            if find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name))).is_empty() {
+                // Line[7] = &file.file_color(file_name).to_string();
+                // Line.push(file.file_color(file_name).to_string());
+                Line.push(file_name.to_string());
+            } else {
+                Line.push(
+                    // format!(
+                    //     "{} -> {}",
+                    //     file.file_color(file_name).to_string(),
+                    //     &link_type.file_color(&s_link).to_string()
+                    // )
+                    format!("{} -> {}", file_name.to_string(), &s_link.to_string())
+                );
+                // Line[7] = &format!(
+                //     "{} -> {}",
+                //     file.file_color(file_name).to_string(),
+                //     &link_type.file_color(&s_link).to_string()
+                // );
+            }
+            // format!(
+            //     "{} {} {} {} {} {} {} {}",
+            //     file_perm,
+            //     links,
+            //     owner,
+            //     group,
+            //     major,
+            //     minor,
+            //     date,
+            //     if find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name))).is_empty() {
+            //         file.file_color(file_name).to_string()
+            //     } else {
+            //         format!(
+            //             "{} -> {}",
+            //             file.file_color(file_name).to_string(),
+            //             &link_type.file_color(&s_link).to_string()
+            //         )
+            //     }
+            // );
         } else {
-            file.file_color(file_name).to_string()
-        };
-        format
+            // Line.push(file.file_color(file_name).to_string());
+            Line.push(file_name.to_string());
+        }
+        // else {
+        //     Line[0] = file.file_color(file_name).to_string();
+        // };
+        Line
     }
 }
 
@@ -66,13 +106,7 @@ pub enum Files {
 
 impl Files {
     pub fn new_file(p_: &Path) -> Self {
-        if p_.is_dir() {
-            return Files::Dir;
-        }
-        if p_.is_symlink() {
-            return Files::Symlink;
-        }
-        if let Ok(path) = fs::metadata(p_) {
+        if let Ok(path) = fs::symlink_metadata(p_) {
             if path.file_type().is_socket() {
                 return Files::Socket;
             }
@@ -82,9 +116,15 @@ impl Files {
             if path.file_type().is_block_device() || path.file_type().is_char_device() {
                 return Files::Dev;
             }
+            if p_.is_file() && is_executable(p_) {
+                return Files::Exec;
+            }
         }
-        if p_.is_file() && is_executable(p_) {
-            return Files::Exec;
+        if p_.is_symlink() {
+            return Files::Symlink;
+        }
+        if p_.is_dir() {
+            return Files::Dir;
         }
         Files::Reg
     }

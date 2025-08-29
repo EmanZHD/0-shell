@@ -1,29 +1,34 @@
-use crate::commands::ls::ls_tools::{ parse_args };
+use crate::commands::ls::ls_tools::{ parse_args, col_width };
 use crate::commands::ls::ls_models::{ Files, Flags };
 use std::path::Path;
 use std::{ fs, io };
+use colored::Colorize;
 
 // ls_printer fn
-fn ls_printer(list: &mut Vec<(String, Files)>, flag: &Flags, path_name: &str) {
+fn ls_printer(list: &mut Vec<(String, Files)>, flag: &Flags, path_name: &str) -> Vec<Vec<String>> {
     list.sort_by(|f1, f2| {
         let f1_key = f1.0.strip_prefix('.').unwrap_or(&f1.0);
         let f2_key = f2.0.strip_prefix('.').unwrap_or(&f2.0);
         f1_key.to_lowercase().cmp(&f2_key.to_lowercase())
     });
+    let mut line = Vec::new();
     for c in list {
         if flag.hidden_file(&c.0) {
             if !flag.l_flag {
-                print!("{} ", flag.format_output(&c.0, &c.1, path_name));
+                // print!("{:?}", flag.format_output(&c.0, &c.1, path_name));
+                line.push(flag.format_output(&c.0, &c.1, path_name));
             } else {
-                println!("{}", flag.format_output(&c.0, &c.1, path_name));
+                // println!("{:?}", flag.format_output(&c.0, &c.1, path_name));
+                line.push(flag.format_output(&c.0, &c.1, path_name));
             }
         }
     }
-    println!();
+    line
 }
 
 // ls_helper fn
-fn ls_helper(path_name: &str, flag: &Flags) -> Result<(), io::Error> {
+fn ls_helper(path_name: &str, flag: &Flags) -> Result<Vec<Vec<String>>, io::Error> {
+    let mut lines: Vec<Vec<String>> = vec![];
     println!("--->Path{:?}", path_name);
     let mut content: Vec<(String, Files)> = vec![];
     for entry in fs::read_dir(path_name)? {
@@ -41,8 +46,9 @@ fn ls_helper(path_name: &str, flag: &Flags) -> Result<(), io::Error> {
         content.insert(0, (".".to_owned(), Files::Dir));
         content.insert(1, ("..".to_owned(), Files::Dir));
     }
-    ls_printer(&mut content, flag, path_name);
-    Ok(())
+    // lines.push(ls_printer(&mut content, flag, path_name));
+    lines.extend(ls_printer(&mut content, flag, path_name));
+    Ok(lines)
 }
 
 //ls fn
@@ -67,7 +73,14 @@ pub fn ls(args: Vec<String>) {
                     if new_args.len() > 1 {
                         println!("{}:", path_str);
                     }
-                    let _ = ls_helper(path_str, &flags);
+                    if let Ok(lines) = ls_helper(path_str, &flags) {
+                        println!("HEREEE");
+                        // for line in lines {
+                        //     println!("{:?}", line);
+                        // }
+                        // println!("{:?}", lines);
+                        display_line(lines);
+                    }
                 }
             }
             Err(_) => eprintln!("ls: cannot access '{}': No such file or directory", path_str),
@@ -76,5 +89,25 @@ pub fn ls(args: Vec<String>) {
         if i != new_args.len() - 1 {
             println!();
         }
+    }
+}
+
+pub fn display_line(lines: Vec<Vec<String>>) {
+    // println!("{:?}", lines);
+    let col_width = col_width(&lines);
+    for line in &lines {
+        for (i, elem) in line.iter().enumerate() {
+            let file_name = i == line.len() - 1;
+            let is_num: bool = elem.chars().all(|e| (e.is_ascii_digit() || e == ','));
+            // println!("CHECKK-->{:?}", is_num);
+            if file_name {
+                print!("{:<w$} ", elem.red(), w = col_width[i]);
+            } else if is_num {
+                print!("{:>w$} ", elem, w = col_width[i]);
+            } else {
+                print!("{:<w$} ", elem, w = col_width[i]);
+            }
+        }
+        println!();
     }
 }
