@@ -1,15 +1,16 @@
 use std::fs;
 use std::path::Path;
+use crate::Params;
 use crate::colors::{red, bold_gray, yellow, green, blue, bold_red, cyan};
 
 // 🥳 here for check args if it's valid or not 🥳
-pub fn mv(args: Vec<String>) {
-    if args.len() < 2 {
+pub fn mv(params: &mut Params) {
+    if params.args.len() < 2 {
         eprintln!("{}{}{}", bold_red("👀 ​mv: need at least 2 arguments\n"), green("👍 ​Usage: mv file1 file2\n"),  green("👍 ​or: mv files... folder"));        
         return;
     }
 
-    let (sources, destination) = args.split_at(args.len() - 1);
+    let (sources, destination) = params.args.split_at(params.args.len() - 1);
     let dest_path = Path::new(&destination[0]);
     let is_dest_dir = dest_path.is_dir();
 

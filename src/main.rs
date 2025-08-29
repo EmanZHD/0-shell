@@ -1,6 +1,7 @@
 mod parser;
 mod consts;
 mod commands;
+mod colors;
 use std::path::PathBuf;
 use std::collections::HashMap;
 use consts::{ TITLE, GREEN, RESET };
@@ -13,6 +14,8 @@ use commands::exit::exit;
 use commands::clear::clear;
 use commands::guide::guide;
 use commands::history::history;
+use commands::mv::mv;
+use commands::cat::cat;
 
 #[derive(Clone, Debug)]
 pub struct Params {
@@ -55,6 +58,8 @@ pub fn handle_cmds(params: &mut Params, keyword: String) {
     dispatcher.insert("guide", guide as fn(&mut Params));
     dispatcher.insert("clear", clear as fn(&mut Params));
     dispatcher.insert("history", history as fn(&mut Params));
+    dispatcher.insert("mv", mv as fn(&mut Params));
+    dispatcher.insert("cat", cat as fn(&mut Params));
 
     match dispatcher.get(&keyword.as_str()) {
         Some(func) => func(params),
