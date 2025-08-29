@@ -52,6 +52,8 @@ pub fn cp(arg: &str) {
         }
     }
 }
+
+
 pub fn multiple_source(files: Vec<&str>) {
     // let mut is_err = false;
     let distination = Path::new(files[files.len() - 1]);
@@ -76,10 +78,10 @@ pub fn multiple_source(files: Vec<&str>) {
                 get_element.next_back();
                 get_element.as_str();
                 let res_elent: String = get_element.collect();
-                if res_elent.chars().nth(0) == Some('*') {
-                        println!("======{:?}",res_elent);
-                        star_source(&res_elent , distination)
-                    } else {
+                // if res_elent.chars().nth(0) == Some('*') {
+                //         println!("======{:?}",res_elent);
+                //         star_source(&res_elent , distination)
+                //     } else {
                         let mut source = Path::new(&res_elent);
                         if !source.exists() {
                             // is_err = true;
@@ -96,7 +98,7 @@ pub fn multiple_source(files: Vec<&str>) {
                         Err(e) => {}
                     }
                 }
-                }
+                // }
             } else if (!tomp.exists() && element.chars().nth(0) != Some('*')) || tomp.is_dir() {
                 // is_err = true;
                 println!("cp: -r not specified; omitting directory '{}'", element);

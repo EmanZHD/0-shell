@@ -39,10 +39,7 @@ cargo r cp file *.txt folder/
 //err
 //cp: -r not specified; omitting directory 'ttgff.txt' 
 
-cargo r cp file *.txt folder/
-//mkyn ta wa7ad kaysali bi .txt
-//err
-//cp: cannot stat '*.txt': No such file or directory 
+
 
 
 cargo r cp file *.txt file/
@@ -53,6 +50,13 @@ cargo r cp file *.txt file/
 cargo r cp file "*.txt" dest/
 //ila kan "" hada kay3ni anaho file smito *.txt ya3ni mayataba9ch 3lih lalgo ta3 * 
 
+cargo r cp file *.txt folder/
+//mkyn ta wa7ad kaysali bi .txt
+//err
+//cp: cannot stat '*.txt': No such file or directory 
+
+
+cargo r cp one.txt * folder // tal test lakhar o handlih (***************************)
 
 
 
@@ -70,7 +74,7 @@ cargo r cp file "*.txt" dest/
 
 
 
-
+cargo r cp * folder
 
 cargo r cp *.txt folder/
 // copy all files with .txt in filder 
