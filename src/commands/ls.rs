@@ -2,6 +2,7 @@ use std::{ fs, io, os::unix::fs::FileTypeExt };
 use colored::{ ColoredString, Colorize };
 use std::path::Path;
 use is_executable::is_executable;
+use crate::Params;
 
 #[derive(Debug)]
 pub enum Files {
@@ -155,9 +156,9 @@ fn ls_helper(path_name: &str, flag: &Flags) -> Result<(), io::Error> {
     Ok(())
 }
 
-pub fn ls(args: Vec<String>) {
+pub fn ls(parameters: &mut Params) {
     // let check_flags = parse_args(args);
-    let (flags, mut new_args) = match parse_args(args) {
+    let (flags, mut new_args) = match parse_args(parameters.args.clone()) {
         Ok((flags, new_args)) => (flags, new_args),
         Err(()) => {
             return;
