@@ -32,6 +32,31 @@ cargo r cp file1 file2 existing_file
 //cp: target 'existing_file' is not a directory
 cargo cp file file folder file file dolder
 //err source 5as ykono files kamlin
+cargo r cp file *.txt folder/
+// copy all files with .txt in filder 
+cargo r cp file *.txt folder/
+//one fo this .txt if not file
+//err
+//cp: -r not specified; omitting directory 'ttgff.txt' 
+
+cargo r cp file *.txt folder/
+//mkyn ta wa7ad kaysali bi .txt
+//err
+//cp: cannot stat '*.txt': No such file or directory 
+
+
+cargo r cp file *.txt file/
+// distination machi folder 7it 3andi ktar mn file kaysali b .txt
+//err
+//cp: target 'kk': Not a directory   jj kk older
+
+cargo r cp file "*.txt" dest/
+//ila kan "" hada kay3ni anaho file smito *.txt ya3ni mayataba9ch 3lih lalgo ta3 * 
+
+
+
+
+
 
 
 
@@ -50,19 +75,24 @@ cargo cp file file folder file file dolder
 cargo r cp *.txt folder/
 // copy all files with .txt in filder 
 
+cargo r cp *.txt folder/
+//one fo this .txt if not file
+//err
+//cp: -r not specified; omitting directory 'ttgff.txt' 
+
+cargo r cp *.txt folder/
+//mkyn ta wa7ad kaysali bi .txt
+//err
+//cp: cannot stat '*.txt': No such file or directory 
+
+cargo r cp *.txt file/
+//source ri file wahad  ya3ni 3andi ri file wa7ad kaysali b .txt machi darori distination ykon folder
+//machi err
+//valid
 
 
-
-
-
-
-
-
-
-
-
-
-
+cargo r cp "*.txt" dest/
+//ila kan "" hada kay3ni anaho file smito *.txt ya3ni mayataba9ch 3lih lalgo ta3 * 
 
 
 cargo r cp notexist.txt destination.txt
