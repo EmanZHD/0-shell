@@ -73,15 +73,48 @@ cargo r cp one.txt * folder
 
 
 
-cargo r cp * folder
+cargo r cp myfile newfile
+//valid
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+cargo r cp file folder
+//valid
+cargo r cp folder folder
+//err source folder noo
+//cp: -r not specified; omitting directory 'my' 
+cargo r cp file file 
+// Copy a file onto itself
+//cp: 'kk' and 'kk' are the same file   
+cargo r cp file file2
+// file2 fayt kayn overwritter
+cargo r cp files file
+// files makaynch err
+//cp: cannot stat 'ddd': No such file or directory 
 cargo r cp *.txt folder/
 // copy all files with .txt in filder 
 
 cargo r cp *.txt folder/
 //one fo this .txt if not file
 //err
-//cp: -r not specified; omitting directory 'ttgff.txt' 
+//cp: -r not specified; omitting directory 'folderr.txt'  
 
 cargo r cp *.txt folder/
 //mkyn ta wa7ad kaysali bi .txt
@@ -94,42 +127,43 @@ cargo r cp *.txt file/
 //valid
 
 
-cargo r cp "*.txt" dest/
+cargo r cp "lll" dest/
 //ila kan "" hada kay3ni anaho file smito *.txt ya3ni mayataba9ch 3lih lalgo ta3 * 
 
 
-cargo r cp notexist.txt destination.txt
-//err
-//cp: cannot stat 'jjkfdkjf': No such file or directory   
-cargo r cp yy destination.txt
-//err
+
+cargo r cp .* destination.txt
+//Copy with hidden files
+
+
 
 cargo r cp source.txt dirnot/neww.txt
 //err
+//cp: cannot stat 'dirnot': No such file or directory 
 
 cargo r cp source.txt yy/notexist/destination.txt
 //err
+//cp: cannot stat 'notexist': No such file or directory 
 
 cargo r cp source.txt notexistdir/
 //err
-
-cargo r cp source.txt yy/destination.txt/newww.txt
-//err
+//cp: cannot stat 'notexist': No such file or directory
 
 cargo r cp source.txt notexistdir/destination.txt
 //err
 
-cargo r cp source.txt /notpermetion/newwww.txt
-//err
 
 cargo r cp unreadable.txt des.txt
-//err
+//err Copy a file you don’t have read permission on
+//cp: cannot open 'kk' for reading: Permission denied 
 
-cargo r cp source.txt source.txt
-//err
+cargo r cp file.txt unwriter.txt
+//err Copy to a directory without write permission
+//cp: cannot create regular file 'kk': Permission denied 
 
-cargo r cp source.txt destination.txt/new.txt
-//err
+
+//(hado joj zidihom ta fi multible)
+
 
 
 //t9ad tala3 ktar mn err 
