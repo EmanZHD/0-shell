@@ -55,8 +55,7 @@ cargo r cp file *.txt folder/
 //err
 //cp: cannot stat '*.txt': No such file or directory 
 
-
-cargo r cp one.txt * folder // tal test lakhar o handlih (***************************)
+cargo r cp one.txt * folder 
 
 
 
