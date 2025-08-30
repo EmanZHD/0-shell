@@ -15,6 +15,7 @@ impl Flags {
     pub fn hidden_file(&self, name: &str) -> bool {
         self.a_flag || !name.starts_with('.')
     }
+    
     pub fn format_output(&self, file_name: &str, path_name: &str) -> Vec<String> {
         let mut line = Vec::new();
         let (file_perm, links, owner, group, major, minor, date) = file_permission(

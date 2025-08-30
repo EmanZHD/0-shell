@@ -6,6 +6,7 @@ use users::{ get_group_by_gid, get_user_by_uid };
 use std::os::unix::fs::MetadataExt;
 use crate::commands::ls::ls_models::{ Flags };
 use libc::{ self, uid_t };
+// use exacl::{ Acl, Perm };
 
 pub fn col_width(lines: &Vec<Vec<String>>) -> Vec<usize> {
     let mut col_width = Vec::new();
@@ -137,6 +138,7 @@ pub fn file_permission(
 
     let str_prm: String = format!("{:?}", permissions.to_owned());
     // println!("PATH -> {} PERMISSIONS-----> {}", path.red(), str_prm.yellow().bold());
+
     file_permission.push_str(
         &str_prm
             .split_whitespace()
@@ -146,3 +148,8 @@ pub fn file_permission(
 
     (file_permission, num_links, owner_id, group_id, f_major, f_minor, format_time)
 }
+
+// fn has_acl(path: &Path) -> Result<bool, Box<dyn std::error::Error>> {
+//     let acl = Acl::read_file(path)?;
+//     Ok(!acl.is_empty() && acl.entries().len() > 3)
+// }
