@@ -75,26 +75,6 @@ cargo r cp one.txt * folder
 
 cargo r cp myfile newfile
 //valid
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 cargo r cp file folder
 //valid
 cargo r cp folder folder
@@ -102,9 +82,22 @@ cargo r cp folder folder
 //cp: -r not specified; omitting directory 'my' 
 cargo r cp file file 
 // Copy a file onto itself
-//cp: 'kk' and 'kk' are the same file   
+//cp: 'kk' and 'kk' are the same file 
 cargo r cp file file2
 // file2 fayt kayn overwritter
+
+
+
+
+
+
+
+
+
+
+
+  
+
 cargo r cp files file
 // files makaynch err
 //cp: cannot stat 'ddd': No such file or directory 
