@@ -36,15 +36,27 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
   let mut new = Vec::new();
   let mut new_input = String::new();
   let mut quote = ' '; // pour memoriser le quote
-    for c in input.chars() {
+    //for c in input.chars() {
+    let mut test = input.chars().peekable();
+    while let Some(c) = test.next() {
+       //println!("===> {c}");
+       // if input.chars().next() == Some('\"') || input.chars().next() == Some('\'')
        match c {
-          '\'' | '"' if !in_quotes => {
+           '\\' if test.next() == Some('\"') => {
+               println!("ana hna");
+               new_input.push('\"');
+            }
+            '\\' if test.next() == Some('\'') => {
+               println!("ana hna 2");
+               new_input.push('\'');
+            }
+           '\'' | '"' if !in_quotes => {
                 in_quotes = true;
                 quote = c; // pour memoriser le type de quote
-          }
-          '\'' | '"' if in_quotes && c == quote => {
+           }
+           '\'' | '"' if in_quotes && c == quote => {
               in_quotes = false; // fermeture de la quote du m type
-          }
+           }
           ' ' | '\t' if !in_quotes => {
              if !new_input.is_empty() {
                 new.push(new_input);
@@ -63,8 +75,10 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
       if !new_input.is_empty() {
           new.push(new_input);
       }
+      println!("new ==> {:?}", new);
       Ok(new)
   } 
+
 
 /*********🌟 read_input 🌟********/
 pub fn read_input() -> (String, Vec<String>) {
@@ -75,17 +89,13 @@ pub fn read_input() -> (String, Vec<String>) {
         io::stdin().read_line(&mut input).expect("Failed to read input");
         
         let input = input.trim_end();
-        //println!("✅ Input: {:?}", input);
         
         if cmd.is_empty() {
             cmd = input.to_string();
         } else {
             cmd = format!("{}\n{}", cmd, input);
-            // println!("👽 else 88: {:?}", cmd);
         }
-        
-        //println!("✅ Command line: {:?}", cmd);
-        
+                
         match parsing(&cmd) {
             Ok(elements) => {
                 if elements.is_empty() {
@@ -98,9 +108,6 @@ pub fn read_input() -> (String, Vec<String>) {
                 } else {
                     Vec::new()
                 };
-                
-                // println!("✅ Command: {:?}", command);
-                // println!("✅ Arguments: {:?}", args);
                 
                 return (command, args);
             }

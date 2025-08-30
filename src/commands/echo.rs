@@ -6,35 +6,42 @@ pub fn echo(parameters: &mut Params) {
     for word in &parameters.args {
         let new_word = word.trim();
         let mut temp = String::new();
-        let mut count = 0;
         if new_word.starts_with("$") {
-            if let Err(_e) = std::env::var(new_word.trim_matches('$')) {
-                continue;
+            if let Ok(var) = std::env::var(new_word.trim_matches('$')) {
+                output.push(var);
+            }
+            continue;
+
+        } 
+        let mut chars = new_word.chars().peekable();
+        
+        while let Some(c) = chars.next() {
+            if c == '\\' {
+                if let Some(next_char) = chars.next() {
+            
+                    match next_char {
+                        'n' => temp.push('\n'),
+                        't' => temp.push('\t'),
+                        'r' => temp.push('\r'),
+                        '\\' => temp.push('\\'),
+                        '"' => temp.push('"'),
+                        '\'' => temp.push('\''),
+                        '0' => temp.push('\0'),
+                        _ => {
+                            temp.push('\\');
+                            temp.push(next_char);
+                        }
+                    }
+                }
+                //  else {
+                //     temp.push('\\');
+                // }
             } else {
-                output.push(std::env::var(new_word.trim_matches('$')).unwrap());
-                // print!("{}", std::env::var(new_word.trim_matches('$')).unwrap());
+                temp.push(c);
             }
-        } else {
-            // new_word = new_word.trim_matches(&['\'', '\"']);
-            // output.push(new_word.to_string());
-            for c in word.chars() {
-                let mut charta= count % 4; // hadchy ghaaalt
-                println!("🌸 {}", charta);
-                if c == '\\' {
-                   count+=1;
-                }
-                if c != '\\' {
-                   temp.push(c);
-                   count = 0;
-                   charta = 0;
-                }
-                if charta > 0 {
-                   temp.push('\\');
-                }
-            }
-            output.push(temp);
-            temp = "".to_string();
         }
+        
+        output.push(temp);
     }
     for i in output {
         print!("{} ", i);
