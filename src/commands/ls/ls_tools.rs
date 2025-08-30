@@ -4,10 +4,9 @@ use std::path::{ Path };
 use std::{ fs, os::unix::fs::FileTypeExt };
 use users::{ get_group_by_gid, get_user_by_uid };
 use std::os::unix::fs::MetadataExt;
-use crate::commands::ls::ls_models::{ Flags };
+use crate::commands::ls::ls_models::{ Flags, Files };
 use libc::{ self, uid_t };
 // use exacl::{ Acl, Perm };
-
 pub fn col_width(lines: &Vec<Vec<String>>) -> Vec<usize> {
     let mut col_width = Vec::new();
     for line in lines {
@@ -145,11 +144,8 @@ pub fn file_permission(
             .collect::<Vec<&str>>()[4]
             .trim_matches(|e| (e == '(' || e == ')'))
     );
-
+    if Files::has_extra_attrs(&path) {
+        file_permission.push('+');
+    }
     (file_permission, num_links, owner_id, group_id, f_major, f_minor, format_time)
 }
-
-// fn has_acl(path: &Path) -> Result<bool, Box<dyn std::error::Error>> {
-//     let acl = Acl::read_file(path)?;
-//     Ok(!acl.is_empty() && acl.entries().len() > 3)
-// }

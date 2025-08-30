@@ -3,6 +3,7 @@ use colored::{ ColoredString, Colorize };
 use is_executable::is_executable;
 use std::path::Path;
 use std::{ fs, os::unix::fs::FileTypeExt };
+use xattr::list;
 
 #[derive(Debug, Default)]
 pub struct Flags {
@@ -15,7 +16,7 @@ impl Flags {
     pub fn hidden_file(&self, name: &str) -> bool {
         self.a_flag || !name.starts_with('.')
     }
-    
+
     pub fn format_output(&self, file_name: &str, path_name: &str) -> Vec<String> {
         let mut line = Vec::new();
         let (file_perm, links, owner, group, major, minor, date) = file_permission(
@@ -119,5 +120,12 @@ impl Files {
             return format!("{}", f_type.file_symbol(&f_type.file_color(file_name)));
         }
         format!("{}", f_type.file_color(file_name))
+    }
+
+    pub fn has_extra_attrs(path: &str) -> bool {
+        match list(path) {
+            Ok(mut attrs) => attrs.next().is_some(),
+            Err(_) => false,
+        }
     }
 }
