@@ -1,5 +1,5 @@
 use chrono::{ DateTime, Duration, Utc };
-use colored::Colorize;
+use std::fs::{ Metadata, Permissions };
 use std::path::{ Path };
 use std::{ fs, os::unix::fs::FileTypeExt };
 use users::{ get_group_by_gid, get_user_by_uid };
@@ -20,6 +20,7 @@ pub fn col_width(lines: &Vec<Vec<String>>) -> Vec<usize> {
     }
     col_width
 }
+
 // parse_args fn
 pub fn parse_args(args: Vec<String>) -> Result<(Flags, Vec<String>), ()> {
     let mut flags = Flags::default();
@@ -101,47 +102,47 @@ pub fn file_permission(
     let mut f_minor = String::new();
     let mut format_time = String::new();
     let path = format!("{}/{}", path_name, file_name);
-
-    if let Ok(meta) = fs::symlink_metadata(Path::new(&path)) {
-        // if file_name == "libmtp-1-4" {
-        //     println!("META -> {:?}", meta);
-        // }
-        let permissions = meta.permissions();
-        num_links = meta.nlink();
-
-        match find_major_minor(&path) {
-            Some((major, minor)) => {
-                // file_size = format!("{},   {}", major, minor);
-                f_major.push_str(&format!("{},", &major.to_string()));
-                f_minor.push_str(&minor.to_string());
-            }
-            _ => {
-                f_minor.push_str(&meta.len().to_string());
-            }
-        }
-        owner_id.push_str(&find_group_owner((meta.uid(), true)));
-        group_id.push_str(&find_group_owner((meta.gid(), false)));
-
-        // let mode = permissions.mode();
-        if let Ok(time) = meta.modified() {
-            let datetime: DateTime<Utc> = DateTime::from(time) + Duration::hours(1);
-            format_time = datetime.format("%b %e %H:%M").to_string();
-        }
-
-        let str_prm: String = format!("{:?}", permissions.to_owned());
-        // println!("PATH -> {} PERMISSIONS-----> {}", path.red(), str_prm.yellow().bold());
-        file_permission.push_str(
-            &str_prm
-                .split_whitespace()
-                .collect::<Vec<&str>>()[4]
-                .trim_matches(|e| (e == '(' || e == ')'))
-        );
+    let meta: Metadata;
+    let permissions: Permissions;
+    if let Ok(meta_d) = fs::symlink_metadata(Path::new(&path)) {
+        permissions = meta_d.permissions();
+        meta = meta_d;
+    } else if let Ok(meta_d) = fs::symlink_metadata(Path::new(&file_name)) {
+        // println!("Permissions: {:?}", meta_d.permissions());
+        permissions = meta_d.permissions();
+        meta = meta_d;
     } else {
-        // println!("CAtch it--> {}", path.on_bright_green());
-        if let Ok(meta) = fs::symlink_metadata(Path::new(&path)) {
-            println!("Permissions: {:?}", meta.permissions());
+        panic!("can't read data");
+    }
+    num_links = meta.nlink();
+
+    match find_major_minor(&path) {
+        Some((major, minor)) => {
+            // file_size = format!("{},   {}", major, minor);
+            f_major.push_str(&format!("{},", &major.to_string()));
+            f_minor.push_str(&minor.to_string());
+        }
+        _ => {
+            f_minor.push_str(&meta.len().to_string());
         }
     }
+    owner_id.push_str(&find_group_owner((meta.uid(), true)));
+    group_id.push_str(&find_group_owner((meta.gid(), false)));
+
+    // let mode = permissions.mode();
+    if let Ok(time) = meta.modified() {
+        let datetime: DateTime<Utc> = DateTime::from(time) + Duration::hours(1);
+        format_time = datetime.format("%b %e %H:%M").to_string();
+    }
+
+    let str_prm: String = format!("{:?}", permissions.to_owned());
+    // println!("PATH -> {} PERMISSIONS-----> {}", path.red(), str_prm.yellow().bold());
+    file_permission.push_str(
+        &str_prm
+            .split_whitespace()
+            .collect::<Vec<&str>>()[4]
+            .trim_matches(|e| (e == '(' || e == ')'))
+    );
 
     (file_permission, num_links, owner_id, group_id, f_major, f_minor, format_time)
 }

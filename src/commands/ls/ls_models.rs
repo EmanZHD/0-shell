@@ -15,81 +15,26 @@ impl Flags {
     pub fn hidden_file(&self, name: &str) -> bool {
         self.a_flag || !name.starts_with('.')
     }
-    pub fn format_output(&self, file_name: &str, file: &Files, path_name: &str) -> Vec<String> {
-        // find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)));
-        // println!(
-        //     "here--> {} ||| {:?}",
-        //     Files::new_file(
-        //         &Path::new(&find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name))))
-        //     ).file_color(&find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)))),
-        //     find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)))
-        // );
-        // println!("OUTPUT--> {} {}", path_name.cyan(), file_name.cyan());
-        let mut Line = Vec::new();
+    pub fn format_output(&self, file_name: &str, path_name: &str) -> Vec<String> {
+        let mut line = Vec::new();
         let (file_perm, links, owner, group, major, minor, date) = file_permission(
             file_name,
             path_name
         );
 
-        let s_link = &find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)));
-        let link_type = Files::new_file(&Path::new(&s_link));
-        if self.f_flag {
-            Line.push(file.file_symbol(&file.file_color(file_name)));
-        } else if self.l_flag {
-            Line.extend(vec![file_perm, links.to_string(), owner, group, major, minor, date]);
-            // Line[0] = &file_perm;
-            // Line[1] = &links.to_string();
-            // Line[2] = &owner;
-            // Line[3] = &group;
-            // Line[4] = &major;
-            // Line[5] = &minor;
-            // Line[6] = &date;
-            if find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name))).is_empty() {
-                // Line[7] = &file.file_color(file_name).to_string();
-                // Line.push(file.file_color(file_name).to_string());
-                Line.push(file_name.to_string());
-            } else {
-                Line.push(
-                    // format!(
-                    //     "{} -> {}",
-                    //     file.file_color(file_name).to_string(),
-                    //     &link_type.file_color(&s_link).to_string()
-                    // )
-                    format!("{} -> {}", file_name.to_string(), &s_link.to_string())
-                );
-                // Line[7] = &format!(
-                //     "{} -> {}",
-                //     file.file_color(file_name).to_string(),
-                //     &link_type.file_color(&s_link).to_string()
-                // );
-            }
-            // format!(
-            //     "{} {} {} {} {} {} {} {}",
-            //     file_perm,
-            //     links,
-            //     owner,
-            //     group,
-            //     major,
-            //     minor,
-            //     date,
-            //     if find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name))).is_empty() {
-            //         file.file_color(file_name).to_string()
-            //     } else {
-            //         format!(
-            //             "{} -> {}",
-            //             file.file_color(file_name).to_string(),
-            //             &link_type.file_color(&s_link).to_string()
-            //         )
-            //     }
-            // );
+        // let s_link = &find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)));
+        // let link_type: Files = Files::new_file(&Path::new(&s_link));
+        if self.l_flag {
+            line.extend(vec![file_perm, links.to_string(), owner, group, major, minor, date]);
+            // if find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name))).is_empty() {
+            line.push(file_name.to_string());
+            // } else {
+            //     line.push(format!("{} -> {}", file_name.to_string(), &s_link.to_string()));
+            // }
         } else {
-            // Line.push(file.file_color(file_name).to_string());
-            Line.push(file_name.to_string());
+            line.push(file_name.to_string());
         }
-        // else {
-        //     Line[0] = file.file_color(file_name).to_string();
-        // };
-        Line
+        line
     }
 }
 
@@ -152,5 +97,26 @@ impl Files {
             _ => {}
         }
         s
+    }
+
+    pub fn file_format(file_name: &str, path: &str, flag: &Flags) -> String {
+        let s_link = &find_symlink(&Path::new(&format!("/{}/{}", path, file_name)));
+        let f_type = Files::new_file(Path::new(&format!("{}/{}", path, file_name)));
+        let sym_type = Files::new_file(&Path::new(&s_link));
+
+        if flag.l_flag {
+            if !find_symlink(&Path::new(&format!("/{}/{}", path, file_name))).is_empty() {
+                return format!("{} -> {}", f_type.file_color(file_name), if flag.f_flag {
+                    sym_type.file_symbol(&sym_type.file_color(s_link))
+                } else {
+                    sym_type.file_color(s_link).to_string()
+                });
+            }
+        }
+
+        if flag.f_flag {
+            return format!("{}", f_type.file_symbol(&f_type.file_color(file_name)));
+        }
+        format!("{}", f_type.file_color(file_name))
     }
 }
