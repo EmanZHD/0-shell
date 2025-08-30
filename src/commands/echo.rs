@@ -13,6 +13,7 @@ pub fn echo(parameters: &mut Params) {
             continue;
 
         } 
+        
         let mut chars = new_word.chars().peekable();
         
         while let Some(c) = chars.next() {
@@ -32,10 +33,9 @@ pub fn echo(parameters: &mut Params) {
                             temp.push(next_char);
                         }
                     }
+                } else {
+                    temp.push('\\');
                 }
-                //  else {
-                //     temp.push('\\');
-                // }
             } else {
                 temp.push(c);
             }

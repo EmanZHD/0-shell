@@ -39,22 +39,19 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
     //for c in input.chars() {
     let mut test = input.chars().peekable();
     while let Some(c) = test.next() {
-       //println!("===> {c}");
-       // if input.chars().next() == Some('\"') || input.chars().next() == Some('\'')
        match c {
-           '\\' if test.next() == Some('\"') => {
+           '\\' if test.peek() == Some(&'\"') || test.peek() == Some(&'\'') => {
                println!("ana hna");
-               new_input.push('\"');
+               new_input.push(test.next().unwrap());
+               continue;
             }
-            '\\' if test.next() == Some('\'') => {
-               println!("ana hna 2");
-               new_input.push('\'');
-            }
+
            '\'' | '"' if !in_quotes => {
                 in_quotes = true;
                 quote = c; // pour memoriser le type de quote
            }
-           '\'' | '"' if in_quotes && c == quote => {
+
+           '\'' | '\"' if in_quotes && c == quote => {
               in_quotes = false; // fermeture de la quote du m type
            }
           ' ' | '\t' if !in_quotes => {
@@ -68,6 +65,7 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
           }
         }
       }
+    
       if in_quotes {
          return Err("unclosed quotes 😓".to_string());
       }
@@ -75,7 +73,7 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
       if !new_input.is_empty() {
           new.push(new_input);
       }
-      println!("new ==> {:?}", new);
+    //   println!("new ==> {:?}", new);
       Ok(new)
   } 
 
@@ -88,7 +86,8 @@ pub fn read_input() -> (String, Vec<String>) {
         let mut input = String::new();
         io::stdin().read_line(&mut input).expect("Failed to read input");
         
-        let input = input.trim_end();
+       let input = input.trim_end();
+    //    println!("{}", input);
         
         if cmd.is_empty() {
             cmd = input.to_string();
