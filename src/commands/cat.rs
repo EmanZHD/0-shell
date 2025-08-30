@@ -1,7 +1,8 @@
 use std::fs;
 use crate::Params;
-use std::io::{self, Read};
-use crate::colors::{red, bold_gray, yellow, green, blue, bold_red, cyan};
+use std::io::{self};
+use std::io::{BufReader, BufRead};
+use crate::colors::{bold_red, cyan};
 
 // 🥳 Updated to work with Params instead of Vec<String> 🥳
 pub fn cat(params: &mut Params) {
@@ -21,9 +22,17 @@ pub fn cat(params: &mut Params) {
 // 💁‍♀️​ handle only cat 💁‍♀️​
 fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", cyan("Reading from stdin (Ctrl+D to end) ☺️​:"));
-    let mut buffer = String::new();
-    io::stdin().read_to_string(&mut buffer)?;
-    print!("{}", buffer);
+    let stdin = io::stdin();
+    let reader = BufReader::new(stdin.lock());
+    
+    for line in reader.lines() {
+        match line {
+             Ok(content) => {
+                println!("{}", content);
+            }
+            Err(e) => return Err(Box::new(e)),
+        }
+    }
     Ok(())
 }
 
