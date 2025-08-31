@@ -14,28 +14,21 @@ pub fn cp(arg: &str) {
         if files[0] == files[1]{
             same = true;
         }
+
         println!("iiii{}" , same);   
         match (same , exists_source, exists_dist, source_is_file, dis_is_file) {
             (true , _ , _ , _ ,_)=> println!("cp: '{}' and '{}' are the same file  " , files[0] , files[1]),
             (false ,false, _, _, _) =>
                 println!("cp: cannot stat '{}': No such file or directory", files[0]),
-            // (_, _, false, _) => println!("cp: omitting directory '{}' ", files[0]),
             (false , true , _ , false , _)=> println!("cp: -r not specified; omitting directory '{}' " , files[0]),
-            (false , _, false, _, _) => {
-                //hna dis hya file mkynch donc 5as n creah o ncopy fih source
-                let parent = Path::new(files[1]).parent();
-                match (parent.expect("REASON").exists(), parent.expect("REASON").is_dir()) {
-                    (false, true) =>
-                        println!("cp: cannot access '{}': No such file or directory", files[1]),
-                    //    (_ , false) => println!("cp: cannot access '{}': No such file or directory" , files[1]) ,
-                    (false, false) => {
-                        fs::copy(files[0], files[1]);
-                    }
-                    (true, true) => {
-                        fs::copy(files[0], files[1]);
-                    }
-                    (true, false) => println!("444444"),
-                }
+           
+            (false , true, false, true, _) => {
+                println!("iiii" );   
+
+                   
+                    let source = Path::new(files[0]);
+                    let destination = Path::new(files[1]);
+                    fs::copy(source, destination);
             }
 
             (false ,_, true, _, false) => {
@@ -48,15 +41,11 @@ pub fn cp(arg: &str) {
             
             let source = Path::new(files[0]);
             let destination = Path::new(files[1]);
-            let destination_path = destination.join(source);
+            // let destination_path = destination.join(source);
           match  fs::copy(source, &destination){
             Ok(_) => {},
             Err(e) => println!("{}" , e)
-          }
-            // println!("souce {}" , files[0]);   
-            // println!("sourcePath {}" , source.display());   
-            // println!("destin {}" , destination.display());   
-            // println!("destin path {}" , destination_path.display());   
+          } 
             }
             (false,true, true, true, false) => {
                 // mn file l dir

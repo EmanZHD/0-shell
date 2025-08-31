@@ -85,7 +85,9 @@ cargo r cp file file
 //cp: 'kk' and 'kk' are the same file 
 cargo r cp file file2
 // file2 fayt kayn overwritter
-
+cargo r cp files file
+// files makaynch err
+//cp: cannot stat 'ddd': No such file or directory 
 
 
 
@@ -97,10 +99,21 @@ cargo r cp file file2
 
 
   
+cargo r cp source.txt dirnot/neww.txt
+//err
+//cp: cannot stat 'dirnot': No such file or directory 
 
-cargo r cp files file
-// files makaynch err
-//cp: cannot stat 'ddd': No such file or directory 
+cargo r cp source.txt yy/notexist/destination.txt
+//err
+//cp: cannot stat 'notexist': No such file or directory 
+
+cargo r cp source.txt notexistdir/
+//err
+//cp: cannot stat 'notexist': No such file or directory
+
+cargo r cp source.txt notexistdir/destination.txt
+//err
+
 cargo r cp *.txt folder/
 // copy all files with .txt in filder 
 
@@ -127,23 +140,6 @@ cargo r cp "lll" dest/
 
 cargo r cp .* destination.txt
 //Copy with hidden files
-
-
-
-cargo r cp source.txt dirnot/neww.txt
-//err
-//cp: cannot stat 'dirnot': No such file or directory 
-
-cargo r cp source.txt yy/notexist/destination.txt
-//err
-//cp: cannot stat 'notexist': No such file or directory 
-
-cargo r cp source.txt notexistdir/
-//err
-//cp: cannot stat 'notexist': No such file or directory
-
-cargo r cp source.txt notexistdir/destination.txt
-//err
 
 
 cargo r cp unreadable.txt des.txt
