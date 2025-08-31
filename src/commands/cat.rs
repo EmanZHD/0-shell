@@ -12,8 +12,8 @@ pub fn cat(params: &mut Params) {
         }
     } else {
         for filename in &params.args {
-            if let Err(e) = cat_file(filename) {
-                eprintln!("{}", bold_red(&format!("cat: {}: {} ☹️", filename, e)));
+            if let Err(_) = cat_file(filename) {
+                eprintln!("{}", bold_red(&format!("cat: '{}': {} ☹️", filename, "No such file or directory")));
             }
         }
     }
@@ -38,7 +38,7 @@ fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
 
 // 💁‍♀️​ handle cat + plusieurs arg(files) 💁‍♀️​
 fn cat_file(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
-    if filename == "-" {
+    if filename == "-" || (filename.starts_with("$") && filename.len() > 1) {
         return only_cat();
     }
     let contents = fs::read_to_string(filename)?;
