@@ -41,7 +41,6 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
     while let Some(c) = test.next() {
        match c {
            '\\' if test.peek() == Some(&'\"') || test.peek() == Some(&'\'') => {
-               println!("ana hna");
                new_input.push(test.next().unwrap());
                continue;
             }
@@ -73,45 +72,81 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
       if !new_input.is_empty() {
           new.push(new_input);
       }
-    //   println!("new ==> {:?}", new);
       Ok(new)
-  } 
+}
 
+/**********🌟 get_prompt 🌟**********/
+pub fn get_prompt() -> String {
+    format!("{}{}{} ", 
+        "~".bold().yellow(), 
+        current().bold().truecolor(199, 21, 133), 
+        "$".bold().yellow()
+    )
+}
 
-/*********🌟 read_input 🌟********/
+/**********🌟 read_input 🌟**********/
 pub fn read_input() -> (String, Vec<String>) {
+ 
+    let mut rl = rustyline::DefaultEditor::new().expect("Failed to create editor");
+    rl.load_history("/home/hlamrani/Documents/0-shell/history/0-shell_history").unwrap_or_default();
+    
     let mut cmd = String::new();
     
     loop {
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).expect("Failed to read input");
-        
-       let input = input.trim_end();
-    //    println!("{}", input);
-        
-        if cmd.is_empty() {
-            cmd = input.to_string();
+        let prompt = if cmd.is_empty() {
+            get_prompt()
         } else {
-            cmd = format!("{}\n{}", cmd, input);
-        }
+            "> ".to_string()
+        };
+      
+        let input = rl.readline(&prompt);
+        
+        match input {
+            Ok(line) => {
+                let line = line.trim_end();
                 
-        match parsing(&cmd) {
-            Ok(elements) => {
-                if elements.is_empty() {
-                    return (String::new(), Vec::new());
+                if cmd.is_empty() {
+                    cmd = line.to_string();
+                } else {
+                    cmd = format!("{}\n{}", cmd, line);
                 }
                 
-                let command = elements[0].clone();
-                let args = if elements.len() > 1 {
-                    elements[1..].to_vec()
-                } else {
-                    Vec::new()
-                };
-                
-                return (command, args);
+                match parsing(&cmd) {
+                    Ok(elements) => {
+                        if elements.is_empty() {
+                            return (String::new(), Vec::new());
+                        }
+                        
+                        let command = elements[0].clone();
+                        let args = if elements.len() > 1 {
+                            elements[1..].to_vec()
+                        } else {
+                            Vec::new()
+                        };
+                        
+                        rl.add_history_entry(&cmd).expect("Failed to add history");
+                        if let Ok(_save) = rl.save_history("/home/hlamrani/Documents/0-shell/history/0-shell_history") {
+                            rl.save_history("/home/hlamrani/Documents/0-shell/history/0-shell_history").unwrap();
+                        }
+                        
+                        return (command, args);
+                    }
+                    Err(_) => {
+                        print_quote_prompt();
+                    }
+                }
             }
-            Err(_) => {
-                print_quote_prompt();
+            Err(rustyline::error::ReadlineError::Interrupted) => {
+                println!("CTRL-C");
+                return (String::new(), Vec::new());
+            }
+            // Err(rustyline::error::ReadlineError::Eof) => {
+            //     println!("CTRL-D");
+            //     return (String::new(), Vec::new());
+            // }
+            Err(err) => {
+                println!("Error: {:?}", err);
+                return (String::new(), Vec::new());
             }
         }
     }

@@ -1,0 +1,26 @@
+#V2
+echo "hello\nthere"
+cd src
+echo "hello\nthere"
+cd --
+echo "hello\nthere"
+history
+hd
+jhfd
+dfhgd
+fdhgf
+history
+help
+exit
+history
+exit
+history
+exit
+history
+exit
+history
+exit
+history
+exit
+history
+exit

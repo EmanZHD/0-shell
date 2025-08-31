@@ -1,6 +1,6 @@
 use crate::Params;
 
-pub fn guide(_parameters: &mut Params) {
+pub fn help(_parameters: &mut Params) {
     println!("Commands:");
     println!("\t\x1b[1m\x1b[34mcd:\x1b[0m Changes the current directory.");
     println!("\t\x1b[1m\x1b[35mguide:\x1b[0m Prints commands descriptions");
