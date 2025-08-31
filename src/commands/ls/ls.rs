@@ -1,7 +1,8 @@
-use crate::commands::ls::ls_tools::{ parse_args, col_width };
+use crate::commands::ls::ls_tools::{ parse_args, total_blocks };
 use crate::commands::ls::ls_models::{ Files, Flags };
 use std::path::Path;
 use std::{ fs, io };
+use std::io::ErrorKind;
 
 // ls_printer fn
 fn ls_printer(list: &mut Vec<String>, flag: &Flags, path_name: &str) -> Vec<Vec<String>> {
@@ -36,12 +37,20 @@ fn ls_helper(path_name: &str, flag: &Flags) -> Result<Vec<Vec<String>>, io::Erro
                     Err(_e) => eprintln!("error in readinf '{}'", path_name),
                 }
             }
-            if !content.is_empty() && flag.a_flag {
+            // if !content.is_empty() && flag.a_flag {
+            if flag.a_flag {
                 content.insert(0, ".".to_owned());
                 content.insert(1, "..".to_owned());
             }
         }
-        Err(_) => content.push(path_name.to_owned()),
+        Err(e) => {
+            // println!("EROR READING DIR -> {}", e);
+            if e.kind() == ErrorKind::PermissionDenied {
+                println!("ls: cannot open directory '{}': Permission denied", path_name);
+            } else {
+                content.push(path_name.to_owned());
+            }
+        }
     }
 
     // lines.push(ls_printer(&mut content, flag, path_name));
@@ -60,18 +69,19 @@ pub fn ls(args: Vec<String>) {
     };
     // println!("🏳️ CHECK FLAG {:?}", flags.);
     new_args.sort();
-    // println!("LS args BEFORE=> {:?}", new_args);
     for (i, path_str) in new_args.iter().enumerate() {
         let path_name = Path::new(path_str);
-        // println!("{} {:?}", "🪄 detect file type -->".yellow().bold(), path_name.metadata());
         match path_name.metadata() {
             Ok(path_data) => {
                 if new_args.len() > 1 && path_data.is_dir() {
                     println!("{}:", path_str);
                 }
                 if let Ok(lines) = ls_helper(path_str, &flags) {
-                    println!("HEREEE");
-                    display_line(lines, path_str, &flags);
+                    // println!("HEREEE");
+                    if flags.l_flag && Files::new_file(Path::new(path_str)) != Files::Reg {
+                        println!("total {}", total_blocks(Path::new(path_str), flags.a_flag));
+                    }
+                    Files::display_line(lines, path_str, &flags);
                 }
             }
             Err(_) => eprintln!("ls: cannot access '{}': No such file or directory", path_str),
@@ -80,25 +90,5 @@ pub fn ls(args: Vec<String>) {
         if i != new_args.len() - 1 {
             println!();
         }
-    }
-}
-
-pub fn display_line(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
-    // println!("{:?}", lines);
-    let col_width = col_width(&lines);
-    for line in &lines {
-        for (i, elem) in line.iter().enumerate() {
-            let file_name = i == line.len() - 1;
-            let is_num: bool = elem.chars().all(|e| (e.is_ascii_digit() || e == ','));
-            // println!("CHECKK-->{:?}", is_num);
-            if file_name {
-                print!("{:<w$} ", Files::file_format(elem, path, flag), w = col_width[i]);
-            } else if is_num {
-                print!("{:>w$} ", elem, w = col_width[i]);
-            } else {
-                print!("{:<w$} ", elem, w = col_width[i]);
-            }
-        }
-        println!();
     }
 }

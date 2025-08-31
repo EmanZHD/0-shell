@@ -53,3 +53,6 @@ p → FIFO (should also show | with ls -F)
 
 
 The major number and minor number tell the kernel how to access the device.
+
+        // println!("{} {:?}", "🪄 detect file type -->".yellow().bold(), path_name.metadata());
+ls /bin -al

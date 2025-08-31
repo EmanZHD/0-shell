@@ -1,4 +1,4 @@
-use crate::commands::ls::ls_tools::{ file_permission, find_symlink };
+use crate::commands::ls::ls_tools::{ file_data, find_symlink, col_width };
 use colored::{ ColoredString, Colorize };
 use is_executable::is_executable;
 use std::path::Path;
@@ -19,10 +19,7 @@ impl Flags {
 
     pub fn format_output(&self, file_name: &str, path_name: &str) -> Vec<String> {
         let mut line = Vec::new();
-        let (file_perm, links, owner, group, major, minor, date) = file_permission(
-            file_name,
-            path_name
-        );
+        let (file_perm, links, owner, group, major, minor, date) = file_data(file_name, path_name);
 
         // let s_link = &find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)));
         // let link_type: Files = Files::new_file(&Path::new(&s_link));
@@ -40,7 +37,7 @@ impl Flags {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Files {
     Symlink,
     Dir,
@@ -120,6 +117,26 @@ impl Files {
             return format!("{}", f_type.file_symbol(&f_type.file_color(file_name)));
         }
         format!("{}", f_type.file_color(file_name))
+    }
+
+    pub fn display_line(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
+        // println!("{:?}", lines);
+        let col_width = col_width(&lines);
+        for line in &lines {
+            for (i, elem) in line.iter().enumerate() {
+                let file_name = i == line.len() - 1;
+                let is_num: bool = elem.chars().all(|e| (e.is_ascii_digit() || e == ','));
+                // println!("CHECKK-->{:?}", is_num);
+                if file_name {
+                    print!("{:<w$} ", Files::file_format(elem, path, flag), w = col_width[i]);
+                } else if is_num {
+                    print!("{:>w$} ", elem, w = col_width[i]);
+                } else {
+                    print!("{:<w$} ", elem, w = col_width[i]);
+                }
+            }
+            println!();
+        }
     }
 
     pub fn has_extra_attrs(path: &str) -> bool {

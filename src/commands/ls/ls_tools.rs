@@ -21,6 +21,34 @@ pub fn col_width(lines: &Vec<Vec<String>>) -> Vec<usize> {
     col_width
 }
 
+pub fn total_blocks(dir_path: &Path, flag_a: bool) -> u64 {
+    println!("PQTH {:?} {:?}", dir_path, flag_a);
+    let mut total: u64 = 0;
+    if flag_a {
+        if let Ok(meta) = fs::symlink_metadata(Path::new(dir_path)) {
+            total += meta.blocks();
+        }
+    }
+    if let Ok(entries) = fs::read_dir(dir_path) {
+        for entry in entries {
+            if let Ok(entry) = entry {
+                if !flag_a && entry.file_name().to_string_lossy().starts_with('.') {
+                    continue;
+                }
+                if let Ok(metadata) = fs::symlink_metadata(entry.path()) {
+                    total += metadata.blocks();
+                }
+            }
+        }
+    }
+    if flag_a {
+        if let Ok(meta) = fs::symlink_metadata(dir_path.join("..")) {
+            total += meta.blocks();
+        }
+    }
+    total / 2
+}
+
 // parse_args fn
 pub fn parse_args(args: Vec<String>) -> Result<(Flags, Vec<String>), ()> {
     let mut flags = Flags::default();
@@ -89,7 +117,7 @@ pub fn find_symlink(path: &Path) -> String {
     }
 }
 
-pub fn file_permission(
+pub fn file_data(
     file_name: &str,
     path_name: &str
 ) -> (String, u64, String, String, String, String, String) {
