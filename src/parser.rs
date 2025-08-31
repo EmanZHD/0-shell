@@ -1,7 +1,9 @@
-use std::{ io };
-use std::io::Write;
 use std::env;
 use colored::*;
+use std::{ io };
+use std::process;
+use std::io::Write;
+use std::path::PathBuf;
 
 /*********🌟 Current Dir 🌟********/
 pub fn current() -> String {
@@ -86,9 +88,16 @@ pub fn get_prompt() -> String {
 
 /**********🌟 read_input 🌟**********/
 pub fn read_input() -> (String, Vec<String>) {
- 
+    
+    let mut history_path = PathBuf::new();
+    if let Ok(home_dir) = env::var("HOME") {
+        history_path.push(home_dir);
+        history_path.push(".0-shell_history");
+    }
+    // println!("history => {:?}", history_path);
+
     let mut rl = rustyline::DefaultEditor::new().expect("Failed to create editor");
-    rl.load_history("/home/hlamrani/Documents/0-shell/history/0-shell_history").unwrap_or_default();
+    rl.load_history(&history_path).unwrap_or_default();
     
     let mut cmd = String::new();
     
@@ -137,13 +146,13 @@ pub fn read_input() -> (String, Vec<String>) {
                 }
             }
             Err(rustyline::error::ReadlineError::Interrupted) => {
-                println!("CTRL-C");
+                println!("CTRL-C ==> for test");
                 return (String::new(), Vec::new());
             }
-            // Err(rustyline::error::ReadlineError::Eof) => {
-            //     println!("CTRL-D");
-            //     return (String::new(), Vec::new());
-            // }
+            Err(rustyline::error::ReadlineError::Eof) => {
+                println!("CTRL-D ==> for test");
+                process::exit(1);
+            }
             Err(err) => {
                 println!("Error: {:?}", err);
                 return (String::new(), Vec::new());
