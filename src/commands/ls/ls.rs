@@ -3,13 +3,15 @@ use crate::commands::ls::ls_models::{ Files, Flags };
 use std::path::Path;
 use std::{ fs, io };
 use std::io::ErrorKind;
-
 // ls_printer fn
 fn ls_printer(list: &mut Vec<String>, flag: &Flags, path_name: &str) -> Vec<Vec<String>> {
     list.sort_by(|f1, f2| {
-        let f1_key = f1.strip_prefix('.').unwrap_or(&f1);
-        let f2_key = f2.strip_prefix('.').unwrap_or(&f2);
-        f1_key.to_lowercase().cmp(&f2_key.to_lowercase())
+        let f1_key = f1.strip_prefix('.').unwrap_or(f1).trim();
+        let f2_key = f2.strip_prefix('.').unwrap_or(f2).trim();
+        let f1_key = f1_key.replace('-', "");
+        let f2_key = f2_key.replace('-', "");
+
+        f1_key.to_lowercase().cmp(&&f2_key.to_lowercase())
     });
     let mut line = Vec::new();
     for c in list {
@@ -52,9 +54,6 @@ fn ls_helper(path_name: &str, flag: &Flags) -> Result<Vec<Vec<String>>, io::Erro
             }
         }
     }
-
-    // lines.push(ls_printer(&mut content, flag, path_name));
-    // println!("content--> {:?} of PATH {:?}", content, path_name);
     lines.extend(ls_printer(&mut content, flag, path_name));
     Ok(lines)
 }
@@ -73,15 +72,30 @@ pub fn ls(args: Vec<String>) {
         let path_name = Path::new(path_str);
         match path_name.metadata() {
             Ok(path_data) => {
-                if new_args.len() > 1 && path_data.is_dir() {
-                    println!("{}:", path_str);
-                }
-                if let Ok(lines) = ls_helper(path_str, &flags) {
-                    // println!("HEREEE");
-                    if flags.l_flag && Files::new_file(Path::new(path_str)) != Files::Reg {
-                        println!("total {}", total_blocks(Path::new(path_str), flags.a_flag));
+                if path_name.is_symlink() && flags.l_flag {
+                    // println!("---------------");
+                    println!(
+                        "{} {}",
+                        flags.format_output(path_str, path_str).join(" "),
+                        Files::file_format(path_str, path_str, &flags)
+                    );
+                } else {
+                    if new_args.len() > 1 && path_data.is_dir() {
+                        println!("{}:", path_str);
                     }
-                    Files::display_line(lines, path_str, &flags);
+                    if let Ok(lines) = ls_helper(path_str, &flags) {
+                        // println!("HEREEE");
+                        if flags.l_flag && Files::new_file(Path::new(path_str)) != Files::Reg {
+                            // println!("{}", path_str.red().on_black());
+                            println!("total {}", total_blocks(Path::new(path_str), flags.a_flag));
+                        }
+                        if flags.l_flag {
+                            Files::display_line(lines, path_str, &flags);
+                        } else {
+                            // println!("=============={}", path_str);
+                            Files::format_out(lines, &path_str, &flags);
+                        }
+                    }
                 }
             }
             Err(_) => eprintln!("ls: cannot access '{}': No such file or directory", path_str),

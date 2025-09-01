@@ -1,12 +1,13 @@
-use chrono::{ DateTime, Duration, Utc };
-use std::fs::{ Metadata, Permissions };
 use std::path::{ Path };
 use std::{ fs, os::unix::fs::FileTypeExt };
 use users::{ get_group_by_gid, get_user_by_uid };
 use std::os::unix::fs::MetadataExt;
-use crate::commands::ls::ls_models::{ Flags, Files };
+use crate::commands::ls::ls_models::{ Flags };
 use libc::{ self, uid_t };
-// use exacl::{ Acl, Perm };
+use console::measure_text_width;
+use std::fs::Metadata;
+use chrono::{ DateTime, Duration, Local, Datelike };
+
 pub fn col_width(lines: &Vec<Vec<String>>) -> Vec<usize> {
     let mut col_width = Vec::new();
     for line in lines {
@@ -22,7 +23,7 @@ pub fn col_width(lines: &Vec<Vec<String>>) -> Vec<usize> {
 }
 
 pub fn total_blocks(dir_path: &Path, flag_a: bool) -> u64 {
-    println!("PQTH {:?} {:?}", dir_path, flag_a);
+    // println!("PQTH {:?} {:?}", dir_path, flag_a);
     let mut total: u64 = 0;
     if flag_a {
         if let Ok(meta) = fs::symlink_metadata(Path::new(dir_path)) {
@@ -117,63 +118,28 @@ pub fn find_symlink(path: &Path) -> String {
     }
 }
 
-pub fn file_data(
-    file_name: &str,
-    path_name: &str
-) -> (String, u64, String, String, String, String, String) {
-    // println!("OUTPUT--> {} {}", path_name.cyan(), file_name.cyan());
-    let mut file_permission = String::new();
-    let mut num_links: u64 = 0;
-    let mut owner_id = String::new();
-    let mut group_id = String::new();
-    let mut f_major = String::new();
-    let mut f_minor = String::new();
-    let mut format_time = String::new();
-    let path = format!("{}/{}", path_name, file_name);
-    let meta: Metadata;
-    let permissions: Permissions;
-    if let Ok(meta_d) = fs::symlink_metadata(Path::new(&path)) {
-        permissions = meta_d.permissions();
-        meta = meta_d;
-    } else if let Ok(meta_d) = fs::symlink_metadata(Path::new(&file_name)) {
-        // println!("Permissions: {:?}", meta_d.permissions());
-        permissions = meta_d.permissions();
-        meta = meta_d;
+pub fn format_time(meta: &Metadata) -> String {
+    if let Ok(modified) = meta.modified() {
+        let mut date: DateTime<Local> = modified.into();
+        let real_date = date.clone();
+        date = date + Duration::hours(1);
+        let now = Local::now();
+        if date.year() != now.year() || real_date > now {
+            date.format("%b %e  %Y").to_string()
+        } else {
+            date.format("%b %e %H:%M").to_string()
+        }
     } else {
-        panic!("can't read data");
+        "--- --- --:--".to_string()
     }
-    num_links = meta.nlink();
+}
 
-    match find_major_minor(&path) {
-        Some((major, minor)) => {
-            // file_size = format!("{},   {}", major, minor);
-            f_major.push_str(&format!("{},", &major.to_string()));
-            f_minor.push_str(&minor.to_string());
-        }
-        _ => {
-            f_minor.push_str(&meta.len().to_string());
-        }
+pub fn padding(str: String, width: usize, is_last: bool) -> String {
+    if is_last {
+        str
+    } else {
+        let space = measure_text_width(&str);
+        let pad = width.saturating_sub(space);
+        format!("{}{}", str, " ".repeat(pad))
     }
-    owner_id.push_str(&find_group_owner((meta.uid(), true)));
-    group_id.push_str(&find_group_owner((meta.gid(), false)));
-
-    // let mode = permissions.mode();
-    if let Ok(time) = meta.modified() {
-        let datetime: DateTime<Utc> = DateTime::from(time) + Duration::hours(1);
-        format_time = datetime.format("%b %e %H:%M").to_string();
-    }
-
-    let str_prm: String = format!("{:?}", permissions.to_owned());
-    // println!("PATH -> {} PERMISSIONS-----> {}", path.red(), str_prm.yellow().bold());
-
-    file_permission.push_str(
-        &str_prm
-            .split_whitespace()
-            .collect::<Vec<&str>>()[4]
-            .trim_matches(|e| (e == '(' || e == ')'))
-    );
-    if Files::has_extra_attrs(&path) {
-        file_permission.push('+');
-    }
-    (file_permission, num_links, owner_id, group_id, f_major, f_minor, format_time)
 }

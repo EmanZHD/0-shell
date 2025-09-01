@@ -1,9 +1,20 @@
-use crate::commands::ls::ls_tools::{ file_data, find_symlink, col_width };
+use crate::commands::ls::ls_tools::{
+    find_symlink,
+    col_width,
+    find_major_minor,
+    find_group_owner,
+    format_time,
+    padding,
+};
 use colored::{ ColoredString, Colorize };
 use is_executable::is_executable;
 use std::path::Path;
 use std::{ fs, os::unix::fs::FileTypeExt };
 use xattr::list;
+use std::fs::{ Metadata };
+use std::os::unix::fs::MetadataExt;
+use terminal_size::{ terminal_size, Width };
+use console::measure_text_width;
 
 #[derive(Debug, Default)]
 pub struct Flags {
@@ -19,17 +30,21 @@ impl Flags {
 
     pub fn format_output(&self, file_name: &str, path_name: &str) -> Vec<String> {
         let mut line = Vec::new();
-        let (file_perm, links, owner, group, major, minor, date) = file_data(file_name, path_name);
+        let file_data = FileData::extarct_data(file_name, path_name);
 
-        // let s_link = &find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name)));
-        // let link_type: Files = Files::new_file(&Path::new(&s_link));
         if self.l_flag {
-            line.extend(vec![file_perm, links.to_string(), owner, group, major, minor, date]);
-            // if find_symlink(&Path::new(&format!("/{}/{}", path_name, file_name))).is_empty() {
+            line.extend(
+                vec![
+                    file_data.f_permission,
+                    file_data.num_links.to_string(),
+                    file_data.owner_id,
+                    file_data.group_id,
+                    file_data.f_major,
+                    file_data.f_minor,
+                    file_data.format_time
+                ]
+            );
             line.push(file_name.to_string());
-            // } else {
-            //     line.push(format!("{} -> {}", file_name.to_string(), &s_link.to_string()));
-            // }
         } else {
             line.push(file_name.to_string());
         }
@@ -99,8 +114,10 @@ impl Files {
     }
 
     pub fn file_format(file_name: &str, path: &str, flag: &Flags) -> String {
+        // println!("HEEEEEEEEY");
         let s_link = &find_symlink(&Path::new(&format!("/{}/{}", path, file_name)));
         let f_type = Files::new_file(Path::new(&format!("{}/{}", path, file_name)));
+        // println!("IN FILE FORMAT {:?}", f_type);
         let sym_type = Files::new_file(&Path::new(&s_link));
 
         if flag.l_flag {
@@ -120,7 +137,7 @@ impl Files {
     }
 
     pub fn display_line(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
-        // println!("{:?}", lines);
+        // println!("LINE-> {:?}", lines);
         let col_width = col_width(&lines);
         for line in &lines {
             for (i, elem) in line.iter().enumerate() {
@@ -143,6 +160,100 @@ impl Files {
         match list(path) {
             Ok(mut attrs) => attrs.next().is_some(),
             Err(_) => false,
+        }
+    }
+
+    pub fn format_out(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
+        let files_name: Vec<String> = lines
+            .iter()
+            .flatten()
+            .map(|s| Files::file_format(s, path, flag).to_string())
+            .collect();
+
+        let max_len = files_name
+            .iter()
+            .map(|s| measure_text_width(s))
+            .max()
+            .unwrap_or(0);
+        let col_width = max_len + 2;
+        let term_width = terminal_size()
+            .map(|(Width(w), _)| w as usize)
+            .unwrap_or(80);
+        let cols = (term_width / col_width).max(1);
+
+        if files_name.len() <= cols {
+            println!("{}", files_name.join("  "));
+            return;
+        }
+
+        let rows = (files_name.len() + cols - 1) / cols;
+        for row in 0..rows {
+            for col in 0..cols {
+                let i = col * rows + row;
+                if i < files_name.len() {
+                    let is_last = col == cols - 1 || i + rows >= files_name.len();
+                    print!("{}", padding(files_name[i].clone(), col_width, is_last));
+                }
+            }
+            println!();
+        }
+    }
+}
+#[derive(Debug)]
+pub struct FileData {
+    pub f_permission: String,
+    pub num_links: u64,
+    pub owner_id: String,
+    pub group_id: String,
+    pub f_major: String,
+    pub f_minor: String,
+    pub format_time: String,
+}
+
+impl FileData {
+    pub fn extarct_data(file_name: &str, path_name: &str) -> Self {
+        let path = format!("{}/{}", path_name, file_name);
+        let mut f_major = String::new();
+        let mut f_minor = String::new();
+        // let mut format_time = String::new();
+
+        let meta: Metadata = fs
+            ::symlink_metadata(Path::new(&path))
+            .or_else(|_| fs::symlink_metadata(Path::new(file_name)))
+            .expect("can't read data");
+        let num_links = meta.nlink();
+        if meta.file_type().is_char_device() || meta.file_type().is_block_device() {
+            if let Some((major, minor)) = find_major_minor(&path) {
+                f_major.push_str(&format!("{},", major));
+                f_minor.push_str(&minor.to_string());
+            }
+        } else {
+            f_minor.push_str(&meta.len().to_string());
+        }
+
+        let owner_id = find_group_owner((meta.uid(), true));
+        let group_id = find_group_owner((meta.gid(), false));
+        // let mode = permissions.mode();
+        let format_time = format_time(&meta);
+        // let str_prm: String = format!("{:?}", permissions.to_owned());
+        // println!("PATH -> {} PERMISSIONS-----> {}", path.red(), str_prm.yellow().bold());
+        let mut f_permission = format!("{:?}", meta.permissions())
+            .split_whitespace()
+            .collect::<Vec<&str>>()[4]
+            .trim_matches(|e| (e == '(' || e == ')'))
+            .to_string();
+
+        if Files::has_extra_attrs(&path) {
+            f_permission.push('+');
+        }
+        Self {
+            f_permission,
+            num_links,
+            owner_id,
+            group_id,
+            f_major,
+            f_minor,
+            format_time,
         }
     }
 }
