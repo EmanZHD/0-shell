@@ -12,8 +12,8 @@ pub fn cat(params: &mut Params) {
         }
     } else {
         for filename in &params.args {
-            if let Err(_) = cat_file(filename) {
-                eprintln!("{}", bold_red(&format!("cat: '{}': {} ☹️", filename, "No such file or directory")));
+            if let Err(e) = cat_file(filename) {
+                eprintln!("{}", bold_red(&format!("cat: '{}': {} ☹️", filename, e)));
             }
         }
     }
@@ -36,12 +36,26 @@ fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+
 // 💁‍♀️​ handle cat + plusieurs arg(files) 💁‍♀️​
 fn cat_file(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
     if filename == "-" || (filename.starts_with("$") && filename.len() > 1) {
         return only_cat();
     }
-    let contents = fs::read_to_string(filename)?;
-    println!("{}", contents);
-    Ok(())
+    match fs::read_to_string(filename) {
+        Ok(contents) => {
+            println!("{}", contents);
+            Ok(())
+        }
+        Err(e) => {
+            if e.kind() == std::io::ErrorKind::PermissionDenied {
+                 eprintln!("cat: {}: Permission denied", filename);
+            } else if e.kind() == std::io::ErrorKind::NotFound {
+                 eprintln!("cat: {}: No such file or directory", filename);
+            } else {
+                eprintln!("cat: {}: {}", filename, e);
+            }
+            Err(e.into())
+        }
+    }
 }
