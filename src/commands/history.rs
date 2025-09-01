@@ -20,11 +20,11 @@ pub fn history(_parameters: &mut Params) {
 
 /*********🌟 read_history_file 🌟********/
 fn read_history_file() -> io::Result<()> {
-    let content = File::open("/home/hlamrani/Documents/0-shell/history/0-shell_history")?;
+    let content = File::open("../0-shell/history/0-shell_history")?;
     let reader = BufReader::new(content);
     let lenght = reader.lines().count().to_string();
 
-    let content = File::open("/home/hlamrani/Documents/0-shell/history/0-shell_history")?;
+    let content = File::open("../0-shell/history/0-shell_history")?;
     let reader = BufReader::new(content);
    //  println!("{}" ,"📜 This is your history 🤗\n".bold());
     for (n, line) in reader.lines().enumerate() {

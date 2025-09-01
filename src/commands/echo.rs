@@ -11,19 +11,10 @@ pub fn echo(parameters: &mut Params) {
             output.push("0-shell".to_string());
         }
 
-        // if new_word.starts_with("$") {
-        //     if let Ok(var) = std::env::var(new_word.trim_matches('$')) {
-        //         output.push(var);
-        //     }
-        //     continue;
-        // } 
-        
         let mut chars = new_word.chars().peekable();
         
         while let Some(c) = chars.next() {
-            println!("==> {c}");
             if c == '$' {
-                println!("### ==> {c}");
                let mut dollar_count = 1;
                 while chars.peek() == Some(&'$') {
                     chars.next();
@@ -81,7 +72,6 @@ pub fn echo(parameters: &mut Params) {
                 temp.push(c);
             }
         }
-        
         output.push(temp);
     }
     for i in output {
