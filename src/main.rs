@@ -1,11 +1,64 @@
-mod shell; // 👈 This tells Rust to look for `shell.rs`
-mod errors; // 👈 This tells Rust to look for `errors.rs`
-mod commands;  // This reads commands/mod.rs
-use shell::spawn_user_input_handler; // 👈 Import the function
-#[tokio::main]
-async fn main() {
-    let user_input_handler = spawn_user_input_handler().await;
-    if let Ok(Err(e)) = user_input_handler{
-        eprintln!("Error: {}" , e);
+mod parser;
+mod consts;
+mod errors;
+mod commands;
+use std::path::PathBuf;
+use std::collections::HashMap;
+use consts::{ TITLE, GREEN, RESET };
+use parser::{ read_input, print_prompt };
+// use commands::echo::echo;
+use commands::cd::cd;
+use commands::ls::ls;
+use commands::pwd::pwd;
+use commands::exit::exit;
+use commands::clear::clear;
+use commands::guide::guide;
+use commands::history::history;
+
+#[derive(Clone, Debug)]
+pub struct Params {
+   args: Vec<String>,
+   archieve: Vec<(i32 ,String)>,
+   previous_path: Option<PathBuf>
+}
+
+impl Params {
+    pub fn new() -> Self {
+        Params {
+            args: Vec::new(),
+            archieve: Vec::new(),
+            previous_path: None,
+        }
+    }
+}
+fn main() {
+    println!("{GREEN}{}{RESET}", TITLE);
+    let mut params = Params::new();
+    let mut count = 1;
+    loop {
+        print_prompt();
+        let (keyword, arguments) = read_input();
+        println!("{}, {:?}", keyword, arguments);
+        let valeur = format!("{} {}", keyword.clone(), arguments.join(" "));
+        params.args = arguments;
+        params.archieve.push((count, valeur));
+        handle_cmds(&mut params, keyword);
+        count+=1;
+    }
+}
+
+pub fn handle_cmds(params: &mut Params, keyword: String) {
+    let mut dispatcher: HashMap<&str, fn(&mut Params)> = HashMap::new();
+    dispatcher.insert("ls", ls as fn(&mut Params)); 
+    dispatcher.insert("cd", cd as fn(&mut Params)); 
+    dispatcher.insert("pwd", pwd as fn(&mut Params));
+    dispatcher.insert("exit", exit as fn(&mut Params));
+    dispatcher.insert("guide", guide as fn(&mut Params));
+    dispatcher.insert("clear", clear as fn(&mut Params));
+    dispatcher.insert("history", history as fn(&mut Params));
+
+    match dispatcher.get(&keyword.as_str()) {
+        Some(func) => func(params),
+        None => println!("0-shell: Command Not Found: {} ☹️", keyword),
     }
 }
