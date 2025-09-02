@@ -1,7 +1,9 @@
-pub fn guide(_args: Vec<String>) {
-    println!("Commands:");
+use crate::Params;
+
+pub fn help(_parameters: &mut Params) {
+    println!("\x1b[1m📌 Commands:\x1b[0m");
     println!("\t\x1b[1m\x1b[34mcd:\x1b[0m Changes the current directory.");
-    println!("\t\x1b[1m\x1b[35mguide:\x1b[0m Prints commands descriptions");
+    println!("\t\x1b[1m\x1b[35mhelp:\x1b[0m Prints commands descriptions");
     println!("\t\x1b[1m\x1b[31mexit:\x1b[0m Closes the 0-shell and all of it's processes.");
     println!("\t\x1b[1m\x1b[33mcat:\x1b[0m Displays the content of a file.");
     println!("\t\x1b[1m\x1b[36mecho:\x1b[0m Displays defined text.");

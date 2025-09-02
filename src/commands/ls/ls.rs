@@ -3,7 +3,7 @@ use crate::commands::ls::ls_models::{ Files, Flags };
 use std::path::Path;
 use std::{ fs, io };
 use std::io::ErrorKind;
-
+use crate::Params;
 // ls_printer fn
 fn ls_printer(list: &mut Vec<String>, flag: &Flags, path_name: &str) -> Vec<Vec<String>> {
     list.sort_by(|f1, f2| {
@@ -57,8 +57,8 @@ fn ls_helper(path_name: &str, flag: &Flags) -> Result<Vec<Vec<String>>, io::Erro
 }
 
 //ls fn
-pub fn ls(args: Vec<String>) {
-    let (flags, mut new_args) = match parse_args(args) {
+pub fn ls(parameters: &mut Params) {
+    let (flags, mut new_args) = match parse_args(parameters.args.clone()) {
         Ok((flags, new_args)) => (flags, new_args),
         Err(()) => {
             return;
