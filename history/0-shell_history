@@ -87,3 +87,10 @@ echo ~
 exit
 help
 exit
+echo ~
+exit
+echo hello
+echo test
+echo "hello amona\nlabas?\nlwlidat?\n"
+clear
+exit

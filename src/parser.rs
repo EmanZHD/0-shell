@@ -77,6 +77,7 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
       Ok(new)
 }
 
+
 /**********🌟 get_prompt 🌟**********/
 pub fn get_prompt() -> String {
     format!("{}{}{} ", 
