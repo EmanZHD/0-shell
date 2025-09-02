@@ -28,3 +28,15 @@ clear
 mkdir hasna
 clear
 mkdir ks
+ls
+clear
+ls
+clear
+cargo run
+ls
+ls -la
+ls -l
+clear
+ls -la
+ls -l
+ls

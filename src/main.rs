@@ -7,14 +7,12 @@ use parser::*;
 use std::path::PathBuf;
 use consts::{ TITLE, GREEN, RESET };
 
-
 #[derive(Clone, Debug)]
 pub struct Params {
     args: Vec<String>,
     archieve: PathBuf,
     previous_path: Option<PathBuf>,
     home: PathBuf,
-
 }
 
 impl Params {
@@ -27,7 +25,13 @@ impl Params {
         }
     }
 }
+
 fn main() {
+    if !atty::is(atty::Stream::Stdout) || !atty::is(atty::Stream::Stderr) {
+        eprintln!("Error: Avoid broken pipe");
+        std::process::exit(1);
+    }
+
     println!("{GREEN}{}{RESET}", TITLE);
     let mut params = Params::new();
     let (history_path, home) = get_paths();
