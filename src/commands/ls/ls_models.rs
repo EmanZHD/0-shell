@@ -28,7 +28,7 @@ impl Flags {
         self.a_flag || !name.starts_with('.')
     }
 
-    pub fn format_output(&self, file_name: &str, path_name: &str) -> Vec<String> {
+    pub fn line_data(&self, file_name: &str, path_name: &str) -> Vec<String> {
         let mut line = Vec::new();
         let file_data = FileData::extarct_data(file_name, path_name);
 
@@ -186,7 +186,7 @@ impl Files {
         }
     }
 
-    pub fn format_out(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
+    pub fn display_file(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
         let files_name: Vec<String> = lines
             .iter()
             .flatten()

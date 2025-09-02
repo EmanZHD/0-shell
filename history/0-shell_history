@@ -40,3 +40,15 @@ clear
 ls -la
 ls -l
 ls
+"ls"
+'ls'
+ls -l
+ls
+ls -la
+ls
+ls -la
+clear
+ls
+ls -laF
+ls -l
+ls

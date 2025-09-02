@@ -143,3 +143,22 @@ pub fn padding(str: String, width: usize, is_last: bool) -> String {
         format!("{}{}", str, " ".repeat(pad))
     }
 }
+
+// format_lines fn
+pub fn format_lines(list: &mut Vec<String>, flag: &Flags, path_name: &str) -> Vec<Vec<String>> {
+    list.sort_by(|f1, f2| {
+        let f1_key = f1.strip_prefix('.').unwrap_or(f1).trim();
+        let f2_key = f2.strip_prefix('.').unwrap_or(f2).trim();
+        let f1_key = f1_key.replace('-', "");
+        let f2_key = f2_key.replace('-', "");
+
+        f1_key.to_lowercase().cmp(&&f2_key.to_lowercase())
+    });
+    let mut line = Vec::new();
+    for c in list {
+        if flag.hidden_file(&c) {
+            line.push(flag.line_data(&c, path_name));
+        }
+    }
+    line
+}
