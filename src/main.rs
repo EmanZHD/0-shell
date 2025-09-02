@@ -15,6 +15,7 @@ use commands::clear::clear;
 use commands::guide::guide;
 use commands::history::history;
 use commands::rm::rm;
+use commands::mkdir::mkdir;
 
 #[derive(Clone, Debug)]
 pub struct Params {
@@ -58,6 +59,7 @@ pub fn handle_cmds(params: &mut Params, keyword: String) {
     dispatcher.insert("clear", clear as fn(&mut Params));
     dispatcher.insert("history", history as fn(&mut Params));
     dispatcher.insert("rm", rm as fn(&mut Params));
+    dispatcher.insert("mkdir" , mkdir as fn(&mut Params));
 
     match dispatcher.get(&keyword.as_str()) {
         Some(func) => func(params),
