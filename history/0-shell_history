@@ -85,3 +85,5 @@ exit
 echo !
 echo ~
 exit
+help
+exit
