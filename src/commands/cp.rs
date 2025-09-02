@@ -1,46 +1,50 @@
 use std::fs;
 use std::path::Path;
-pub fn cp(arg: &str) {
-    let files: Vec<&str> = arg.split_whitespace().collect();
-
-    if files.len() > 2 {
-        multiple_source(files);
+use crate::Params;
+pub fn cp(input: &mut Params) {
+    // println!("{:?}" , input.args);
+    if input.args.len()== 0{
+        println!("cp: missing file operand");
+    }else if input.args.len() == 1{
+        println!("cp: missing destination file operand after {}" , input.args[0])
+    }else if input.args.len() > 2 {
+        multiple_source(input.args.clone());
     } else {
-        let exists_source = Path::new(files[0]).exists();
-        let exists_dist = Path::new(files[1]).exists();
-        let source_is_file = Path::new(files[0]).is_file();
-        let dis_is_file = Path::new(files[1]).is_file();
+        let exists_source = Path::new(&input.args[0]).exists();
+        let exists_dist = Path::new(&input.args[1]).exists();
+        let source_is_file = Path::new(&input.args[0]).is_file();
+        let dis_is_file = Path::new(&input.args[1]).is_file();
         let mut same = false;
-        if files[0] == files[1]{
+        if input.args[0] == input.args[1]{
             same = true;
         }
 
         println!("iiii{}" , same);   
         match (same , exists_source, exists_dist, source_is_file, dis_is_file) {
-            (true , _ , _ , _ ,_)=> println!("cp: '{}' and '{}' are the same file  " , files[0] , files[1]),
+            (true , _ , _ , _ ,_)=> println!("cp: '{}' and '{}' are the same file  " , input.args[0] , input.args[1]),
             (false ,false, _, _, _) =>
-                println!("cp: cannot stat '{}': No such file or directory", files[0]),
-            (false , true , _ , false , _)=> println!("cp: -r not specified; omitting directory '{}' " , files[0]),
+                println!("cp: cannot stat '{}': No such file or directory", input.args[0]),
+            (false , true , _ , false , _)=> println!("cp: -r not specified; omitting directory '{}' " , input.args[0]),
            
             (false , true, false, true, _) => {
                 println!("iiii" );   
 
                    
-                    let source = Path::new(files[0]);
-                    let destination = Path::new(files[1]);
+                    let source = Path::new(&input.args[0]);
+                    let destination = Path::new(&input.args[1]);
                     fs::copy(source, destination);
             }
 
             (false ,_, true, _, false) => {
-                let finle_dis = Path::new(files[1]).join(files[0]);
-                fs::copy(files[0], finle_dis);
+                let finle_dis = Path::new(&input.args[1]).join(&input.args[0]);
+                fs::copy(&input.args[0], finle_dis);
             }
 
             (false,true, true, true, true) => {
             println!("HHHHH {}" , same);   
             
-            let source = Path::new(files[0]);
-            let destination = Path::new(files[1]);
+            let source = Path::new(&input.args[0]);
+            let destination = Path::new(&input.args[1]);
             // let destination_path = destination.join(source);
           match  fs::copy(source, &destination){
             Ok(_) => {},
@@ -49,19 +53,19 @@ pub fn cp(arg: &str) {
             }
             (false,true, true, true, false) => {
                 // mn file l dir
-                let destination_file = Path::new(files[1]).join(
-                    Path::new(files[0]).file_name().unwrap()
+                let destination_file = Path::new(&input.args[1]).join(
+                    Path::new(&input.args[0]).file_name().unwrap()
                 );
 
-                fs::copy(files[0], destination_file).expect("Failed to copy file");
+                fs::copy(&input.args[0], destination_file).expect("Failed to copy file");
             }
         }
     }
 }
 
-pub fn multiple_source(files: Vec<&str>) {
+pub fn multiple_source(files: Vec<String>) {
     // let mut is_err = false;
-    let distination = Path::new(files[files.len() - 1]);
+    let distination = Path::new(&files[files.len() - 1]);
     if !distination.exists() {
         // is_err = true;
         println!("cp: target '{}': No such file or directory", distination.display());
@@ -118,14 +122,6 @@ pub fn multiple_source(files: Vec<&str>) {
             }
         }
     }
-    // if !is_err {
-    //     for (i, element) in files.iter().enumerate() {
-    //         if i == files.len() - 1 {
-    //         } else {
-
-    //         }
-    //     }
-    // }
 }
 
 pub fn star_source(element: &str, distination: &Path) {
