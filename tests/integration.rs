@@ -88,8 +88,16 @@ cargo r cp file file2
 cargo r cp files file
 // files makaynch err
 //cp: cannot stat 'ddd': No such file or directory 
+cargo r cp source.txt dirnot/neww.txt
+//err
+//cp: cannot stat 'dirnot': No such file or directory 
 
-
+cargo r cp source.txt yy/notexist/destination.txt
+//err
+//cp: cannot stat 'notexist': No such file or directory 
+cargo r cp source.txt notexistdir/
+//err
+//cp: cannot stat 'notexist': No such file or directory
 
 
 
@@ -99,20 +107,11 @@ cargo r cp files file
 
 
   
-cargo r cp source.txt dirnot/neww.txt
-//err
-//cp: cannot stat 'dirnot': No such file or directory 
 
-cargo r cp source.txt yy/notexist/destination.txt
-//err
-//cp: cannot stat 'notexist': No such file or directory 
 
-cargo r cp source.txt notexistdir/
-//err
-//cp: cannot stat 'notexist': No such file or directory
 
-cargo r cp source.txt notexistdir/destination.txt
-//err
+
+
 
 cargo r cp *.txt folder/
 // copy all files with .txt in filder 
@@ -153,10 +152,3 @@ cargo r cp file.txt unwriter.txt
 
 //(hado joj zidihom ta fi multible)
 
-
-
-//t9ad tala3 ktar mn err 
-// like:
-// cp kk myd mydir tt rust  
-//    cp: -r not specified; omitting directory 'mydir'    
-//       cp: cannot stat 'tt': No such file or directory 

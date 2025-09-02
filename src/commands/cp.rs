@@ -3,11 +3,11 @@ use std::path::Path;
 use crate::Params;
 pub fn cp(input: &mut Params) {
     // println!("{:?}" , input.args);
-    if input.args.len()== 0{
+    if input.args.len() == 0 {
         println!("cp: missing file operand");
-    }else if input.args.len() == 1{
-        println!("cp: missing destination file operand after {}" , input.args[0])
-    }else if input.args.len() > 2 {
+    } else if input.args.len() == 1 {
+        println!("cp: missing destination file operand after {}", input.args[0])
+    } else if input.args.len() > 2 {
         multiple_source(input.args.clone());
     } else {
         let exists_source = Path::new(&input.args[0]).exists();
@@ -15,49 +15,43 @@ pub fn cp(input: &mut Params) {
         let source_is_file = Path::new(&input.args[0]).is_file();
         let dis_is_file = Path::new(&input.args[1]).is_file();
         let mut same = false;
-        if input.args[0] == input.args[1]{
+        if input.args[0] == input.args[1] {
             same = true;
         }
 
-        println!("iiii{}" , same);   
-        match (same , exists_source, exists_dist, source_is_file, dis_is_file) {
-            (true , _ , _ , _ ,_)=> println!("cp: '{}' and '{}' are the same file  " , input.args[0] , input.args[1]),
-            (false ,false, _, _, _) =>
+        match (same, exists_source, exists_dist, source_is_file, dis_is_file) {
+            (true, _, _, _, _) =>
+                println!("cp: '{}' and '{}' are the same file  ", input.args[0], input.args[1]),
+            (false, false, _, _, _) =>
                 println!("cp: cannot stat '{}': No such file or directory", input.args[0]),
-            (false , true , _ , false , _)=> println!("cp: -r not specified; omitting directory '{}' " , input.args[0]),
-           
-            (false , true, false, true, _) => {
-                println!("iiii" );   
+            (false, true, _, false, _) =>
+                println!("cp: -r not specified; omitting directory '{}' ", input.args[0]),
 
-                   
-                    let source = Path::new(&input.args[0]);
-                    let destination = Path::new(&input.args[1]);
-                    fs::copy(source, destination);
+            (false, true, false, true, _) => {
+                let source = Path::new(&input.args[0]);
+                let destination = Path::new(&input.args[1]);
+                if let Some(parent) = destination.parent() {
+                    if !parent.exists() {
+                        println!(
+                            "cp: cannot create regular file '{}': No such file or directory   ",
+                            destination.display()
+                        );
+                    } else {
+                        fs::copy(source, destination);
+                    }
+                }
+                fs::copy(source, destination);
             }
 
-            (false ,_, true, _, false) => {
+            (false, true, true, true, false) => {
                 let finle_dis = Path::new(&input.args[1]).join(&input.args[0]);
                 fs::copy(&input.args[0], finle_dis);
             }
 
-            (false,true, true, true, true) => {
-            println!("HHHHH {}" , same);   
-            
-            let source = Path::new(&input.args[0]);
-            let destination = Path::new(&input.args[1]);
-            // let destination_path = destination.join(source);
-          match  fs::copy(source, &destination){
-            Ok(_) => {},
-            Err(e) => println!("{}" , e)
-          } 
-            }
-            (false,true, true, true, false) => {
-                // mn file l dir
-                let destination_file = Path::new(&input.args[1]).join(
-                    Path::new(&input.args[0]).file_name().unwrap()
-                );
-
-                fs::copy(&input.args[0], destination_file).expect("Failed to copy file");
+            (false, true, true, true, true) => {
+                let source = Path::new(&input.args[0]);
+                let destination = Path::new(&input.args[1]);
+                fs::copy(source, &destination);
             }
         }
     }
@@ -157,7 +151,6 @@ pub fn star_source(element: &str, distination: &Path) {
                                 "cp: -r not specified; omitting directory '{}'",
                                 file_name.display()
                             );
-                            
                         }
                     }
                 }
