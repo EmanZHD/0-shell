@@ -12,7 +12,8 @@ pub fn echo(parameters: &mut Params) {
         }
 
         if new_word == "~" {
-            output.push("".to_string());
+            output.push(parameters.home.display().to_string());
+            break;
         }
 
         let mut chars = new_word.chars().peekable();
@@ -25,7 +26,7 @@ pub fn echo(parameters: &mut Params) {
                     dollar_count += 1;
                 }
                 
-                if dollar_count == 1 {  // bach njam3 l'env variable
+                if dollar_count == 1 { 
                     let mut var_env = String::new();
                     while let Some(&next_char) = chars.peek() {
                         if next_char.is_alphanumeric() || next_char == '_' {

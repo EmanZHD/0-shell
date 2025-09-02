@@ -41,15 +41,25 @@ fn main() {
     let history_path = match env::current_dir() {
         Ok(home_dir) => {
           let mut path = home_dir;
-          params.home = path.clone();
           path.push("history/0-shell_history");
           path
         }
         Err(_) => {
-           PathBuf::from("0-shell_history")
+            PathBuf::from("0-shell_history")
+        }
+    };
+    
+    let home = match env::home_dir() {
+        Some(home_dir) => {
+            let path = home_dir; 
+            path
+        }
+        None => {
+          PathBuf::new()
         }
     };
     params.archieve = history_path.clone();
+    params.home = home.clone();
 
     loop {
         print_prompt();

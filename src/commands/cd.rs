@@ -35,7 +35,7 @@ pub fn cd(parameters: &mut Params) {
         path => {
           let new_path = Path::new(path);
             if let Err(_e) = set_current_dir(&new_path) {
-                eprintln!("⛔ 0-shell: No such file or directory {:?} 🫤", new_path);
+                println!("⛔ 0-shell: No such file or directory {:?} 🫤", new_path);
             }
         }
     }
