@@ -4,7 +4,6 @@ use crate::commands;
 use std::path::PathBuf;
 use std::collections::HashMap;
 use crate::commands::ls::ls::ls;
-// use commands::ls::ls;
 use commands::cd::cd;
 use commands::pwd::pwd;
 use commands::exit::exit;
