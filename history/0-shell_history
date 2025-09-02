@@ -1,31 +1,78 @@
 #V2
 exit
-hello hasnae
-echo hello hsnae
-exit
-hello
-hello hasnae
-exit
-echo hello hsnae
-exit
-echo hello hsnae
+echo hellpo
+echo "sdghjd\njsgvd"
+fsdhf
+sjdfsf
+cd shdf
 cd src
-echo jhdsjds
-echo hello hsnae
+pwd
 cd src
+echo eman
+exit
+echo hello
+exit
+echo hello
+exit
+history
+echo hello
+echo "hello\nthere"
+echo $$
+exit
+history
+echo \\n
+echo \\\\n
+echo \\\\\\n
+echo \\\\\\\\\\n
+echo \\\\\\\\
+echo '"hi'"\n"
+echo '"hi"'
+echo "'hi'"
+echo '"hi                "there'
+echo "\n'hi\nther'\n"
+echo ££
+echo $$
+echo $USER
+echo $hdgf
+echo ~
+history
+echo history
+history
+echo $PATH
+echo \\N$PATH
+echo \\n$PATH
+pwd
+cd test
+history
+cd ::
 cd ..
-cd src
-cd ..
 exit
+history
+cd test
+pwd
 cd ..
-cd src
-cd 0-shell
-cd src
+cd -
+cd --
+cd -
+cd
+cd -
 exit
-jdss
-cd tests
-cd src
-cd ..
+cd
+cd -
 exit
-cd tests
+history
+exit
+echo ~
+exit
+echo ~
+echo $0
+exit
+echo ~
+exit
+echo ~
+echo $0
+echo $00
+echo $0
+exit
+echo ~
 exit

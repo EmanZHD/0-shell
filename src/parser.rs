@@ -87,24 +87,10 @@ pub fn get_prompt() -> String {
 }
 
 /**********🌟 read_input 🌟**********/
-pub fn read_input() -> (String, Vec<String>) {
-    
-    let history_path = match env::current_dir() {
-        Ok(home_dir) => {
-          let mut path = home_dir;
-          path.push("history/0-shell_history");
-          path
-        }
-        Err(_) => {
-           PathBuf::from("0-shell_history")
-        }
-    };
-    println!("1 history => {:?}", history_path);
+pub fn read_input(history: PathBuf) -> (String, Vec<String>) {
 
     let mut rl = rustyline::DefaultEditor::new().expect("Failed to create editor");
-    rl.load_history(&history_path).unwrap_or_default();
-    // rl.load_history("/workspaces/0-shell/history/0-shell_history").unwrap_or_default();
-
+    rl.load_history(&history).unwrap_or_default();
     
     let mut cmd = String::new();
     
@@ -141,10 +127,8 @@ pub fn read_input() -> (String, Vec<String>) {
                         };
                         
                         rl.add_history_entry(&cmd).expect("Failed to add history");
-                        if let Ok(_save) = rl.save_history(&history_path) {
-                        // if let Ok(_save) = rl.save_history("/workspaces/0-shell/history/0-shell_history") {
-                            rl.save_history(&history_path).unwrap();
-                            // rl.save_history("/workspaces/0-shell/history/0-shell_history").unwrap();
+                        if let Ok(_save) = rl.save_history(&history) {
+                            rl.save_history(&history).unwrap();
                         }
                         
                         return (command, args);

@@ -11,6 +11,10 @@ pub fn echo(parameters: &mut Params) {
             output.push("0-shell".to_string());
         }
 
+        if new_word == "~" {
+            output.push("".to_string());
+        }
+
         let mut chars = new_word.chars().peekable();
         
         while let Some(c) = chars.next() {
@@ -48,7 +52,6 @@ pub fn echo(parameters: &mut Params) {
                         }
                     }
                 }
-                println!("dollar {}", dollar_count);
             } else if c == '\\' {
                 if let Some(next_char) = chars.next() {
             

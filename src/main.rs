@@ -1,6 +1,7 @@
 mod parser;
 mod consts;
 mod commands;
+use std::env;
 use parser::*;
 use std::path::PathBuf;
 use std::collections::HashMap;
@@ -18,37 +19,46 @@ use commands::history::history;
 #[derive(Clone, Debug)]
 pub struct Params {
     args: Vec<String>,
-    archieve: Vec<(i32, String)>,
+    archieve: PathBuf,
     previous_path: Option<PathBuf>,
+    home: PathBuf,
+
 }
 
 impl Params {
     pub fn new() -> Self {
         Params {
             args: Vec::new(),
-            archieve: Vec::new(),
+            archieve: PathBuf::new(),
             previous_path: None,
+            home: PathBuf::new(),
         }
     }
 }
 fn main() {
     println!("{GREEN}{}{RESET}", TITLE);
     let mut params = Params::new();
-    let mut count = 1;
+    let history_path = match env::current_dir() {
+        Ok(home_dir) => {
+          let mut path = home_dir;
+          params.home = path.clone();
+          path.push("history/0-shell_history");
+          path
+        }
+        Err(_) => {
+           PathBuf::from("0-shell_history")
+        }
+    };
+    params.archieve = history_path.clone();
 
     loop {
         print_prompt();
-        let (keyword, arguments) = read_input();
-
+        let (keyword, arguments) = read_input(history_path.clone());
         if keyword.is_empty() && arguments.is_empty() {
             continue;
         }
-        let cmd_and_args = format!("{} {}", keyword.clone(), arguments.join(" "));
         params.args = arguments;
-        params.archieve.push((count, cmd_and_args));
-
         handle_cmds(&mut params, keyword);
-        count += 1;
     }
 }
 
