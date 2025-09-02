@@ -6,10 +6,11 @@ use std::io::Write;
 /*********🌟 Current Dir 🌟********/
 fn current() -> String {
     let result: String = match env::current_dir() {
-        Ok(path) => match path.file_name() {
-            Some(file_name) => file_name.to_string_lossy().into_owned(),
-            _none => String::from("/"),
-        },
+        Ok(path) =>
+            match path.file_name() {
+                Some(file_name) => file_name.to_string_lossy().into_owned(),
+                _none => String::from("/"),
+            }
         Err(_e) => "/".to_string(),
     };
     result
@@ -25,7 +26,9 @@ pub fn print_prompt() {
     );
     print!("{}", begin);
     match io::stdout().flush() {
-        Ok(()) => return,
+        Ok(()) => {
+            return;
+        }
         _ => eprintln!("broken pipe"),
     }
 }
@@ -34,11 +37,12 @@ pub fn print_prompt() {
 pub fn read_input() -> (String, Vec<String>) {
     let mut cmd = String::new();
 
-    io::stdin()
-        .read_line(&mut cmd)
-        .expect("Failed to read in command");
-    println!("✅ Verification: cmd: {:?}", cmd);
-    let cms: Vec<String> = cmd.split_whitespace().map(|s| s.to_string()).collect();
+    io::stdin().read_line(&mut cmd).expect("Failed to read in command");
+    // println!("✅ Verification: cmd: {:?}", cmd);
+    let cms: Vec<String> = cmd
+        .split_whitespace()
+        .map(|s| s.to_string())
+        .collect();
     if !cms.is_empty() {
         let keyword = cms[0].to_string();
         let arguments = cms[1..].to_vec();

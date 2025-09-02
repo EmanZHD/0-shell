@@ -9,7 +9,7 @@ use crate::commands::ls::ls_tools::{
 use colored::{ ColoredString, Colorize };
 use is_executable::is_executable;
 use std::path::Path;
-use std::{ fs, os::unix::fs::FileTypeExt };
+use std::{ env, fs, os::unix::fs::FileTypeExt };
 use xattr::list;
 use std::fs::{ Metadata };
 use std::os::unix::fs::MetadataExt;
@@ -114,14 +114,37 @@ impl Files {
     }
 
     pub fn file_format(file_name: &str, path: &str, flag: &Flags) -> String {
-        // println!("HEEEEEEEEY");
-        let s_link = &find_symlink(&Path::new(&format!("/{}/{}", path, file_name)));
-        let f_type = Files::new_file(Path::new(&format!("{}/{}", path, file_name)));
+        // println!("CHECK --> {:?}", Files::new_file(&Path::new(path)));
+        let s_linkk = find_symlink(&Path::new(&format!("/{}/{}", ".", file_name)));
+        if Files::new_file(&Path::new(path)) == Files::Symlink && (flag.l_flag || flag.f_flag) {
+            return format!("-> {}", Files::new_file(&Path::new(&s_linkk)).file_color(&s_linkk));
+        }
+        let mut dir = "./".to_string();
+        if path == "./".to_string() {
+            if let Ok(curr_dir) = env::current_dir() {
+                // println!("FIND CURR DIR ---> {}", curr_dir.display());
+                if let Some(s) = curr_dir.to_str() {
+                    dir = s.to_string();
+                }
+            }
+        } else {
+            dir = path.to_string();
+        }
+
+        // println!(
+        //     "--> {} PATH {} FILE {} --> {}",
+        //     dir,
+        //     path,
+        //     file_name,
+        //     &find_symlink(&Path::new(&format!("/{}/{}", ".", file_name)))
+        // );
+        let s_link = &find_symlink(&Path::new(&format!("/{}/{}", dir, file_name)));
+        let f_type = Files::new_file(Path::new(&format!("{}/{}", dir, file_name)));
         // println!("IN FILE FORMAT {:?}", f_type);
         let sym_type = Files::new_file(&Path::new(&s_link));
 
         if flag.l_flag {
-            if !find_symlink(&Path::new(&format!("/{}/{}", path, file_name))).is_empty() {
+            if !find_symlink(&Path::new(&format!("/{}/{}", dir, file_name))).is_empty() {
                 return format!("{} -> {}", f_type.file_color(file_name), if flag.f_flag {
                     sym_type.file_symbol(&sym_type.file_color(s_link))
                 } else {

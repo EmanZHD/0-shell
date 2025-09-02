@@ -3,6 +3,7 @@ use crate::commands::ls::ls_models::{ Files, Flags };
 use std::path::Path;
 use std::{ fs, io };
 use std::io::ErrorKind;
+
 // ls_printer fn
 fn ls_printer(list: &mut Vec<String>, flag: &Flags, path_name: &str) -> Vec<Vec<String>> {
     list.sort_by(|f1, f2| {
@@ -25,7 +26,6 @@ fn ls_printer(list: &mut Vec<String>, flag: &Flags, path_name: &str) -> Vec<Vec<
 // ls_helper fn
 fn ls_helper(path_name: &str, flag: &Flags) -> Result<Vec<Vec<String>>, io::Error> {
     let mut lines: Vec<Vec<String>> = vec![];
-    // println!("--->Path{:?}", path_name);
     let mut content: Vec<String> = vec![];
     match fs::read_dir(path_name) {
         Ok(dir_entries) => {
@@ -39,14 +39,12 @@ fn ls_helper(path_name: &str, flag: &Flags) -> Result<Vec<Vec<String>>, io::Erro
                     Err(_e) => eprintln!("error in readinf '{}'", path_name),
                 }
             }
-            // if !content.is_empty() && flag.a_flag {
             if flag.a_flag {
                 content.insert(0, ".".to_owned());
                 content.insert(1, "..".to_owned());
             }
         }
         Err(e) => {
-            // println!("EROR READING DIR -> {}", e);
             if e.kind() == ErrorKind::PermissionDenied {
                 println!("ls: cannot open directory '{}': Permission denied", path_name);
             } else {
@@ -66,33 +64,39 @@ pub fn ls(args: Vec<String>) {
             return;
         }
     };
-    // println!("🏳️ CHECK FLAG {:?}", flags.);
     new_args.sort();
     for (i, path_str) in new_args.iter().enumerate() {
         let path_name = Path::new(path_str);
         match path_name.metadata() {
             Ok(path_data) => {
-                if path_name.is_symlink() && flags.l_flag {
-                    // println!("---------------");
-                    println!(
-                        "{} {}",
-                        flags.format_output(path_str, path_str).join(" "),
-                        Files::file_format(path_str, path_str, &flags)
-                    );
+                if
+                    (path_name.is_symlink() && flags.l_flag) ||
+                    (path_name.is_symlink() && flags.f_flag)
+                {
+                    if flags.l_flag {
+                        // println!("PATHDATA -> {:?}", path_data);
+                        println!(
+                            "{} {}",
+                            flags.format_output(path_str, path_str).join(" "),
+                            Files::file_format(path_str, path_str, &flags)
+                        );
+                    } else {
+                        println!(
+                            "{}",
+                            Files::Symlink.file_symbol(&Files::Symlink.file_color(&path_str))
+                        );
+                    }
                 } else {
                     if new_args.len() > 1 && path_data.is_dir() {
                         println!("{}:", path_str);
                     }
                     if let Ok(lines) = ls_helper(path_str, &flags) {
-                        // println!("HEREEE");
                         if flags.l_flag && Files::new_file(Path::new(path_str)) != Files::Reg {
-                            // println!("{}", path_str.red().on_black());
                             println!("total {}", total_blocks(Path::new(path_str), flags.a_flag));
                         }
                         if flags.l_flag {
                             Files::display_line(lines, path_str, &flags);
                         } else {
-                            // println!("=============={}", path_str);
                             Files::format_out(lines, &path_str, &flags);
                         }
                     }
