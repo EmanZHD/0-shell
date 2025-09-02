@@ -259,7 +259,10 @@ impl FileData {
         // let mode = permissions.mode();
         let format_time = format_time(&meta);
         // let str_prm: String = format!("{:?}", permissions.to_owned());
-        // println!("PATH -> {} PERMISSIONS-----> {}", path.red(), str_prm.yellow().bold());
+        // println!("PERMISSIONS-----> {:?}", meta.mode());
+        // let octal_string = format!("{:o}", meta.mode());
+        // println!("TO OCTAL-----> {}", octal_string);
+
         let mut f_permission = format!("{:?}", meta.permissions())
             .split_whitespace()
             .collect::<Vec<&str>>()[4]
