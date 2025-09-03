@@ -38,8 +38,6 @@ pub fn print_prompt() {
 pub fn print_quote_prompt() {
     print!("> ");
     io::stdout().flush().unwrap();
-    print!("> ");
-    io::stdout().flush().unwrap();
 }
 
 /***********🌟 parsing 🌟**********/
@@ -54,31 +52,13 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
             '\\' if test.peek() == Some(&'\"') || test.peek() == Some(&'\'') => {
                 new_input.push(test.next().unwrap());
                 continue;
-        match c {
-            '\\' if test.peek() == Some(&'\"') || test.peek() == Some(&'\'') => {
-                new_input.push(test.next().unwrap());
-                continue;
             }
 
-            '\'' | '"' if !in_quotes => {
             '\'' | '"' if !in_quotes => {
                 in_quotes = true;
                 quote = c; // pour memoriser le type de quote
             }
-            }
 
-            '\'' | '\"' if in_quotes && c == quote => {
-                in_quotes = false; // fermeture de la quote du m type
-            }
-            ' ' | '\t' if !in_quotes => {
-                if !new_input.is_empty() {
-                    new.push(new_input);
-                    new_input = String::new();
-                }
-            }
-            _ => {
-                new_input.push(c);
-            }
             '\'' | '\"' if in_quotes && c == quote => {
                 in_quotes = false; // fermeture de la quote du m type
             }
@@ -92,11 +72,6 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
                 new_input.push(c);
             }
         }
-    }
-
-    if in_quotes {
-        return Err("unclosed quotes 😓".to_string());
-    }
     }
 
     if in_quotes {
