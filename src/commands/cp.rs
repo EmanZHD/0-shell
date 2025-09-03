@@ -1,8 +1,11 @@
 use std::fs;
 use std::path::Path;
 use crate::Params;
+use std::io::ErrorKind;
+use std::io;
+use std::fs::{ File, OpenOptions };
+
 pub fn cp(input: &mut Params) {
-    // println!("{:?}" , input.args);
     if input.args.len() == 0 {
         println!("cp: missing file operand");
     } else if input.args.len() == 1 {
@@ -14,59 +17,81 @@ pub fn cp(input: &mut Params) {
         let exists_dist = Path::new(&input.args[1]).exists();
         let source_is_file = Path::new(&input.args[0]).is_file();
         let dis_is_file = Path::new(&input.args[1]).is_file();
+        let mut star = false;
         let mut same = false;
         if input.args[0] == input.args[1] {
             same = true;
         }
-
-        match (same, exists_source, exists_dist, source_is_file, dis_is_file) {
-            (true, _, _, _, _) =>
-                println!("cp: '{}' and '{}' are the same file  ", input.args[0], input.args[1]),
-            (false, false, _, _, _) =>
+        if input.args[0].chars().nth(0) == Some('*') {
+            star = true;
+        }
+        match (star, same, exists_source, exists_dist, source_is_file, dis_is_file) {
+            (false, true, _, _, _, _) =>
+                println!("cp: '{}' and '{}' are the same file", input.args[0], input.args[1]),
+            (false, false, false, _, _, _) =>
                 println!("cp: cannot stat '{}': No such file or directory", input.args[0]),
-            (false, true, _, false, _) =>
+            (false, false, true, _, false, _) =>
                 println!("cp: -r not specified; omitting directory '{}' ", input.args[0]),
 
-            (false, true, false, true, _) => {
+            (false, false, true, false, true, _) => {
                 let source = Path::new(&input.args[0]);
                 let destination = Path::new(&input.args[1]);
                 if let Some(parent) = destination.parent() {
                     if !parent.exists() {
                         println!(
-                            "cp: cannot create regular file '{}': No such file or directory   ",
+                            "cp: cannot create regular file '{}': No such file or directory",
                             destination.display()
                         );
                     } else {
-                        fs::copy(source, destination);
+                        // fs::copy(source, destination);
+                        copy_file(&input.args[0], &input.args[1]);
                     }
                 }
-                fs::copy(source, destination);
+                copy_file(&input.args[0], &input.args[1]);
+                // fs::copy(source, destination);
             }
 
-            (false, true, true, true, false) => {
+            (false, false, true, true, true, false) => {
+                println!("hhhhh");
                 let finle_dis = Path::new(&input.args[1]).join(&input.args[0]);
-                fs::copy(&input.args[0], finle_dis);
+                // fs::copy(&input.args[0], finle_dis);
+                copy_file(&input.args[0], finle_dis.to_str().expect("err in convert"));
             }
 
-            (false, true, true, true, true) => {
+            (false, false, true, true, true, true) => {
+                println!("kkkkk");
                 let source = Path::new(&input.args[0]);
                 let destination = Path::new(&input.args[1]);
-                fs::copy(source, &destination);
+                copy_file(&input.args[0], &input.args[1]);
             }
+
+            (true, false, false, true, false, false) => {
+                println!("ddddddd");
+
+                star_source(&input.args[0], Path::new(&input.args[1]), false);
+            }
+
+            (true, false, false, true, false, true) => {
+                println!("zaaaa");
+
+                star_source(&input.args[0], Path::new(&input.args[1]), true);
+            }
+
+            (_, _, _, _, _, _) => {}
         }
     }
 }
 
 pub fn multiple_source(files: Vec<String>) {
     // let mut is_err = false;
-    let distination = Path::new(&files[files.len() - 1]);
-    if !distination.exists() {
+    let destination = Path::new(&files[files.len() - 1]);
+    if !destination.exists() {
         // is_err = true;
-        println!("cp: target '{}': No such file or directory", distination.display());
+        println!("cp: target '{}': No such file or directory", destination.display());
     }
-    if distination.exists() && distination.is_file() {
+    if destination.exists() && destination.is_file() {
         // is_err = true;
-        println!("cp: target '{}': Not a directory", distination.display());
+        println!("cp: target '{}': Not a directory", destination.display());
     }
     for (i, element) in files.iter().enumerate() {
         if i == files.len() - 1 {
@@ -82,7 +107,7 @@ pub fn multiple_source(files: Vec<String>) {
                 get_element.as_str();
                 let res_elent: String = get_element.collect();
                 // if res_elent.chars().nth(0) == Some('*') {
-                //         star_source(&res_elent , distination)
+                //         star_source(&res_elent , destination)
                 //     } else {
                 let mut source = Path::new(&res_elent);
                 if !source.exists() {
@@ -94,31 +119,39 @@ pub fn multiple_source(files: Vec<String>) {
                     println!("cp: -r not specified; omitting directory '{}'", source.display());
                 }
                 if source.exists() && source.is_file() {
-                    let mut dis_path = distination.join(source);
-                    match fs::copy(source, dis_path) {
-                        Ok(_) => {}
-                        Err(e) => {}
-                    }
+                    let mut dis_path = destination.join(source);
+                    // match fs::copy(source, dis_path) {
+                    //     Ok(_) => {}
+                    //     Err(e) => {}
+                    // }
+                    copy_file(
+                        source.to_str().expect("err in convert"),
+                        dis_path.to_str().expect("err in convert")
+                    );
                 }
                 // }
             } else if (!tomp.exists() && element.chars().nth(0) != Some('*')) || tomp.is_dir() {
                 // is_err = true;
                 println!("cp: -r not specified; omitting directory '{}'", element);
             } else if element.chars().nth(0) == Some('*') {
-                star_source(element, distination);
+                star_source(element, destination, false);
             } else {
                 let mut source = Path::new(element);
-                let mut dis_path = distination.join(source);
-                match fs::copy(source, dis_path) {
-                    Ok(_) => {}
-                    Err(e) => {}
-                }
+                let mut dis_path = destination.join(source);
+                // match fs::copy(source, dis_path) {
+                //     Ok(_) => {}
+                //     Err(e) => {}
+                // }
+                copy_file(
+                    source.to_str().expect("err in convert"),
+                    dis_path.to_str().expect("err in convert")
+                );
             }
         }
     }
 }
 
-pub fn star_source(element: &str, distination: &Path) {
+pub fn star_source(element: &str, destination: &Path, if_file: bool) {
     let suffix = &element[1..];
     let mut found_file = false;
     //read_dir That gives you a list of files and folders
@@ -133,12 +166,28 @@ pub fn star_source(element: &str, distination: &Path) {
                         let file_name = path.file_name().unwrap();
                         if file_name.to_string_lossy().ends_with(suffix) {
                             found_file = true;
-                            // println!("kkkkkk{:?}" , found_file);
-                            let mut dis_path = distination.join(file_name);
+
                             let mut source = Path::new(file_name);
-                            match fs::copy(source, dis_path) {
-                                Ok(_) => {}
-                                Err(e) => {}
+                            // println!("kkkkkk{:?}" , found_file);
+                            if if_file {
+                                // match fs::copy(source, destination) {
+                                //     Ok(_) => {}
+                                //     Err(e) => {}
+                                // }
+                                copy_file(
+                                    source.to_str().expect("err in convert"),
+                                    destination.to_str().expect("err in convert")
+                                );
+                            } else {
+                                let mut dis_path = destination.join(file_name);
+                                // match fs::copy(source, dis_path) {
+                                //     Ok(_) => {}
+                                //     Err(e) => println!("{:?}", e),
+                                // }
+                                copy_file(
+                                    source.to_str().expect("err in convert"),
+                                    dis_path.to_str().expect("err in convert")
+                                );
                             }
                         }
                     }
@@ -160,4 +209,32 @@ pub fn star_source(element: &str, distination: &Path) {
             println!("cp: cannot stat '*.txt': No such file or directory");
         }
     }
+}
+
+fn copy_file(source: &str, destination: &str) {
+    let mut src_file = match File::open(source) {
+        Ok(f) => f,
+        Err(e) => {
+            if e.kind() == ErrorKind::PermissionDenied {
+                println!("cp: cannot open '{}' for reading: Permission denied", source);
+            } else {
+                println!("cp: cannot open '{}' for reading", source);
+            }
+            return;
+        }
+    };
+    let mut dest_file = match
+        OpenOptions::new().write(true).create(true).truncate(true).open(destination)
+    {
+        Ok(f) => f,
+        Err(e) => {
+            if e.kind() == ErrorKind::PermissionDenied {
+                eprintln!("cp: cannot create regular file '{}': Permission denied", destination);
+            } else {
+                eprintln!("cp: cannot create regular file '{}': {}", destination, e);
+            }
+            return;
+        }
+    };
+    io::copy(&mut src_file, &mut dest_file);
 }

@@ -98,21 +98,6 @@ cargo r cp source.txt yy/notexist/destination.txt
 cargo r cp source.txt notexistdir/
 //err
 //cp: cannot stat 'notexist': No such file or directory
-
-
-
-
-
-
-
-
-  
-
-
-
-
-
-
 cargo r cp *.txt folder/
 // copy all files with .txt in filder 
 
@@ -131,15 +116,8 @@ cargo r cp *.txt file/
 //machi err
 //valid
 
-
 cargo r cp "lll" dest/
 //ila kan "" hada kay3ni anaho file smito *.txt ya3ni mayataba9ch 3lih lalgo ta3 * 
-
-
-
-cargo r cp .* destination.txt
-//Copy with hidden files
-
 
 cargo r cp unreadable.txt des.txt
 //err Copy a file you don’t have read permission on
@@ -148,6 +126,24 @@ cargo r cp unreadable.txt des.txt
 cargo r cp file.txt unwriter.txt
 //err Copy to a directory without write permission
 //cp: cannot create regular file 'kk': Permission denied 
+
+
+
+
+  
+
+
+
+
+
+
+
+
+cargo r cp .* destination.txt
+//Copy with hidden files
+
+
+
 
 
 //(hado joj zidihom ta fi multible)
