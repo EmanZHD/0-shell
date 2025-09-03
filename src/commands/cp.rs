@@ -34,7 +34,7 @@ pub fn cp(input: &mut Params) {
                 println!("cp: -r not specified; omitting directory '{}'", input.args[0]),
 
             (false, false, true, false, true, _) => {
-                let source = Path::new(&input.args[0]);
+                let _source = Path::new(&input.args[0]);
                 let destination = Path::new(&input.args[1]);
                 if let Some(parent) = destination.parent() {
                     if !parent.exists() {
@@ -55,8 +55,8 @@ pub fn cp(input: &mut Params) {
             }
 
             (false, false, true, true, true, true) => {
-                let source = Path::new(&input.args[0]);
-                let destination = Path::new(&input.args[1]);
+                let _source = Path::new(&input.args[0]);
+                let _destination = Path::new(&input.args[1]);
                 copy_file(&input.args[0], &input.args[1]);
             }
 
@@ -86,7 +86,7 @@ pub fn multiple_source(files: Vec<String>) {
     for (i, element) in files.iter().enumerate() {
         if i == files.len() - 1 {
         } else {
-            let mut tomp = Path::new(element);
+            let  tomp = Path::new(element);
             if !tomp.exists() && element.chars().nth(0) != Some('*') {
                 println!("cp: cannot stat '{}': No such file or directory", element);
             } else if tomp.is_dir() {
@@ -94,8 +94,8 @@ pub fn multiple_source(files: Vec<String>) {
             } else if element.chars().nth(0) == Some('*') {
                 star_source(element, destination, false);
             } else {
-                let mut source = Path::new(element);
-                let mut dis_path = destination.join(source);
+                let  source = Path::new(element);
+                let  dis_path = destination.join(source);
                 copy_file(
                     source.to_str().expect("Err in convert"),
                     dis_path.to_str().expect("Err in convert")
@@ -116,19 +116,19 @@ pub fn star_source(element: &str, destination: &Path, if_file: bool) {
             if item.is_ok() {
                 let path = item.expect("expected at least one file entry").path();
                 if path.is_file() {
-                    if let Some(file_name) = path.file_name() {
+                    if let Some(_file_name) = path.file_name() {
                         let file_name = path.file_name().unwrap();
                         if file_name.to_string_lossy().ends_with(suffix) {
                             found_file = true;
 
-                            let mut source = Path::new(file_name);
+                            let source = Path::new(file_name);
                             if if_file {
                                 copy_file(
                                     source.to_str().expect("Err in convert"),
                                     destination.to_str().expect("Err in convert")
                                 );
                             } else {
-                                let mut dis_path = destination.join(file_name);
+                                let dis_path = destination.join(file_name);
                                 copy_file(
                                     source.to_str().expect("Err in convert"),
                                     dis_path.to_str().expect("Err in convert")
@@ -137,7 +137,7 @@ pub fn star_source(element: &str, destination: &Path, if_file: bool) {
                         }
                     }
                 } else {
-                    if let Some(file_name) = path.file_name() {
+                    if let Some(_file_name) = path.file_name() {
                         let file_name = path.file_name().unwrap();
                         if file_name.to_string_lossy().ends_with(suffix) {
                             println!(
@@ -182,5 +182,8 @@ fn copy_file(source: &str, destination: &str) {
             return;
         }
     };
-    io::copy(&mut src_file, &mut dest_file);
+    match io::copy(&mut src_file, &mut dest_file){
+        Ok(_) => {},
+        Err(_) =>{}
+    }
 }

@@ -1,6 +1,5 @@
 mod parser;
 mod consts;
-mod errors;
 mod commands;
 mod colors;
 use std::path::PathBuf;
