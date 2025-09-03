@@ -1,5 +1,6 @@
 mod parser;
 mod consts;
+mod errors;
 mod commands;
 mod colors;
 use std::path::PathBuf;
@@ -16,6 +17,9 @@ use commands::guide::guide;
 use commands::history::history;
 use commands::mv::mv;
 use commands::cat::cat;
+use commands::rm::rm;
+use commands::mkdir::mkdir;
+use commands::cp::cp;
 
 #[derive(Clone, Debug)]
 pub struct Params {
@@ -60,6 +64,9 @@ pub fn handle_cmds(params: &mut Params, keyword: String) {
     dispatcher.insert("history", history as fn(&mut Params));
     dispatcher.insert("mv", mv as fn(&mut Params));
     dispatcher.insert("cat", cat as fn(&mut Params));
+    dispatcher.insert("rm", rm as fn(&mut Params));
+    dispatcher.insert("mkdir" , mkdir as fn(&mut Params));
+    dispatcher.insert("cp" , cp as fn (&mut Params));
 
     match dispatcher.get(&keyword.as_str()) {
         Some(func) => func(params),
