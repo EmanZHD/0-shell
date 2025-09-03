@@ -31,7 +31,7 @@ pub fn cp(input: &mut Params) {
             (false, false, false, _, _, _) =>
                 println!("cp: cannot stat '{}': No such file or directory", input.args[0]),
             (false, false, true, _, false, _) =>
-                println!("cp: -r not specified; omitting directory '{}' ", input.args[0]),
+                println!("cp: -r not specified; omitting directory '{}'", input.args[0]),
 
             (false, false, true, false, true, _) => {
                 let source = Path::new(&input.args[0]);
