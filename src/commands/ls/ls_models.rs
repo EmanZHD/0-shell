@@ -28,7 +28,7 @@ impl Flags {
         self.a_flag || !name.starts_with('.')
     }
 
-    pub fn format_output(&self, file_name: &str, path_name: &str) -> Vec<String> {
+    pub fn line_data(&self, file_name: &str, path_name: &str) -> Vec<String> {
         let mut line = Vec::new();
         let file_data = FileData::extarct_data(file_name, path_name);
 
@@ -186,7 +186,7 @@ impl Files {
         }
     }
 
-    pub fn format_out(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
+    pub fn display_file(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
         let files_name: Vec<String> = lines
             .iter()
             .flatten()
@@ -259,7 +259,10 @@ impl FileData {
         // let mode = permissions.mode();
         let format_time = format_time(&meta);
         // let str_prm: String = format!("{:?}", permissions.to_owned());
-        // println!("PATH -> {} PERMISSIONS-----> {}", path.red(), str_prm.yellow().bold());
+        // println!("PERMISSIONS-----> {:?}", meta.mode());
+        // let octal_string = format!("{:o}", meta.mode());
+        // println!("TO OCTAL-----> {}", octal_string);
+
         let mut f_permission = format!("{:?}", meta.permissions())
             .split_whitespace()
             .collect::<Vec<&str>>()[4]
