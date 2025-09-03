@@ -168,16 +168,6 @@ impl Files {
     }
 
     pub fn file_format(file_name: &str, path: &str, flag: &Flags) -> String {
-        // let s_linkk = find_symlink(&Path::new(&format!("/{}/{}", ".", file_name)));
-        // println!("here file {} | path   {}", file_name, path);
-        // if Files::new_file(&Path::new(path)) == Files::Symlink && (flag.l_flag || flag.f_flag) {
-        //     println!(
-        //         "here file {} | link {}",
-        //         file_name,
-        //         find_symlink(&Path::new(&format!("/{}/{}", ".", file_name)))
-        //     );
-        //     return format!("-> {}", Files::new_file(&Path::new(&s_linkk)).file_color(&s_linkk));
-        // }
         let mut dir = "./".to_string();
         if path == "./".to_string() || Files::new_file(&Path::new(path)) == Files::Symlink {
             if let Ok(curr_dir) = env::current_dir() {
@@ -190,14 +180,6 @@ impl Files {
         }
         let s_link = &find_symlink(&Path::new(&format!("/{}/{}", dir, file_name)));
         if Files::new_file(&Path::new(path)) == Files::Symlink && (flag.l_flag || flag.f_flag) {
-            // println!(
-            //     "here file {} | link {} | dir {}",
-            //     file_name,
-            //     find_symlink(
-            //         &Path::new(&format!("/{}/{}", "/home/izahid/Downloads/0-shell", "ii"))
-            //     ),
-            //     dir
-            // );
             return format!("-> {}", Files::new_file(&Path::new(&s_link)).file_color(&s_link));
         }
         let f_type = Files::new_file(Path::new(&format!("{}/{}", dir, file_name)));
@@ -245,6 +227,7 @@ impl Files {
     }
 
     pub fn display_file(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
+        println!("TEST -> {:?}", path);
         let files_name: Vec<String> = lines
             .iter()
             .flatten()

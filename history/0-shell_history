@@ -1,23 +1,4 @@
 #V2
-ls -la ii
-cd ~
-cd ../..
-ls
-ls bin
-ls
-ls cdrom
-ls -la cdrom
-ls -l cdrom
-ls sbin
-ls -la bin
-ls -la
-ls
-ls -la
-ls -la F
-ls -laF
-ls /dev
-ls /dev/vfio
-ls -la /dev
 la -laF /dev
 ls -laF /dev
 ls -laF /dev/vfio
@@ -99,3 +80,22 @@ l
 ls ~
 ls ~ test
 ls ~ t0 target
+ls
+ls ~
+ls -laF ~
+clear
+cd ~
+ls ../..
+ls
+cd ../..
+ls
+ls bin
+ls ~
+ls
+mkdir "1  2"
+cd ..
+ls Descktop
+ls
+ls Desktop
+ls -la Desktop
+ls /dev
