@@ -38,7 +38,8 @@ fn ls_helper(
         }
         Err(e) => {
             if e.kind() == ErrorKind::PermissionDenied {
-                println!("ls: cannot open directory '{}': Permission denied", path_str);
+                eprintln!("ls: cannot open directory '{}': Permission denied", path_str);
+                return Err(e);
             } else {
                 content.push(path_str.to_owned());
             }
@@ -49,12 +50,19 @@ fn ls_helper(
 
 //ls fn
 pub fn ls(params: &mut Params) {
+    let tilde = "~".to_string();
     let (flags, mut new_args) = match parse_args(params.args.clone()) {
         Ok((flags, new_args)) => (flags, new_args),
         Err(()) => {
             return;
         }
     };
+    for s in &mut new_args {
+        if *s == tilde {
+            *s = format!("{}", params.home.display().to_string()).clone();
+            break;
+        }
+    }
     new_args.sort();
     for (i, path_str) in new_args.iter().enumerate() {
         let path_name = Path::new(path_str);

@@ -98,14 +98,14 @@ pub fn find_group_owner(info: (uid_t, bool)) -> String {
     } else {
         get_group_by_gid(info.0).map(|g| g.name().to_owned())
     };
-
+    let s = info.0.to_string();
     match name {
         Some(v) =>
             v
                 .to_str()
-                .unwrap_or_else(|| "undefined")
+                .unwrap_or_else(|| &s.as_str())
                 .to_string(),
-        _ => "undefined".to_string(),
+        _ => info.0.to_string(),
     }
 }
 

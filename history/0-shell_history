@@ -1,93 +1,4 @@
 #V2
-ls -l \\temp
-ls -l /tmp
-ls -
-ls --h
-pwd
-ls
-ls src
-ls src target README.md tests commands
-ls -aFl src target README.md tests commands
-ls
-mkdir tt
-clear
-mkdir hasna
-clear
-mkdir ks
-ls
-clear
-ls
-clear
-cargo run
-ls
-ls -la
-ls -l
-clear
-ls -la
-ls -l
-ls
-"ls"
-'ls'
-ls -l
-ls
-ls -la
-ls
-ls -la
-clear
-ls
-ls -laF
-ls -l
-ls
-ls -la
-ls -laF
-ls ii
-ls -la ii
-clear
-ls
-ls ii
-ls -la
-ls -laF ii
-ls -la
-clear
-ls -la ii
-ls -la /dev/bin
-ls -la /dev
-ls
-ls -la /dev/cdrom
-cd ~
-cd ../..
-cd dev
-ls -la cdrom
-ls -la ii
-ls
-ls -la
-clear
-ls
-ls -la
-ls
-ls -la
-ls ii
-ls -la ii
-ls la
-ls -la
-ls ii
-ls -la ii
-ls
-cargo run
-ls
-ls -la ii
-ls
-ls -la ii
-ls
-clear
-ls
-ls -la ii
-ls -la
-ls -la ii
-ls -l
-ls -la
-ls -la ii
-ls -la
 ls -la ii
 cd ~
 cd ../..
@@ -99,3 +10,92 @@ ls -la cdrom
 ls -l cdrom
 ls sbin
 ls -la bin
+ls -la
+ls
+ls -la
+ls -la F
+ls -laF
+ls /dev
+ls /dev/vfio
+ls -la /dev
+la -laF /dev
+ls -laF /dev
+ls -laF /dev/vfio
+ls
+ls -laF ii/1
+ls ls
+ls lss
+clear
+ls -laF /dev/stderr
+cd ~
+cd ../..
+cd /dev
+ls
+ls stderr
+ls -laF stderr
+cd ../../
+ls
+ls ..
+ls
+ls home/izahid
+ls -la
+ls
+cd home/izahid
+ls
+ls -laF
+ls /Download/0-shell
+ls Downloads/0-shell
+cd ..
+ls ifares
+ls izahid
+cd ..
+ls bin
+cd ~
+cd ../..
+ls
+ls dev
+cd dev
+clear
+ls
+clear
+cd ..
+ls
+ls root
+ls -al root
+cd ~
+cd ../..
+ls
+ls -la usr
+ls
+ls -la ii
+cd tt
+ls
+cd ..
+ls
+ls tt
+ls -la tt
+ls tt
+ls
+clear
+ls
+ls bin
+cd ~
+ls
+ls -la
+clear
+ls eman
+ls houda
+cleqr
+clear
+cd ²
+cleqr
+clear
+cd  ~
+ls ~
+ls ~ tests
+ls ~
+ls ~ tests target
+l
+ls ~
+ls ~ test
+ls ~ t0 target
