@@ -43,37 +43,28 @@ pub fn cp(input: &mut Params) {
                             destination.display()
                         );
                     } else {
-                        // fs::copy(source, destination);
                         copy_file(&input.args[0], &input.args[1]);
                     }
                 }
                 copy_file(&input.args[0], &input.args[1]);
-                // fs::copy(source, destination);
             }
 
             (false, false, true, true, true, false) => {
-                println!("hhhhh");
                 let finle_dis = Path::new(&input.args[1]).join(&input.args[0]);
-                // fs::copy(&input.args[0], finle_dis);
-                copy_file(&input.args[0], finle_dis.to_str().expect("err in convert"));
+                copy_file(&input.args[0], finle_dis.to_str().expect("Err in convert"));
             }
 
             (false, false, true, true, true, true) => {
-                println!("kkkkk");
                 let source = Path::new(&input.args[0]);
                 let destination = Path::new(&input.args[1]);
                 copy_file(&input.args[0], &input.args[1]);
             }
 
             (true, false, false, true, false, false) => {
-                println!("ddddddd");
-
                 star_source(&input.args[0], Path::new(&input.args[1]), false);
             }
 
             (true, false, false, true, false, true) => {
-                println!("zaaaa");
-
                 star_source(&input.args[0], Path::new(&input.args[1]), true);
             }
 
@@ -82,85 +73,48 @@ pub fn cp(input: &mut Params) {
     }
 }
 
+// to copy multiple sources
+
 pub fn multiple_source(files: Vec<String>) {
-    // let mut is_err = false;
     let destination = Path::new(&files[files.len() - 1]);
     if !destination.exists() {
-        // is_err = true;
         println!("cp: target '{}': No such file or directory", destination.display());
     }
     if destination.exists() && destination.is_file() {
-        // is_err = true;
         println!("cp: target '{}': Not a directory", destination.display());
     }
     for (i, element) in files.iter().enumerate() {
         if i == files.len() - 1 {
         } else {
             let mut tomp = Path::new(element);
-            if
-                element.chars().nth(0) == Some('"') &&
-                element.chars().nth(element.len() - 1) == Some('"')
-            {
-                let mut get_element = element.chars();
-                get_element.next();
-                get_element.next_back();
-                get_element.as_str();
-                let res_elent: String = get_element.collect();
-                // if res_elent.chars().nth(0) == Some('*') {
-                //         star_source(&res_elent , destination)
-                //     } else {
-                let mut source = Path::new(&res_elent);
-                if !source.exists() {
-                    // is_err = true;
-                    println!("cp: target '{}': No such file or directory", source.display());
-                }
-                if source.exists() && source.is_dir() {
-                    // is_err = true;
-                    println!("cp: -r not specified; omitting directory '{}'", source.display());
-                }
-                if source.exists() && source.is_file() {
-                    let mut dis_path = destination.join(source);
-                    // match fs::copy(source, dis_path) {
-                    //     Ok(_) => {}
-                    //     Err(e) => {}
-                    // }
-                    copy_file(
-                        source.to_str().expect("err in convert"),
-                        dis_path.to_str().expect("err in convert")
-                    );
-                }
-                // }
-            } else if (!tomp.exists() && element.chars().nth(0) != Some('*')) || tomp.is_dir() {
-                // is_err = true;
+            if !tomp.exists() && element.chars().nth(0) != Some('*') {
+                println!("cp: cannot stat '{}': No such file or directory", element);
+            } else if tomp.is_dir() {
                 println!("cp: -r not specified; omitting directory '{}'", element);
             } else if element.chars().nth(0) == Some('*') {
                 star_source(element, destination, false);
             } else {
                 let mut source = Path::new(element);
                 let mut dis_path = destination.join(source);
-                // match fs::copy(source, dis_path) {
-                //     Ok(_) => {}
-                //     Err(e) => {}
-                // }
                 copy_file(
-                    source.to_str().expect("err in convert"),
-                    dis_path.to_str().expect("err in convert")
+                    source.to_str().expect("Err in convert"),
+                    dis_path.to_str().expect("Err in convert")
                 );
             }
         }
     }
 }
 
+// For selecting multiple files by their suffix
+
 pub fn star_source(element: &str, destination: &Path, if_file: bool) {
     let suffix = &element[1..];
     let mut found_file = false;
-    //read_dir That gives you a list of files and folders
-    //read_dir gives u Iterator
 
     if let Ok(element_curr) = fs::read_dir(".") {
         for item in element_curr {
             if item.is_ok() {
-                let path = item.expect("REASON").path();
+                let path = item.expect("expected at least one file entry").path();
                 if path.is_file() {
                     if let Some(file_name) = path.file_name() {
                         let file_name = path.file_name().unwrap();
@@ -168,25 +122,16 @@ pub fn star_source(element: &str, destination: &Path, if_file: bool) {
                             found_file = true;
 
                             let mut source = Path::new(file_name);
-                            // println!("kkkkkk{:?}" , found_file);
                             if if_file {
-                                // match fs::copy(source, destination) {
-                                //     Ok(_) => {}
-                                //     Err(e) => {}
-                                // }
                                 copy_file(
-                                    source.to_str().expect("err in convert"),
-                                    destination.to_str().expect("err in convert")
+                                    source.to_str().expect("Err in convert"),
+                                    destination.to_str().expect("Err in convert")
                                 );
                             } else {
                                 let mut dis_path = destination.join(file_name);
-                                // match fs::copy(source, dis_path) {
-                                //     Ok(_) => {}
-                                //     Err(e) => println!("{:?}", e),
-                                // }
                                 copy_file(
-                                    source.to_str().expect("err in convert"),
-                                    dis_path.to_str().expect("err in convert")
+                                    source.to_str().expect("Err in convert"),
+                                    dis_path.to_str().expect("Err in convert")
                                 );
                             }
                         }
@@ -195,7 +140,6 @@ pub fn star_source(element: &str, destination: &Path, if_file: bool) {
                     if let Some(file_name) = path.file_name() {
                         let file_name = path.file_name().unwrap();
                         if file_name.to_string_lossy().ends_with(suffix) {
-                            // println!("======{:?}", path);
                             println!(
                                 "cp: -r not specified; omitting directory '{}'",
                                 file_name.display()
@@ -210,6 +154,8 @@ pub fn star_source(element: &str, destination: &Path, if_file: bool) {
         }
     }
 }
+
+// For copying a file to the destination
 
 fn copy_file(source: &str, destination: &str) {
     let mut src_file = match File::open(source) {
