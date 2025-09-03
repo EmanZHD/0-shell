@@ -49,9 +49,9 @@ fn cat_file(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
         }
         Err(e) => {
             if e.kind() == std::io::ErrorKind::PermissionDenied {
-                 eprintln!("cat: {}: Permission denied", filename);
+                 return Err(("Permission denied").into());
             } else if e.kind() == std::io::ErrorKind::NotFound {
-                 eprintln!("cat: {}: No such file or directory", filename);
+                return Err(("No such file or directory").into());
             } else {
                 eprintln!("cat: {}: {}", filename, e);
             }
