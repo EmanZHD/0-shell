@@ -1,18 +1,4 @@
 #V2
-history
-pwd
-ls
-ls -a
-ls -alF
-clear
-ls -l
-ls
-ls -la
-clear
-ls
-ls -l
-ls /temp
-ls -l /temp
 ls -l \\temp
 ls -l /tmp
 ls -
@@ -52,3 +38,64 @@ ls
 ls -laF
 ls -l
 ls
+ls -la
+ls -laF
+ls ii
+ls -la ii
+clear
+ls
+ls ii
+ls -la
+ls -laF ii
+ls -la
+clear
+ls -la ii
+ls -la /dev/bin
+ls -la /dev
+ls
+ls -la /dev/cdrom
+cd ~
+cd ../..
+cd dev
+ls -la cdrom
+ls -la ii
+ls
+ls -la
+clear
+ls
+ls -la
+ls
+ls -la
+ls ii
+ls -la ii
+ls la
+ls -la
+ls ii
+ls -la ii
+ls
+cargo run
+ls
+ls -la ii
+ls
+ls -la ii
+ls
+clear
+ls
+ls -la ii
+ls -la
+ls -la ii
+ls -l
+ls -la
+ls -la ii
+ls -la
+ls -la ii
+cd ~
+cd ../..
+ls
+ls bin
+ls
+ls cdrom
+ls -la cdrom
+ls -l cdrom
+ls sbin
+ls -la bin

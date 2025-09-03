@@ -11,11 +11,9 @@ fn ls_helper(
     path_name: &Path,
     flag: &Flags
 ) -> Result<Vec<Vec<String>>, io::Error> {
-    // let mut lines: Vec<Vec<String>> = vec![];
     let mut content: Vec<String> = vec![];
     if (path_name.is_symlink() && flag.l_flag) || (path_name.is_symlink() && flag.f_flag) {
         if flag.l_flag {
-            // println!("PATHDATA -> {:?}", path_data);
             println!(
                 "{} {}",
                 flag.line_data(path_str, path_str).join(" "),
@@ -50,8 +48,8 @@ fn ls_helper(
 }
 
 //ls fn
-pub fn ls(parameters: &mut Params) {
-    let (flags, mut new_args) = match parse_args(parameters.args.clone()) {
+pub fn ls(params: &mut Params) {
+    let (flags, mut new_args) = match parse_args(params.args.clone()) {
         Ok((flags, new_args)) => (flags, new_args),
         Err(()) => {
             return;
@@ -66,8 +64,12 @@ pub fn ls(parameters: &mut Params) {
                     println!("{}:", path_str);
                 }
                 if let Ok(lines) = ls_helper(path_str, path_name, &flags) {
-                    if flags.l_flag && Files::new_file(Path::new(path_str)) != Files::Reg {
-                        println!("total {}", total_blocks(Path::new(path_str), flags.a_flag));
+                    if
+                        !path_name.is_symlink() &&
+                        flags.l_flag &&
+                        Files::new_file(path_name) != Files::Reg
+                    {
+                        println!("total {}", total_blocks(path_name, flags.a_flag));
                     }
                     if flags.l_flag {
                         Files::display_line(lines, path_str, &flags);

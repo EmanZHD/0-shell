@@ -52,6 +52,60 @@ impl Flags {
     }
 }
 
+#[derive(Debug)]
+pub struct FileData {
+    pub f_permission: String,
+    pub num_links: u64,
+    pub owner_id: String,
+    pub group_id: String,
+    pub f_major: String,
+    pub f_minor: String,
+    pub format_time: String,
+}
+
+impl FileData {
+    pub fn extarct_data(file_name: &str, path_name: &str) -> Self {
+        let path = format!("{}/{}", path_name, file_name);
+        let mut f_major = String::new();
+        let mut f_minor = String::new();
+        let meta: Metadata = fs
+            ::symlink_metadata(Path::new(&path))
+            .or_else(|_| fs::symlink_metadata(Path::new(file_name)))
+            .expect("can't read data");
+        let num_links = meta.nlink();
+        if meta.file_type().is_char_device() || meta.file_type().is_block_device() {
+            if let Some((major, minor)) = find_major_minor(&path) {
+                f_major.push_str(&format!("{},", major));
+                f_minor.push_str(&minor.to_string());
+            }
+        } else {
+            f_minor.push_str(&meta.len().to_string());
+        }
+
+        let owner_id = find_group_owner((meta.uid(), true));
+        let group_id = find_group_owner((meta.gid(), false));
+        let format_time = format_time(&meta);
+        let mut f_permission = format!("{:?}", meta.permissions())
+            .split_whitespace()
+            .collect::<Vec<&str>>()[4]
+            .trim_matches(|e| (e == '(' || e == ')'))
+            .to_string();
+
+        if Files::has_extra_attrs(&path) {
+            f_permission.push('+');
+        }
+        Self {
+            f_permission,
+            num_links,
+            owner_id,
+            group_id,
+            f_major,
+            f_minor,
+            format_time,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum Files {
     Symlink,
@@ -114,15 +168,19 @@ impl Files {
     }
 
     pub fn file_format(file_name: &str, path: &str, flag: &Flags) -> String {
-        // println!("CHECK --> {:?}", Files::new_file(&Path::new(path)));
-        let s_linkk = find_symlink(&Path::new(&format!("/{}/{}", ".", file_name)));
-        if Files::new_file(&Path::new(path)) == Files::Symlink && (flag.l_flag || flag.f_flag) {
-            return format!("-> {}", Files::new_file(&Path::new(&s_linkk)).file_color(&s_linkk));
-        }
+        // let s_linkk = find_symlink(&Path::new(&format!("/{}/{}", ".", file_name)));
+        // println!("here file {} | path   {}", file_name, path);
+        // if Files::new_file(&Path::new(path)) == Files::Symlink && (flag.l_flag || flag.f_flag) {
+        //     println!(
+        //         "here file {} | link {}",
+        //         file_name,
+        //         find_symlink(&Path::new(&format!("/{}/{}", ".", file_name)))
+        //     );
+        //     return format!("-> {}", Files::new_file(&Path::new(&s_linkk)).file_color(&s_linkk));
+        // }
         let mut dir = "./".to_string();
-        if path == "./".to_string() {
+        if path == "./".to_string() || Files::new_file(&Path::new(path)) == Files::Symlink {
             if let Ok(curr_dir) = env::current_dir() {
-                // println!("FIND CURR DIR ---> {}", curr_dir.display());
                 if let Some(s) = curr_dir.to_str() {
                     dir = s.to_string();
                 }
@@ -130,17 +188,19 @@ impl Files {
         } else {
             dir = path.to_string();
         }
-
-        // println!(
-        //     "--> {} PATH {} FILE {} --> {}",
-        //     dir,
-        //     path,
-        //     file_name,
-        //     &find_symlink(&Path::new(&format!("/{}/{}", ".", file_name)))
-        // );
         let s_link = &find_symlink(&Path::new(&format!("/{}/{}", dir, file_name)));
+        if Files::new_file(&Path::new(path)) == Files::Symlink && (flag.l_flag || flag.f_flag) {
+            // println!(
+            //     "here file {} | link {} | dir {}",
+            //     file_name,
+            //     find_symlink(
+            //         &Path::new(&format!("/{}/{}", "/home/izahid/Downloads/0-shell", "ii"))
+            //     ),
+            //     dir
+            // );
+            return format!("-> {}", Files::new_file(&Path::new(&s_link)).file_color(&s_link));
+        }
         let f_type = Files::new_file(Path::new(&format!("{}/{}", dir, file_name)));
-        // println!("IN FILE FORMAT {:?}", f_type);
         let sym_type = Files::new_file(&Path::new(&s_link));
 
         if flag.l_flag {
@@ -160,13 +220,11 @@ impl Files {
     }
 
     pub fn display_line(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
-        // println!("LINE-> {:?}", lines);
         let col_width = col_width(&lines);
         for line in &lines {
             for (i, elem) in line.iter().enumerate() {
                 let file_name = i == line.len() - 1;
                 let is_num: bool = elem.chars().all(|e| (e.is_ascii_digit() || e == ','));
-                // println!("CHECKK-->{:?}", is_num);
                 if file_name {
                     print!("{:<w$} ", Files::file_format(elem, path, flag), w = col_width[i]);
                 } else if is_num {
@@ -219,67 +277,6 @@ impl Files {
                 }
             }
             println!();
-        }
-    }
-}
-#[derive(Debug)]
-pub struct FileData {
-    pub f_permission: String,
-    pub num_links: u64,
-    pub owner_id: String,
-    pub group_id: String,
-    pub f_major: String,
-    pub f_minor: String,
-    pub format_time: String,
-}
-
-impl FileData {
-    pub fn extarct_data(file_name: &str, path_name: &str) -> Self {
-        let path = format!("{}/{}", path_name, file_name);
-        let mut f_major = String::new();
-        let mut f_minor = String::new();
-        // let mut format_time = String::new();
-
-        let meta: Metadata = fs
-            ::symlink_metadata(Path::new(&path))
-            .or_else(|_| fs::symlink_metadata(Path::new(file_name)))
-            .expect("can't read data");
-        let num_links = meta.nlink();
-        if meta.file_type().is_char_device() || meta.file_type().is_block_device() {
-            if let Some((major, minor)) = find_major_minor(&path) {
-                f_major.push_str(&format!("{},", major));
-                f_minor.push_str(&minor.to_string());
-            }
-        } else {
-            f_minor.push_str(&meta.len().to_string());
-        }
-
-        let owner_id = find_group_owner((meta.uid(), true));
-        let group_id = find_group_owner((meta.gid(), false));
-        // let mode = permissions.mode();
-        let format_time = format_time(&meta);
-        // let str_prm: String = format!("{:?}", permissions.to_owned());
-        // println!("PERMISSIONS-----> {:?}", meta.mode());
-        // let octal_string = format!("{:o}", meta.mode());
-        // println!("TO OCTAL-----> {}", octal_string);
-
-        let mut f_permission = format!("{:?}", meta.permissions())
-            .split_whitespace()
-            .collect::<Vec<&str>>()[4]
-            .trim_matches(|e| (e == '(' || e == ')'))
-            .to_string();
-
-        if Files::has_extra_attrs(&path) {
-            f_permission.push('+');
-        }
-        Self {
-            f_permission,
-            num_links,
-            owner_id,
-            group_id,
-            f_major,
-            f_minor,
-            format_time,
         }
     }
 }

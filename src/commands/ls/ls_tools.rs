@@ -111,7 +111,7 @@ pub fn find_group_owner(info: (uid_t, bool)) -> String {
 
 pub fn find_symlink(path: &Path) -> String {
     if let Ok(link) = fs::read_link(path) {
-        // println!("{:?} ---> {:?}", path, link);
+        // println!("INSIDE SYM{:?} ---> {:?}", path, link);
         return link.display().to_string();
     } else {
         return "".to_owned();
