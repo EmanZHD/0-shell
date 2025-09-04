@@ -9,6 +9,7 @@ pub fn mv(params: &mut Params) {
         eprintln!("{}", bold_red("👀 mv: missing file operand"));        
         return;
     }
+    
     let (sources, des) = params.args.split_at(params.args.len() - 1);
     let dest_path = Path::new(&des[0]);
     let is_dest_dir = dest_path.is_dir();
@@ -16,16 +17,18 @@ pub fn mv(params: &mut Params) {
         eprintln!("{} '{}'", bold_red("👀 mv: missing destination file operand after"), green(&des[0]));        
         return;
     }
-
+    
+    
     if sources.len() > 1 && !is_dest_dir {
         eprintln!("{} '{}' {}", bold_red("😸​ mv: target"),yellow(&des[0]) , bold_red("is not a directory"));
         return;
     }
-
+    
     for source in sources {
-        if source == &des[0] && is_dest_dir {
-            eprintln!("{}", red(&format!("😸​ mv: cannot move '{}' to a subdirectory of itself, '{}/{}'", yellow(source), yellow(&des[0]), yellow(&des[0]))));
-        } else if source == &des[0] {
+        if dest_path.exists(){
+            eprintln!("{}", bold_gray(&format!("❌ mv: '{}' and '{}' are the same file", source, &dest_path.display().to_string())));
+            return;
+        } else  if source == &des[0] {
             eprintln!("{}", red(&format!("😸​ mv: '{}' and '{}' are the same file", yellow(source), yellow(&des[0]))));
         } else if &des[0] == "."  {
             eprintln!("{}", red(&format!("😸​ mv: '{}' and '{}/{}' are the same file", yellow(source), yellow(&des[0]), yellow(source))));
