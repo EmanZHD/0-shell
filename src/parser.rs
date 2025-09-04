@@ -53,11 +53,11 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
     let mut new = Vec::new();
     let mut new_input = String::new();
     let mut quote = ' '; // pour memoriser le quote
-    let mut test = input.chars().peekable();
-    while let Some(c) = test.next() {
+    let mut peek_input = input.chars().peekable();
+    while let Some(c) = peek_input.next() {
         match c {
-            '\\' if test.peek() == Some(&'\"') || test.peek() == Some(&'\'') => {
-                new_input.push(test.next().unwrap());
+            '\\' if peek_input.peek() == Some(&'\"') || peek_input.peek() == Some(&'\'') => {
+                new_input.push(peek_input.next().unwrap());
                 continue;
             }
 
@@ -238,3 +238,8 @@ fn env_variable(args: Vec<String>) -> Vec<String> {
     new_args
     
 }
+
+// "" => comm = "" 
+// switch "" ==> default command not found
+// ["", "ls"]
+// 
