@@ -27,7 +27,9 @@ pub fn mv(params: &mut Params) {
             eprintln!("{}", red(&format!("😸​ mv: cannot move '{}' to a subdirectory of itself, '{}/{}'", yellow(source), yellow(&des[0]), yellow(&des[0]))));
         } else if source == &des[0] {
             eprintln!("{}", red(&format!("😸​ mv: '{}' and '{}' are the same file", yellow(source), yellow(&des[0]))));
-        }  else {
+        } else if &des[0] == "."  {
+            eprintln!("{}", red(&format!("😸​ mv: '{}' and '{}/{}' are the same file", yellow(source), yellow(&des[0]), yellow(source))));
+        } else {
             let _ = move_file(source, &des[0], is_dest_dir);
         }
     }
