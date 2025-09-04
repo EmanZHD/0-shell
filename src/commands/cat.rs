@@ -4,7 +4,7 @@ use std::io::{self};
 use std::io::{BufReader, BufRead};
 use crate::colors::{bold_red, cyan};
 
-// 🥳 Updated to work with Params instead of Vec<String> 🥳
+//  🥳
 pub fn cat(params: &mut Params) {
     if params.args.is_empty() {
         if let Err(e) = only_cat() {
