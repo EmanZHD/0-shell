@@ -167,38 +167,91 @@ impl Files {
         s
     }
 
+    // pub fn file_format(file_name: &str, path: &str, flag: &Flags) -> String {
+    //     let mut dir = "./".to_string();
+    //     if path == "./".to_string() || Files::new_file(&Path::new(path)) == Files::Symlink {
+    //         if let Ok(curr_dir) = env::current_dir() {
+    //             if let Some(s) = curr_dir.to_str() {
+    //                 dir = s.to_string();
+    //             }
+    //         }
+    //     } else {
+    //         dir = path.to_string();
+    //     }
+    //     // println!("DIR -> {} file {} path {}", dir, file_name, path);
+    //     let s_link = &find_symlink(&Path::new(&format!("{}/{}", dir, file_name)));
+    //     if Files::new_file(&Path::new(path)) == Files::Symlink && (flag.l_flag || flag.f_flag) {
+    //         // println!(
+    //         //     "SYMLINK -> {} dir {} file {}",
+    //         //     dir,
+    //         //     file_name,
+    //         //     &find_symlink(&Path::new(&format!("/{}/{}", ".", file_name)))
+    //         // );
+    //         return format!("-> {}", Files::new_file(&Path::new(&s_link)).file_color(&s_link));
+    //     }
+    //     let f_type = Files::new_file(Path::new(&format!("{}/{}", dir, file_name)));
+    //     // println!(
+    //     //     "FILE --> {} TYPE--> {:?} COLOR {}",
+    //     //     &format!("{}/{}", path, file_name),
+    //     //     f_type,
+    //     //     Files::new_file(Path::new(&format!("{}/{}", path, file_name))).file_color(file_name)
+    //     // );
+    //     let sym_type = Files::new_file(&Path::new(&s_link));
+
+    //     if flag.l_flag {
+    //         if !find_symlink(&Path::new(&format!("{}/{}", dir, file_name))).is_empty() {
+    //             return format!("{} -> {}", f_type.file_color(file_name), if flag.f_flag {
+    //                 sym_type.file_symbol(&sym_type.file_color(s_link))
+    //             } else {
+    //                 sym_type.file_color(s_link).to_string()
+    //             });
+    //         }
+    //     }
+
+    //     if flag.f_flag {
+    //         return format!("{}", f_type.file_symbol(&f_type.file_color(file_name)));
+    //     }
+    //     format!(
+    //         "{}",
+    //         Files::new_file(Path::new(&format!("{}/{}", path, file_name))).file_color(file_name)
+    //     )
+    // }
     pub fn file_format(file_name: &str, path: &str, flag: &Flags) -> String {
-        let mut dir = "./".to_string();
-        if path == "./".to_string() || Files::new_file(&Path::new(path)) == Files::Symlink {
-            if let Ok(curr_dir) = env::current_dir() {
-                if let Some(s) = curr_dir.to_str() {
-                    dir = s.to_string();
+        let new_path = Path::new(path).join(file_name);
+
+        if let Ok(meta) = fs::symlink_metadata(&new_path) {
+            if meta.file_type().is_symlink() {
+                let sym_file = find_symlink(&new_path);
+                if !sym_file.is_empty() {
+                    let sym_type = Files::new_file(Path::new(&sym_file));
+                    if flag.l_flag {
+                        return format!("{} -> {}", Files::Symlink.file_color(file_name), if
+                            flag.f_flag
+                        {
+                            println!(
+                                "SYM -> {}",
+                                sym_type.file_symbol(&sym_type.file_color(&sym_file))
+                            );
+                            sym_type.file_symbol(&sym_type.file_color(&sym_file))
+                        } else {
+                            sym_type.file_color(&sym_file).to_string()
+                        });
+                    }
+
+                    if flag.f_flag {
+                        return Files::Symlink.file_symbol(&Files::Symlink.file_color(file_name));
+                    }
+
+                    return Files::Symlink.file_color(file_name).to_string();
                 }
             }
-        } else {
-            dir = path.to_string();
-        }
-        let s_link = &find_symlink(&Path::new(&format!("/{}/{}", dir, file_name)));
-        if Files::new_file(&Path::new(path)) == Files::Symlink && (flag.l_flag || flag.f_flag) {
-            return format!("-> {}", Files::new_file(&Path::new(&s_link)).file_color(&s_link));
-        }
-        let f_type = Files::new_file(Path::new(&format!("{}/{}", dir, file_name)));
-        let sym_type = Files::new_file(&Path::new(&s_link));
-
-        if flag.l_flag {
-            if !find_symlink(&Path::new(&format!("/{}/{}", dir, file_name))).is_empty() {
-                return format!("{} -> {}", f_type.file_color(file_name), if flag.f_flag {
-                    sym_type.file_symbol(&sym_type.file_color(s_link))
-                } else {
-                    sym_type.file_color(s_link).to_string()
-                });
-            }
         }
 
+        let f_type = Files::new_file(&new_path);
         if flag.f_flag {
-            return format!("{}", f_type.file_symbol(&f_type.file_color(file_name)));
+            return f_type.file_symbol(&f_type.file_color(file_name));
         }
-        format!("{}", f_type.file_color(file_name))
+        f_type.file_color(file_name).to_string()
     }
 
     pub fn display_line(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
@@ -227,11 +280,14 @@ impl Files {
     }
 
     pub fn display_file(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
-        println!("TEST -> {:?}", path);
+        // println!("TEST -> {:?}", path);
         let files_name: Vec<String> = lines
             .iter()
             .flatten()
-            .map(|s| Files::file_format(s, path, flag).to_string())
+            .map(|s| {
+                // println!("COLORE IT -> {}", Files::file_format(s, path, flag).to_string());
+                return Files::file_format(s, path, flag).to_string();
+            })
             .collect();
 
         let max_len = files_name

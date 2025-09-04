@@ -13,13 +13,16 @@ fn ls_helper(
 ) -> Result<Vec<Vec<String>>, io::Error> {
     let mut content: Vec<String> = vec![];
     if (path_name.is_symlink() && flag.l_flag) || (path_name.is_symlink() && flag.f_flag) {
+        let data = flag.line_data(path_str, path_str);
         if flag.l_flag {
+            println!("hee00");
             println!(
                 "{} {}",
-                flag.line_data(path_str, path_str).join(" "),
+                data[..data.len() - 1].join(" "),
                 Files::file_format(path_str, path_str, &flag)
             );
         } else {
+            println!("hee00");
             println!("{}", Files::Symlink.file_symbol(&Files::Symlink.file_color(&path_str)));
         }
         return Ok(vec![]);

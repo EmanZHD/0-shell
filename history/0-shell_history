@@ -1,101 +1,101 @@
 #V2
-la -laF /dev
-ls -laF /dev
-ls -laF /dev/vfio
-ls
-ls -laF ii/1
-ls ls
-ls lss
+ls -lF /bin
 clear
-ls -laF /dev/stderr
-cd ~
-cd ../..
-cd /dev
-ls
-ls stderr
-ls -laF stderr
-cd ../../
-ls
-ls ..
-ls
-ls home/izahid
+cargo run
 ls -la
-ls
-cd home/izahid
-ls
-ls -laF
-ls /Download/0-shell
-ls Downloads/0-shell
-cd ..
-ls ifares
-ls izahid
-cd ..
-ls bin
-cd ~
-cd ../..
-ls
-ls dev
-cd dev
-clear
-ls
-clear
-cd ..
-ls
-ls root
-ls -al root
-cd ~
-cd ../..
-ls
-ls -la usr
-ls
+ls -Fa /bin
+ls -laF /bin
+ls -la /bin
+ls -la
 ls -la ii
-cd tt
+ls -la /bin
+ls -la ii
+ls -la /bin
+ls -la /ii
+ls -la ii
+ls -la /bin
+ls -la
 ls
-cd ..
-ls
-ls tt
-ls -la tt
-ls tt
-ls
-clear
-ls
-ls bin
-cd ~
+ls /bin
+ls -la /bin
+ls -la ii
+ls -lF bin
+ls -lF /bin
 ls
 ls -la
-clear
-ls eman
-ls houda
-cleqr
-clear
-cd ²
-cleqr
-clear
-cd  ~
-ls ~
-ls ~ tests
-ls ~
-ls ~ tests target
-l
-ls ~
-ls ~ test
-ls ~ t0 target
+ls -la ii
+ls -la /bin
+ls -laF /bin
+ls -la /dev
+ls -la
+la -la ii
+ls -la ii
+ls /bin
+ls -la /bin
 ls
-ls ~
-ls -laF ~
-clear
+ls -la
+ls -la ii
+ls-la /bin
+ls -la /bin
+ls /bin
 cd ~
-ls ../..
-ls
+ls /dev
+ls -la /dev
+ls -laF /dev
+ls -laF /bin
 cd ../..
 ls
 ls bin
-ls ~
+ls-labin
+ls -la bin
+ls -la
+ls -la ii
+ls -la /dec
+ls -la /dev
+ls -la /bin
+cd ~
+ls -la /bin
+cd ../..
+ls -la /bin
+cd bin
+ls -la
+cd ../dev
 ls
-mkdir "1  2"
 cd ..
-ls Descktop
 ls
-ls Desktop
-ls -la Desktop
-ls /dev
+clear
+cd ..
+ls
+cd lib
+cd ..
+ls lib
+ls -la lib
+clear
+cd homw/izahid/
+cd home/izahid/
+ls
+cd home
+cd izahid
+ls
+cd eman
+ls
+cd Document/0-shell
+cd Document
+cd Documents
+ls
+cd 0-shell
+ls
+clear
+ls -la /dev
+clear
+ls -la /bin
+ls -laF /bin
+clear
+ls -la /bin
+cd ~
+ls -la /bin
+cd ../..
+ls
+ls -la /bin
+ls -la /lib
+ls -laF /lib
