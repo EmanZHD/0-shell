@@ -140,12 +140,14 @@ pub fn read_input(history: PathBuf, params: &Params) -> (String, Vec<String>) {
                             Vec::new()
                         };
 
+                        let new_args = env_variable(args);
+
                         rl.add_history_entry(&cmd).expect("Failed to add history");
                         if let Ok(_save) = rl.save_history(&history) {
                             rl.save_history(&history).unwrap();
                         }
 
-                        return (command, args);
+                        return (command, new_args);
                     }
                     Err(_) => {
                         print_quote_prompt();
@@ -164,4 +166,75 @@ pub fn read_input(history: PathBuf, params: &Params) -> (String, Vec<String>) {
             }
         }
     }
+}
+
+/*********🌟 env_variable 🌟********/
+fn env_variable(args: Vec<String>) -> Vec<String> {
+    let mut new_args: Vec<String> = Vec::new();
+    for word in &args {
+        let new_word = word.trim();
+        let mut temp = String::new();
+
+        if new_word == "$0" {
+            new_args.push("0-shell".to_string());
+        }
+
+        if new_word == "$0" {
+            new_args.push("0-shell".to_string());
+        }
+
+        if new_word == "~" {
+            let home = match env::home_dir() {
+               Some(home_dir) => home_dir,
+               None => PathBuf::from("/"),
+            };
+            new_args.push(home.display().to_string());
+            break;
+        }
+
+        let mut chars = new_word.chars().peekable();
+        
+        while let Some(c) = chars.next() {
+            if c == '$' {
+               let mut dollar_count = 1;
+                while chars.peek() == Some(&'$') {
+                    chars.next();
+                    dollar_count += 1;
+                }
+                
+                if dollar_count == 1 { 
+                    let mut var_env = String::new();
+                    while let Some(&next_char) = chars.peek() {
+                        if next_char.is_alphanumeric() || next_char == '_' {
+                            var_env.push(chars.next().unwrap());
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    if var_env.is_empty() {
+                        temp.push('$');
+                    } else if let Ok(env_var) = std::env::var(&var_env) {
+                        temp.push_str(&env_var);
+                    }
+                } else {
+                    if dollar_count % 2 == 1 {
+                        for _ in 0..(dollar_count / 2) {
+                            temp.push_str(&std::process::id().to_string());
+                        }
+                        temp.push('$');
+                    } else {
+                        for _ in 0..(dollar_count / 2) {
+                            temp.push_str(&std::process::id().to_string());
+                        }
+                    }
+                }
+            } else {
+               temp.push(c);
+            }
+        }
+        new_args.push(temp);
+    }
+    new_args
+    
 }

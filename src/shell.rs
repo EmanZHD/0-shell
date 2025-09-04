@@ -43,7 +43,7 @@ pub fn handle_cmds(params: &mut Params, keyword: String) {
 
 
 /*********🌟 get_paths 🌟********/
-pub fn get_paths() -> (PathBuf, PathBuf) {
+pub fn get_paths() -> PathBuf {
     // get history file path
     let history_path = match env::current_dir() {
         Ok(home_dir) => {
@@ -59,11 +59,5 @@ pub fn get_paths() -> (PathBuf, PathBuf) {
     if let Some(parent) = history_path.parent() {
         let _ = fs::create_dir_all(parent);
     }
-    
-    // get home_directory path
-    let home = match env::home_dir() {
-        Some(home_dir) => home_dir,
-        None => PathBuf::from("/"),
-    };
-    return (history_path, home)
+    return history_path
 }
