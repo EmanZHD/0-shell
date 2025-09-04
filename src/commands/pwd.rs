@@ -15,6 +15,10 @@ pub fn pwd(parameters: &mut Params) {
        return;
     }
     if let Err(_e) = initial_pwd() {
-        println!("⛔ Error running pwd command");
+        match &parameters.previous_path {
+            Some(_) => println!("⛔ Error running pwd command"),
+            None => println!("pwd: path not found ‼️"),
+        };
     }
+   
 }

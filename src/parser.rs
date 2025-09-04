@@ -1,30 +1,35 @@
-use std::env;
 use colored::*;
-use std::{ io };
+use std::io;
+use std::env;
 use std::process;
+use crate::Params;
 use std::io::Write;
 use std::path::PathBuf;
 
 /*********🌟 Current Dir 🌟********/
-pub fn current() -> String {
+pub fn current(params: &Params) -> String {
     let result: String = match env::current_dir() {
-        Ok(path) => {
-            match path.file_name() {
-                Some(file_name) => file_name.to_string_lossy().into_owned(),
-                _none => String::from("/"),
-            }
-        }
-        Err(_e) => "/".to_string(),
+        Ok(path) => match path.file_name() {
+            Some(file_name) => file_name.to_string_lossy().into_owned(),
+            _none => String::from("/"),
+        },
+        Err(_e) => match &params.previous_path {
+            Some(p)=> match p.file_name() {
+               Some(file_name) => file_name.to_string_lossy().into_owned(),
+               _none => String::from(""),
+            },
+            None=> '/'.to_string(),
+        },
     };
     result
 }
 
 /*********🌟 print_prompt 🌟********/
-pub fn print_prompt() {
+pub fn print_prompt(params: &Params) {
     let begin = format!(
         "{}{}{} ",
         "~".bold().yellow(),
-        current().bold().truecolor(199, 21, 133),
+        current(params).bold().truecolor(199, 21, 133),
         "$".bold().yellow()
     );
     print!("{}", begin);
@@ -32,7 +37,7 @@ pub fn print_prompt() {
         Ok(()) => {
             return;
         }
-        _ => eprintln!("broken pipe"),
+        _ => println!("broken pipe"),
     }
 }
 
@@ -48,7 +53,6 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
     let mut new = Vec::new();
     let mut new_input = String::new();
     let mut quote = ' '; // pour memoriser le quote
-    //for c in input.chars() {
     let mut test = input.chars().peekable();
     while let Some(c) = test.next() {
         match c {
@@ -59,7 +63,7 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
 
             '\'' | '"' if !in_quotes => {
                 in_quotes = true;
-                quote = c; // pour memoriser le type de quote
+                quote = c;
             }
 
             '\'' | '\"' if in_quotes && c == quote => {
@@ -88,24 +92,28 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
 }
 
 /**********🌟 get_prompt 🌟**********/
-pub fn get_prompt() -> String {
+pub fn get_prompt(params: &Params) -> String {
     format!(
         "{}{}{} ",
         "~".bold().yellow(),
-        current().bold().truecolor(199, 21, 133),
+        current(params).bold().truecolor(199, 21, 133),
         "$".bold().yellow()
     )
 }
 
 /**********🌟 read_input 🌟**********/
-pub fn read_input(history: PathBuf) -> (String, Vec<String>) {
+pub fn read_input(history: PathBuf, params: &Params) -> (String, Vec<String>) {
     let mut rl = rustyline::DefaultEditor::new().expect("Failed to create editor");
     rl.load_history(&history).unwrap_or_default();
 
     let mut cmd = String::new();
 
     loop {
-        let prompt = if cmd.is_empty() { get_prompt() } else { "> ".to_string() };
+        let prompt = if cmd.is_empty() {
+            get_prompt(params)
+        } else {
+            "> ".to_string()
+        };
 
         let input = rl.readline(&prompt);
 
@@ -132,12 +140,14 @@ pub fn read_input(history: PathBuf) -> (String, Vec<String>) {
                             Vec::new()
                         };
 
+                        let new_args = env_variable(args);
+
                         rl.add_history_entry(&cmd).expect("Failed to add history");
                         if let Ok(_save) = rl.save_history(&history) {
                             rl.save_history(&history).unwrap();
                         }
 
-                        return (command, args);
+                        return (command, new_args);
                     }
                     Err(_) => {
                         print_quote_prompt();
@@ -156,4 +166,75 @@ pub fn read_input(history: PathBuf) -> (String, Vec<String>) {
             }
         }
     }
+}
+
+/*********🌟 env_variable 🌟********/
+fn env_variable(args: Vec<String>) -> Vec<String> {
+    let mut new_args: Vec<String> = Vec::new();
+    for word in &args {
+        let new_word = word.trim();
+        let mut temp = String::new();
+
+        if new_word == "$0" {
+            new_args.push("0-shell".to_string());
+        }
+
+        if new_word == "$0" {
+            new_args.push("0-shell".to_string());
+        }
+
+        if new_word == "~" {
+            let home = match env::home_dir() {
+               Some(home_dir) => home_dir,
+               None => PathBuf::from("/"),
+            };
+            new_args.push(home.display().to_string());
+            break;
+        }
+
+        let mut chars = new_word.chars().peekable();
+        
+        while let Some(c) = chars.next() {
+            if c == '$' {
+               let mut dollar_count = 1;
+                while chars.peek() == Some(&'$') {
+                    chars.next();
+                    dollar_count += 1;
+                }
+                
+                if dollar_count == 1 { 
+                    let mut var_env = String::new();
+                    while let Some(&next_char) = chars.peek() {
+                        if next_char.is_alphanumeric() || next_char == '_' {
+                            var_env.push(chars.next().unwrap());
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    if var_env.is_empty() {
+                        temp.push('$');
+                    } else if let Ok(env_var) = std::env::var(&var_env) {
+                        temp.push_str(&env_var);
+                    }
+                } else {
+                    if dollar_count % 2 == 1 {
+                        for _ in 0..(dollar_count / 2) {
+                            temp.push_str(&std::process::id().to_string());
+                        }
+                        temp.push('$');
+                    } else {
+                        for _ in 0..(dollar_count / 2) {
+                            temp.push_str(&std::process::id().to_string());
+                        }
+                    }
+                }
+            } else {
+               temp.push(c);
+            }
+        }
+        new_args.push(temp);
+    }
+    new_args
+    
 }

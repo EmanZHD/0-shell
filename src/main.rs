@@ -4,6 +4,7 @@ mod consts;
 mod commands;
 use shell::*;
 use parser::*;
+mod colors;
 use std::path::PathBuf;
 use consts::{ TITLE, GREEN, RESET };
 
@@ -12,7 +13,6 @@ pub struct Params {
     args: Vec<String>,
     archieve: PathBuf,
     previous_path: Option<PathBuf>,
-    home: PathBuf,
 }
 
 impl Params {
@@ -21,7 +21,6 @@ impl Params {
             args: Vec::new(),
             archieve: PathBuf::new(),
             previous_path: None,
-            home: PathBuf::new(),
         }
     }
 }
@@ -34,13 +33,12 @@ fn main() {
 
     println!("{GREEN}{}{RESET}", TITLE);
     let mut params = Params::new();
-    let (history_path, home) = get_paths();
+    let history_path = get_paths();
     params.archieve = history_path.clone();
-    params.home = home.clone();
 
     loop {
-        print_prompt();
-        let (keyword, arguments) = read_input(history_path.clone());
+        print_prompt(&params);
+        let (keyword, arguments) = read_input(history_path.clone(), &params);
         if keyword.is_empty() && arguments.is_empty() {
             continue;
         }

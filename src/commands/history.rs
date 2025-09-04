@@ -6,7 +6,7 @@ use std::io::{self, BufReader, BufRead};
 /***********🌟 history 🌟**********/
 pub fn history(parameters: &mut Params) {
    if let Err(_e) = read_history_file(parameters.archieve.clone()) {
-      println!("⛔ 0-shell: Error Loading History, Try Later 🙃");
+      eprintln!("⛔ 0-shell: Error Loading History, Try Later 🙃");
    }
 }
 
