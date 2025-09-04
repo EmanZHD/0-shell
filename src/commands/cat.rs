@@ -8,12 +8,12 @@ use crate::colors::{bold_red, cyan};
 pub fn cat(params: &mut Params) {
     if params.args.is_empty() {
         if let Err(e) = only_cat() {
-            eprintln!("cat: stdin: {} ☹️", e);
+            eprintln!("☹️ cat: stdin: {} ", e);
         }
     } else {
         for filename in &params.args {
             if let Err(e) = cat_file(filename) {
-                eprintln!("{}", bold_red(&format!("cat: '{}': {} ☹️", filename, e)));
+                eprintln!("{}", bold_red(&format!("☹️ cat: '{}': {} ", filename, e)));
             }
         }
     }
@@ -21,7 +21,7 @@ pub fn cat(params: &mut Params) {
 
 // 💁‍♀️​ handle only cat 💁‍♀️​
 fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
-    println!("{}", cyan("Reading from stdin (Ctrl+D to end) ☺️​:"));
+    println!("{}", cyan("☺️​ Reading from stdin (Ctrl+D to end) :"));
     let stdin = io::stdin();
     let reader = BufReader::new(stdin.lock());
     
@@ -39,12 +39,12 @@ fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
 
 // 💁‍♀️​ handle cat + plusieurs arg(files) 💁‍♀️​
 fn cat_file(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
-    if filename == "-" || (filename.starts_with("$") && filename.len() > 1) {
+    if filename == "-" || filename == "--" || (filename.starts_with("$") && filename.len() > 1) {
         return only_cat();
     }
-    match fs::read_to_string(filename) {
+    match fs::read(filename) {
         Ok(contents) => {
-            println!("{}", contents);
+            println!("{}", String::from_utf8_lossy(&contents));
             Ok(())
         }
         Err(e) => {
