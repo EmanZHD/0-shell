@@ -1,101 +1,101 @@
 #V2
-ls -lF /bin
+ls -alF /dev
+ls -alF /cdrom
+la /cdrom
+ls /cdrom
+ls
+ls -la ii
+ls -laF ii
 clear
-cargo run
-ls -la
-ls -Fa /bin
-ls -laF /bin
-ls -la /bin
-ls -la
-ls -la ii
-ls -la /bin
-ls -la ii
-ls -la /bin
-ls -la /ii
-ls -la ii
-ls -la /bin
-ls -la
-ls
-ls /bin
-ls -la /bin
-ls -la ii
-ls -lF bin
-ls -lF /bin
-ls
-ls -la
-ls -la ii
-ls -la /bin
-ls -laF /bin
-ls -la /dev
-ls -la
-la -la ii
-ls -la ii
-ls /bin
-ls -la /bin
-ls
-ls -la
-ls -la ii
-ls-la /bin
-ls -la /bin
-ls /bin
 cd ~
-ls /dev
-ls -la /dev
-ls -laF /dev
-ls -laF /bin
+cd ../..
+ls *la bin
+ls *l
+ls -al
+ls -ls /bin
+ls -al /bin
+ls -al
+ls ~
 cd ../..
 ls
-ls bin
-ls-labin
-ls -la bin
-ls -la
-ls -la ii
-ls -la /dec
-ls -la /dev
-ls -la /bin
 cd ~
-ls -la /bin
 cd ../..
-ls -la /bin
-cd bin
-ls -la
-cd ../dev
-ls
-cd ..
-ls
-clear
-cd ..
-ls
-cd lib
-cd ..
-ls lib
-ls -la lib
-clear
-cd homw/izahid/
-cd home/izahid/
+ls -al /dev
+ls -al /bin
+ls -al bin
 ls
 cd home
 cd izahid
-ls
-cd eman
-ls
-cd Document/0-shell
-cd Document
-cd Documents
-ls
-cd 0-shell
-ls
-clear
-ls -la /dev
-clear
-ls -la /bin
-ls -laF /bin
-clear
-ls -la /bin
+cd Documents/0-shell
+ls -al /bin
+ls -al
+ls /bin
+ls -al /bin
+ls -al
+ls -al /bin
+ls -la
+ls -al
+ls -al /bin
 cd ~
-ls -la /bin
 cd ../..
 ls
+ls -al bin
+ls -al /bin
+ls
+ls -al
+ls -al /bin
+ls -al
+ls -al /bin
+ls
+ls -al
+ls -al ii
+ls -al /bin
+ls -la
+ls -laF
 ls -la /bin
-ls -la /lib
-ls -laF /lib
+ls
+ls -al
+ls -alF
+ls -al /bin
+cd ~
+ls -al /bin
+cd
+cd ../..
+ls
+cd bin
+cd ..
+ls -al /bin
+ls -al bin
+ls -l
+ls -al /bin
+ls -al /tmp
+ls -alF /tmp
+ls -alF /dev
+ls -alllFF /usr/bin/passwd
+ls -alllFF qsd src qdf
+cd aa
+rm .
+rm -r .
+clear
+ls -alF
+cd ..
+ls -AlFF
+ls -alF
+ls /dev
+ls -l /dev -Faaa
+xrwxrwt   2 root   root             ls -l /dev/null
+ls -l /dev/null
+ls /usr/bin
+ls -l /dev/null
+ls /bin
+ls -laFF /bin
+ls -aF /dev
+ls -aF /bin
+ls -aF /dev
+ls -aFlll /dev
+ls -l
+clear
+ls -alFF /usr/bin
+ls -aFF /usr/bin
+ls -alFF /usr/bin
+clear
