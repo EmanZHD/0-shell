@@ -1,7 +1,5 @@
 use std::fs;
 use crate::Params;
-use std::io::{self};
-use std::io::{BufReader, BufRead};
 use crate::colors::{bold_red, cyan};
 
 //  🥳
@@ -23,7 +21,6 @@ pub fn cat(params: &mut Params) {
     fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
         println!("{}", cyan("☺️​ Reading from stdin (Ctrl+D to end) :"));
             let mut rl = rustyline::DefaultEditor::new().expect("Failed to create editor");
-            let stdin = io::stdin();
             loop {
                 let input = rl.readline(&cyan("🌸 "));
                 match input  {
