@@ -15,17 +15,15 @@ pub fn rm(params: &mut Params) {
                         let path = Path::new(arg);
                          let metadata = match std::fs::symlink_metadata(&path) {
                             Ok(r) => r,
-                            Err(err) => { eprintln!("Failed to read metadata for '{}'", path.display()) ;continue}
+                            Err(_err) => { eprintln!("Failed to read metadata for '{}'", path.display()) ;continue}
                         };
 
                         if metadata.file_type().is_symlink() {
                             match std::fs::remove_file(&path) {
                                 Ok(_) => {
-                                    continue;
                                 }
-                                Err(err) => {
-                                    eprintln!("rm: can't remove '{}': No such file or directory " , path.display());
-                                }
+                                Err(_err) => eprintln!("rm: can't remove '{}': No such file or directory " , path.display()),
+                                
                             }
                         }
 
@@ -51,7 +49,7 @@ pub fn rm(params: &mut Params) {
                         let path = Path::new(arg);
                         let metadata = match std::fs::symlink_metadata(&path) {
                             Ok(r) => r,
-                            Err(err) => { eprintln!("Failed to read metadata for '{}'", path.display()) ;continue}
+                            Err(_err) => { eprintln!("Failed to read metadata for '{}'", path.display()) ;continue}
                         };
 
                         if metadata.file_type().is_symlink() {
@@ -59,7 +57,7 @@ pub fn rm(params: &mut Params) {
                                 Ok(_) => {
                                     continue;
                                 }
-                                Err(err) => {
+                                Err(_err) => {
                                     eprintln!("rm: can't remove '{}': No such file or directory " , path.display());
                                 }
                             }
