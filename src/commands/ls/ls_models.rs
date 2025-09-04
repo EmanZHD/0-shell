@@ -9,7 +9,7 @@ use crate::commands::ls::ls_tools::{
 use colored::{ ColoredString, Colorize };
 use is_executable::is_executable;
 use std::path::Path;
-use std::{ env, fs, os::unix::fs::FileTypeExt };
+use std::{ fs, os::unix::fs::FileTypeExt };
 use xattr::list;
 use std::fs::{ Metadata };
 use std::os::unix::fs::MetadataExt;

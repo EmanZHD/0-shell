@@ -13,7 +13,7 @@ pub fn cd(parameters: &mut Params) {
     }
     
     match parameters.args[0].as_str() {
-       "~" | "--" => {
+       "--" => {
            go_to_home();
            parameters.previous_path = current_dir;  
        }
