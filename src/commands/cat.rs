@@ -22,17 +22,24 @@ pub fn cat(params: &mut Params) {
 // 💁‍♀️​ handle only cat 💁‍♀️​
     fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
         println!("{}", cyan("☺️​ Reading from stdin (Ctrl+D to end) :"));
-        let stdin = io::stdin();
-        let reader = BufReader::new(stdin.lock());
-        
-        for line in reader.lines() {
-            match line {
-                Ok(content) => {
-                    println!("{}", content);
+            let mut rl = rustyline::DefaultEditor::new().expect("Failed to create editor");
+            let stdin = io::stdin();
+            loop {
+                let input = rl.readline(&cyan("🌸 "));
+                match input  {
+                    Ok(ref content) => {
+                        println!("🌸 {}", content);
+                    }
+                    Err(rustyline::error::ReadlineError::Interrupted) => {
+                       break;
+                    }
+                    Err(rustyline::error::ReadlineError::Eof) => {
+                        break;
+                    }
+                    Err(e) => return Err(Box::new(e)),
+
                 }
-                Err(e) => return Err(Box::new(e)),
             }
-        }
         Ok(())
     }
 
