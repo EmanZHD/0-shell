@@ -13,6 +13,22 @@ pub fn rm(params: &mut Params) {
                 "-r" => {
                     for arg in &params.args[1..] {
                         let path = Path::new(arg);
+                         let metadata = match std::fs::symlink_metadata(&path) {
+                            Ok(r) => r,
+                            Err(err) => { eprintln!("Failed to read metadata for '{}'", path.display()) ;continue}
+                        };
+
+                        if metadata.file_type().is_symlink() {
+                            match std::fs::remove_file(&path) {
+                                Ok(_) => {
+                                    continue;
+                                }
+                                Err(err) => {
+                                    eprintln!("rm: can't remove '{}': No such file or directory " , path.display());
+                                }
+                            }
+                        }
+
                         if path.exists() {
                             if path.is_file() {
                                 is_file(path);
@@ -33,6 +49,22 @@ pub fn rm(params: &mut Params) {
                 _ => {
                     for arg in &params.args {
                         let path = Path::new(arg);
+                        let metadata = match std::fs::symlink_metadata(&path) {
+                            Ok(r) => r,
+                            Err(err) => { eprintln!("Failed to read metadata for '{}'", path.display()) ;continue}
+                        };
+
+                        if metadata.file_type().is_symlink() {
+                            match std::fs::remove_file(&path) {
+                                Ok(_) => {
+                                    continue;
+                                }
+                                Err(err) => {
+                                    eprintln!("rm: can't remove '{}': No such file or directory " , path.display());
+                                }
+                            }
+                        }
+
                         if path.exists() {
                             if path.is_file() {
                                 is_file(path);
@@ -69,7 +101,7 @@ fn is_file(path: &Path) {
         let mut response = String::new();
         if let Ok(_) = io::stdin().read_line(&mut response) {
             let resp = response.trim().to_lowercase();
-            if resp == "y" || resp == "yes" {
+            if resp.starts_with('y')  {
                 match fs::remove_file(path) {
                     Ok(_) => {}
                     Err(_) => eprintln!("Failed to remove {}", path.display()),
