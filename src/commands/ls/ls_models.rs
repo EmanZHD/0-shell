@@ -125,11 +125,11 @@ impl Files {
             if path.file_type().is_fifo() {
                 return Files::Fifo;
             }
-            if path.file_type().is_block_device() || path.file_type().is_char_device() {
-                return Files::Dev;
-            }
             if p_.is_file() && is_executable(p_) {
                 return Files::Exec;
+            }
+            if path.file_type().is_block_device() || path.file_type().is_char_device() {
+                return Files::Dev;
             }
         }
         if p_.is_symlink() {
