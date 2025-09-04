@@ -7,7 +7,7 @@ use std::io::Write;
 use crate::Params;
 pub fn rm(params: &mut Params) {
     match params.args.len() {
-        0 => println!("rm: missing operand"),
+        0 => eprintln!("rm: missing operand"),
         _ => {
             match params.args[0].as_str() {
                 "-r" => {
@@ -19,11 +19,11 @@ pub fn rm(params: &mut Params) {
                             } else {
                                 match fs::remove_dir_all(path) {
                                     Ok(_) => {}
-                                    Err(_) => println!("err {}", path.display()),
+                                    Err(_) => eprintln!("Failed to remove {}", path.display()),
                                 }
                             }
                         } else {
-                            println!(
+                            eprintln!(
                                 "rm: cannot remove '{}': No such file or directory",
                                 path.display()
                             );
@@ -37,10 +37,10 @@ pub fn rm(params: &mut Params) {
                             if path.is_file() {
                                 is_file(path);
                             } else {
-                                println!("rm: cannot remove '{}': Is a directory", path.display());
+                                eprintln!("rm: cannot remove '{}': Is a directory", path.display());
                             }
                         } else {
-                            println!(
+                            eprintln!(
                                 "rm: cannot remove '{}': No such file or directory",
                                 path.display()
                             );
@@ -60,10 +60,10 @@ fn is_file(path: &Path) {
     if is_writable(path) {
         match fs::remove_file(path) {
             Ok(_) => {}
-            Err(_) => println!("err {}", path.display()),
+            Err(_) => eprintln!("Failed to remove {}", path.display()),
         }
     } else {
-        println!("rm: remove write-protected regular empty file '{}'? ", path.display());
+        eprintln!("rm: remove write-protected regular empty file '{}'? ", path.display());
         io::stdout().flush().unwrap(); // printed befor waiting for input
 
         let mut response = String::new();
@@ -72,7 +72,7 @@ fn is_file(path: &Path) {
             if resp == "y" || resp == "yes" {
                 match fs::remove_file(path) {
                     Ok(_) => {}
-                    Err(_) => println!("err {}", path.display()),
+                    Err(_) => eprintln!("Failed to remove {}", path.display()),
                 }
             }
         }
