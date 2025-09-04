@@ -1,6 +1,4 @@
 #V2
-ls -alF /dev
-ls -alF /cdrom
 la /cdrom
 ls /cdrom
 ls
@@ -99,3 +97,5 @@ ls -alFF /usr/bin
 ls -aFF /usr/bin
 ls -alFF /usr/bin
 clear
+ls -laF
+git merge master
