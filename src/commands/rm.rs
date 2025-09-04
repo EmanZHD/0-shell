@@ -17,7 +17,7 @@ pub fn rm(params: &mut Params) {
                             if path.is_file() {
                                 is_file(path);
                             } else {
-                                match fs::remove_dir(path) {
+                                match fs::remove_dir_all(path) {
                                     Ok(_) => {}
                                     Err(_) => println!("err {}", path.display()),
                                 }

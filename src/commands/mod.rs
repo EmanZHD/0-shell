@@ -11,4 +11,3 @@ pub mod help;
 pub mod mkdir;
 pub mod clear;
 pub mod history;
-// pub mod ls_tools;

@@ -1,4 +1,5 @@
 use std::env;
+use std::fs;
 use crate::Params;
 use crate::commands;
 use std::path::PathBuf;
@@ -54,17 +55,15 @@ pub fn get_paths() -> (PathBuf, PathBuf) {
             PathBuf::from("0-shell_history")
         }
     };
+
+    if let Some(parent) = history_path.parent() {
+        let _ = fs::create_dir_all(parent);
+    }
     
     // get home_directory path
     let home = match env::home_dir() {
-        Some(home_dir) => {
-            let path = home_dir; 
-            path
-        }
-        None => {
-           let root = PathBuf::from("/");
-           root
-        }
+        Some(home_dir) => home_dir,
+        None => PathBuf::from("/"),
     };
     return (history_path, home)
 }

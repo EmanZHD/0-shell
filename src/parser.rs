@@ -30,7 +30,7 @@ pub fn print_prompt() {
         Ok(()) => {
             return;
         }
-        _ => eprintln!("broken pipe"),
+        _ => println!("broken pipe"),
     }
 }
 
@@ -56,7 +56,7 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
 
             '\'' | '"' if !in_quotes => {
                 in_quotes = true;
-                quote = c; // pour memoriser le type de quote
+                quote = c;
             }
 
             '\'' | '\"' if in_quotes && c == quote => {
