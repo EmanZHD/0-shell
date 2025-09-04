@@ -35,9 +35,7 @@ pub fn mv(params: &mut Params) {
             eprintln!("{}", red(&format!("😸​ mv: cannot move '{}' to a subdirectory of itself, '{}/{}'", yellow(source), yellow(des), yellow(des))));
         } else if source == des {
             eprintln!("{}", red(&format!("😸​ mv: '{}' and '{}' are the same file", yellow(source), yellow(des))));
-        } else  if source == des {
-            eprintln!("{}", red(&format!("😸​ mv: '{}' and '{}' are the same file", yellow(source), yellow(des))));
-        } else if des == "."  {
+        }  else if des == "."  {
             eprintln!("{}", red(&format!("😸​ mv: '{}' and '{}/{}' are the same file", yellow(source), yellow(des), yellow(source))));
         } else {
             let _ = move_file(source, des, is_dest_dir);
@@ -60,7 +58,7 @@ fn move_file(source: &str, des: &str, dest_is_dir: bool) -> Result<(), Box<dyn s
     };
 
     if dest_path.exists(){
-        eprintln!("sourse and distination are the same file {:?}", dest_path);
+        eprintln!("{}", red(&format!("😸​ mv: sourse and distination are the same file")));
         return Ok(());
     }
 
