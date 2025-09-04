@@ -3,6 +3,7 @@ use std::env;
 use std::env::set_current_dir;
 use crate::Params;
 
+/*********🌟 cd 🌟********/
 pub fn cd(parameters: &mut Params) {
     let current_dir = env::current_dir().ok();
     if parameters.args.is_empty() {
@@ -20,7 +21,7 @@ pub fn cd(parameters: &mut Params) {
            if let Some(precedent) = parameters.previous_path.take() {
               if let Err(e) = env::set_current_dir(&precedent) {
                  eprintln!("0-shell: cd: {}: {}", precedent.display(), e);
-                 parameters.previous_path = Some(precedent); // fhaltma w9a3 mochkil tanraj3o lpath ly kan 9bel
+                 parameters.previous_path = Some(precedent); // En cas de probleme, nous reviendrons au chemin precedent
               }else {
                  println!("{}", precedent.display());
                  parameters.previous_path = current_dir;
@@ -35,7 +36,7 @@ pub fn cd(parameters: &mut Params) {
         path => {
           let new_path = Path::new(path);
             if let Err(_e) = set_current_dir(&new_path) {
-                eprintln!("⛔ 0-shell: No such file or directory {:?} 🫤", new_path);
+                println!("⛔ 0-shell: No such file or directory {:?} 🫤", new_path);
             }
         }
     }

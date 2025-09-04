@@ -20,3 +20,39 @@ ls: unrecognized option '--F'
 ```
 ```
 ls emty_Dir -> print /n
+```
+delete new line paleaaase => assigned by the QUEEN hasnae elamrani
+
+file permissions, number of links, owner, group, size, last modification time, and the name
+
+fix sort of numeric in /dev dir
+issue in file size
+issue in format of -l
+issue in  ls -F /dev format
+
+/dev/tty → terminal device
+
+/dev/random, /dev/urandom → random number generators
+
+/dev/null → data sink
+```
+ls -l /dev/null
+crw-rw-rw- 1 root root 1, 3 Aug 23 10:02 /dev/null
+```
+
+
+```echo $LS_COLORS```
+
+block devices (b) or character devices (c) being colored yellow due to your LS_COLORS configuration.
+
+b → block device (yellow background normally)
+
+c → character device (cyan normally, but yellow if your theme changed)
+
+p → FIFO (should also show | with ls -F)
+
+
+The major number and minor number tell the kernel how to access the device.
+
+        // println!("{} {:?}", "🪄 detect file type -->".yellow().bold(), path_name.metadata());
+ls /bin -al

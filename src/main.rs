@@ -1,19 +1,12 @@
 mod parser;
+mod shell;
 mod consts;
 mod commands;
+use shell::*;
+use parser::*;
 mod colors;
 use std::path::PathBuf;
-use std::collections::HashMap;
 use consts::{ TITLE, GREEN, RESET };
-use parser::{ read_input, print_prompt };
-// use commands::echo::echo;
-use commands::cd::cd;
-use commands::ls::ls;
-use commands::pwd::pwd;
-use commands::exit::exit;
-use commands::clear::clear;
-use commands::guide::guide;
-use commands::history::history;
 use commands::mv::mv;
 use commands::cat::cat;
 use commands::rm::rm;
@@ -22,33 +15,43 @@ use commands::cp::cp;
 
 #[derive(Clone, Debug)]
 pub struct Params {
-   args: Vec<String>,
-   archieve: Vec<(i32 ,String)>,
-   previous_path: Option<PathBuf>
+    args: Vec<String>,
+    archieve: PathBuf,
+    previous_path: Option<PathBuf>,
+    home: PathBuf,
 }
 
 impl Params {
     pub fn new() -> Self {
         Params {
             args: Vec::new(),
-            archieve: Vec::new(),
+            archieve: PathBuf::new(),
             previous_path: None,
+            home: PathBuf::new(),
         }
     }
 }
+
 fn main() {
+    if !atty::is(atty::Stream::Stdout) || !atty::is(atty::Stream::Stderr) {
+        eprintln!("Error: Avoid broken pipe");
+        std::process::exit(1);
+    }
+
     println!("{GREEN}{}{RESET}", TITLE);
     let mut params = Params::new();
-    let mut count = 1;
+    let (history_path, home) = get_paths();
+    params.archieve = history_path.clone();
+    params.home = home.clone();
+
     loop {
         print_prompt();
-        let (keyword, arguments) = read_input();
-        println!("{}, {:?}", keyword, arguments);
-        let valeur = format!("{} {}", keyword.clone(), arguments.join(" "));
+        let (keyword, arguments) = read_input(history_path.clone());
+        if keyword.is_empty() && arguments.is_empty() {
+            continue;
+        }
         params.args = arguments;
-        params.archieve.push((count, valeur));
         handle_cmds(&mut params, keyword);
-        count+=1;
     }
 }
 
