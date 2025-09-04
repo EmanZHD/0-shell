@@ -47,7 +47,7 @@ pub fn mv(params: &mut Params) {
 fn move_file(source: &str, des: &str, dest_is_dir: bool) -> Result<(), Box<dyn std::error::Error>> {
     let source_path = Path::new(source);
 
-    if !source_path.exists() {
+    if !source_path.exists() && !source_path.is_symlink() {
         eprintln!("{}", red(&format!("😸​ mv: cannot stat '{}': {}", yellow(source), bold_gray("No such file or directory"))));
     }
 

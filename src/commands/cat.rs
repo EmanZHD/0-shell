@@ -20,21 +20,21 @@ pub fn cat(params: &mut Params) {
 }
 
 // 💁‍♀️​ handle only cat 💁‍♀️​
-fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
-    println!("{}", cyan("☺️​ Reading from stdin (Ctrl+D to end) :"));
-    let stdin = io::stdin();
-    let reader = BufReader::new(stdin.lock());
-    
-    for line in reader.lines() {
-        match line {
-             Ok(content) => {
-                println!("{}", content);
+    fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
+        println!("{}", cyan("☺️​ Reading from stdin (Ctrl+D to end) :"));
+        let stdin = io::stdin();
+        let reader = BufReader::new(stdin.lock());
+        
+        for line in reader.lines() {
+            match line {
+                Ok(content) => {
+                    println!("{}", content);
+                }
+                Err(e) => return Err(Box::new(e)),
             }
-            Err(e) => return Err(Box::new(e)),
         }
+        Ok(())
     }
-    Ok(())
-}
 
 
 // 💁‍♀️​ handle cat + plusieurs arg(files) 💁‍♀️​
