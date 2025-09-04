@@ -11,17 +11,18 @@ fn ls_helper(
     path_name: &Path,
     flag: &Flags
 ) -> Result<Vec<Vec<String>>, io::Error> {
-    // let mut lines: Vec<Vec<String>> = vec![];
     let mut content: Vec<String> = vec![];
     if (path_name.is_symlink() && flag.l_flag) || (path_name.is_symlink() && flag.f_flag) {
+        let data = flag.line_data(path_str, path_str);
         if flag.l_flag {
-            // println!("PATHDATA -> {:?}", path_data);
+            println!("hee00");
             println!(
                 "{} {}",
-                flag.line_data(path_str, path_str).join(" "),
+                data[..data.len() - 1].join(" "),
                 Files::file_format(path_str, path_str, &flag)
             );
         } else {
+            println!("hee00");
             println!("{}", Files::Symlink.file_symbol(&Files::Symlink.file_color(&path_str)));
         }
         return Ok(vec![]);
@@ -40,7 +41,8 @@ fn ls_helper(
         }
         Err(e) => {
             if e.kind() == ErrorKind::PermissionDenied {
-                println!("ls: cannot open directory '{}': Permission denied", path_str);
+                eprintln!("ls: cannot open directory '{}': Permission denied", path_str);
+                return Err(e);
             } else {
                 content.push(path_str.to_owned());
             }
@@ -50,13 +52,20 @@ fn ls_helper(
 }
 
 //ls fn
-pub fn ls(parameters: &mut Params) {
-    let (flags, mut new_args) = match parse_args(parameters.args.clone()) {
+pub fn ls(params: &mut Params) {
+    let tilde = "~".to_string();
+    let (flags, mut new_args) = match parse_args(params.args.clone()) {
         Ok((flags, new_args)) => (flags, new_args),
         Err(()) => {
             return;
         }
     };
+    for s in &mut new_args {
+        if *s == tilde {
+            *s = format!("{}", params.home.display().to_string()).clone();
+            break;
+        }
+    }
     new_args.sort();
     for (i, path_str) in new_args.iter().enumerate() {
         let path_name = Path::new(path_str);
@@ -66,8 +75,12 @@ pub fn ls(parameters: &mut Params) {
                     println!("{}:", path_str);
                 }
                 if let Ok(lines) = ls_helper(path_str, path_name, &flags) {
-                    if flags.l_flag && Files::new_file(Path::new(path_str)) != Files::Reg {
-                        println!("total {}", total_blocks(Path::new(path_str), flags.a_flag));
+                    if
+                        !path_name.is_symlink() &&
+                        flags.l_flag &&
+                        Files::new_file(path_name) != Files::Reg
+                    {
+                        println!("total {}", total_blocks(path_name, flags.a_flag));
                     }
                     if flags.l_flag {
                         Files::display_line(lines, path_str, &flags);
