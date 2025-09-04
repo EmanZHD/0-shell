@@ -103,7 +103,12 @@ pub fn get_prompt(params: &Params) -> String {
 
 /**********🌟 read_input 🌟**********/
 pub fn read_input(history: PathBuf, params: &Params) -> (String, Vec<String>) {
-    let mut rl = rustyline::DefaultEditor::new().expect("Failed to create editor");
+    let mut rl = match rustyline::DefaultEditor::new() {
+        Ok(editor) => editor,
+        Err(_) => {
+           return (String::new(), Vec::new());
+        }
+    };
     rl.load_history(&history).unwrap_or_default();
 
     let mut cmd = String::new();
