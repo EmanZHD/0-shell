@@ -1,8 +1,4 @@
 #V2
-ls
-ls -la ii
-ls -laF ii
-clear
 cd ~
 cd ../..
 ls *la bin
@@ -99,3 +95,7 @@ ls -laF
 git merge master
 ls -la
 ls -laF /dev
+ls -alf /usr/bin
+ls -alF /usr/bin
+ls
+pwd
