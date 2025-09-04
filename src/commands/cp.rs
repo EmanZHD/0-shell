@@ -5,7 +5,6 @@ use std::io::ErrorKind;
 use std::io;
 use std::env;
 use std::fs::{ File, OpenOptions };
-use std::path::PathBuf;
 
 pub fn cp(input: &mut Params) {
     if input.args.len() == 0 {

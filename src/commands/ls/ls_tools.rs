@@ -23,7 +23,6 @@ pub fn col_width(lines: &Vec<Vec<String>>) -> Vec<usize> {
 }
 
 pub fn total_blocks(dir_path: &Path, flag_a: bool) -> u64 {
-    // println!("PQTH {:?} {:?}", dir_path, flag_a);
     let mut total: u64 = 0;
     if flag_a {
         if let Ok(meta) = fs::symlink_metadata(Path::new(dir_path)) {
