@@ -1,28 +1,35 @@
 use colored::*;
-use std::env;
 use std::io;
+use std::env;
+use std::process;
+use crate::Params;
 use std::io::Write;
 use std::path::PathBuf;
-use std::process;
 
 /*********🌟 Current Dir 🌟********/
-pub fn current() -> String {
+pub fn current(params: &Params) -> String {
     let result: String = match env::current_dir() {
         Ok(path) => match path.file_name() {
             Some(file_name) => file_name.to_string_lossy().into_owned(),
             _none => String::from("/"),
         },
-        Err(_e) => "/".to_string(),
+        Err(_e) => match &params.previous_path {
+            Some(p)=> match p.file_name() {
+               Some(file_name) => file_name.to_string_lossy().into_owned(),
+               _none => String::from(""),
+            },
+            None=> '/'.to_string(),
+        },
     };
     result
 }
 
 /*********🌟 print_prompt 🌟********/
-pub fn print_prompt() {
+pub fn print_prompt(params: &Params) {
     let begin = format!(
         "{}{}{} ",
         "~".bold().yellow(),
-        current().bold().truecolor(199, 21, 133),
+        current(params).bold().truecolor(199, 21, 133),
         "$".bold().yellow()
     );
     print!("{}", begin);
@@ -85,17 +92,17 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
 }
 
 /**********🌟 get_prompt 🌟**********/
-pub fn get_prompt() -> String {
+pub fn get_prompt(params: &Params) -> String {
     format!(
         "{}{}{} ",
         "~".bold().yellow(),
-        current().bold().truecolor(199, 21, 133),
+        current(params).bold().truecolor(199, 21, 133),
         "$".bold().yellow()
     )
 }
 
 /**********🌟 read_input 🌟**********/
-pub fn read_input(history: PathBuf) -> (String, Vec<String>) {
+pub fn read_input(history: PathBuf, params: &Params) -> (String, Vec<String>) {
     let mut rl = rustyline::DefaultEditor::new().expect("Failed to create editor");
     rl.load_history(&history).unwrap_or_default();
 
@@ -103,7 +110,7 @@ pub fn read_input(history: PathBuf) -> (String, Vec<String>) {
 
     loop {
         let prompt = if cmd.is_empty() {
-            get_prompt()
+            get_prompt(params)
         } else {
             "> ".to_string()
         };
@@ -149,7 +156,6 @@ pub fn read_input(history: PathBuf) -> (String, Vec<String>) {
                 return (String::new(), Vec::new());
             }
             Err(rustyline::error::ReadlineError::Eof) => {
-                println!("test");
                 process::exit(1);
             }
             Err(err) => {

@@ -40,8 +40,8 @@ fn main() {
     params.home = home.clone();
 
     loop {
-        print_prompt();
-        let (keyword, arguments) = read_input(history_path.clone());
+        print_prompt(&params);
+        let (keyword, arguments) = read_input(history_path.clone(), &params);
         if keyword.is_empty() && arguments.is_empty() {
             continue;
         }

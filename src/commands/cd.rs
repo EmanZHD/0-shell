@@ -36,7 +36,9 @@ pub fn cd(parameters: &mut Params) {
         path => {
           let new_path = Path::new(path);
             if let Err(_e) = set_current_dir(&new_path) {
-                println!("⛔ 0-shell: No such file or directory {:?} 🫤", new_path);
+                eprintln!("⛔ 0-shell: No such file or directory {:?} 🫤", new_path);
+            }else {
+                parameters.previous_path = Some(path.into());
             }
         }
     }
@@ -47,9 +49,9 @@ fn go_to_home() {
     match env::home_dir() {
         Some(path) => {
             if let Err(_e) = set_current_dir(path) {
-                println!("⛔ 0-shell: No such file or directory");
+                eprintln!("⛔ 0-shell: No such file or directory");
             }
         }
-        None => println!("⛔ 0-shell: Impossible to get your home dir! 🫤"),
+        None => eprintln!("⛔ 0-shell: Impossible to get your home dir! 🫤"),
     }
 }

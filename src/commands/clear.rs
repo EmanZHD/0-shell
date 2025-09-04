@@ -11,7 +11,7 @@ fn prepare_clear() -> Result<(), String> {
 
 pub fn clear(parameters: &mut Params) {
     if parameters.args.len() > 0 {
-       println!("clear: too many arguments ‼️");
+       eprintln!("clear: too many arguments ‼️");
        return;
     }
     if let Err(e) = prepare_clear() {
