@@ -1,28 +1,23 @@
 use crate::commands::ls::ls_tools::{ parse_args, total_blocks, format_lines };
 use crate::commands::ls::ls_models::{ Files, Flags };
 use std::path::Path;
-use std::{ fs, io };
+use std::{ env, fs, io };
 use std::io::ErrorKind;
 use crate::Params;
 
 // ls_helper fn
-fn ls_helper(
-    path_str: &str,
-    path_name: &Path,
-    flag: &Flags
-) -> Result<Vec<Vec<String>>, io::Error> {
+fn ls_helper(path_str: &str, path_name: &str, flag: &Flags) -> Result<Vec<Vec<String>>, io::Error> {
     let mut content: Vec<String> = vec![];
-    if (path_name.is_symlink() && flag.l_flag) || (path_name.is_symlink() && flag.f_flag) {
-        let data = flag.line_data(path_str, path_str);
+    let path = Path::new(path_name);
+    if (path.is_symlink() && flag.l_flag) || (path.is_symlink() && flag.f_flag) {
+        let data = flag.line_data(path_str, path_name);
         if flag.l_flag {
-            println!("hee00");
             println!(
                 "{} {}",
-                data[..data.len() - 1].join(" "),
-                Files::file_format(path_str, path_str, &flag)
+                data[0..data.len() - 1].join(" "),
+                Files::file_format(path_name, path_str, &flag)
             );
         } else {
-            println!("hee00");
             println!("{}", Files::Symlink.file_symbol(&Files::Symlink.file_color(&path_str)));
         }
         return Ok(vec![]);
@@ -53,28 +48,30 @@ fn ls_helper(
 
 //ls fn
 pub fn ls(params: &mut Params) {
-    let tilde = "~".to_string();
     let (flags, mut new_args) = match parse_args(params.args.clone()) {
         Ok((flags, new_args)) => (flags, new_args),
         Err(()) => {
             return;
         }
     };
-    for s in &mut new_args {
-        if *s == tilde {
-            *s = format!("{}", params.home.display().to_string()).clone();
-            break;
-        }
-    }
+ 
     new_args.sort();
     for (i, path_str) in new_args.iter().enumerate() {
-        let path_name = Path::new(path_str);
-        match path_name.metadata() {
+        let mut path: String = path_str.to_string();
+        if let Ok(curr_dir) = env::current_dir() {
+            if let Some(s) = curr_dir.to_str() {
+                if s == "/" {
+                    path = s.to_string();
+                }
+            }
+        }
+        let path_name = Path::new(&path);
+        match path_name.symlink_metadata() {
             Ok(path_data) => {
                 if new_args.len() > 1 && path_data.is_dir() {
                     println!("{}:", path_str);
                 }
-                if let Ok(lines) = ls_helper(path_str, path_name, &flags) {
+                if let Ok(lines) = ls_helper(&path, path_str, &flags) {
                     if
                         !path_name.is_symlink() &&
                         flags.l_flag &&
@@ -83,16 +80,16 @@ pub fn ls(params: &mut Params) {
                         println!("total {}", total_blocks(path_name, flags.a_flag));
                     }
                     if flags.l_flag {
-                        Files::display_line(lines, path_str, &flags);
+                        Files::display_line(lines, &path, &flags);
                     } else {
-                        Files::display_file(lines, &path_str, &flags);
+                        Files::display_file(lines, &path, &flags);
                     }
                 }
             }
-            Err(_) => eprintln!("ls: cannot access '{}': No such file or directory", path_str),
+            Err(_) => eprintln!("ls: cannot access '{}': No such file or directory", path),
         }
 
-        if i != new_args.len() - 1 {
+        if i != new_args.len() - 1 && !new_args.is_empty() {
             println!();
         }
     }

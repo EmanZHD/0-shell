@@ -14,31 +14,25 @@ pub fn mv(params: &mut Params) {
     let dest_path = Path::new(&des[0]);
     let is_dest_dir = dest_path.is_dir();
 
-    let des = if &des[0] == "~" {
-        params.home.to_str().unwrap()
-         } else {
-         &des[0]
-    };
-
     if params.args.len() < 2 {
-        eprintln!("{} '{}'", bold_red("👀 mv: missing destination file operand after"), green(des));        
+        eprintln!("{} '{}'", bold_red("👀 mv: missing destination file operand after"), green(&des[0]));        
         return;
     }
     
     if sources.len() > 1 && !is_dest_dir {
-        eprintln!("{} '{}' {}", bold_red("😸​ mv: target"),yellow(des) , bold_red("is not a directory"));
+        eprintln!("{} '{}' {}", bold_red("😸​ mv: target"),yellow(&des[0]) , bold_red("is not a directory"));
         return;
     }
     
     for source in sources {
-        if source == des && is_dest_dir {
-            eprintln!("{}", red(&format!("😸​ mv: cannot move '{}' to a subdirectory of itself, '{}/{}'", yellow(source), yellow(des), yellow(des))));
-        } else if source == des {
-            eprintln!("{}", red(&format!("😸​ mv: '{}' and '{}' are the same file", yellow(source), yellow(des))));
-        }  else if des == "."  {
-            eprintln!("{}", red(&format!("😸​ mv: '{}' and '{}/{}' are the same file", yellow(source), yellow(des), yellow(source))));
+        if source == &des[0] && is_dest_dir {
+            eprintln!("{}", red(&format!("😸​ mv: cannot move '{}' to a subdirectory of itself, '{}/{}'", yellow(source), yellow(&des[0]), yellow(&des[0]))));
+        } else if source == &des[0] {
+            eprintln!("{}", red(&format!("😸​ mv: '{}' and '{}' are the same file", yellow(source), yellow(&des[0]))));
+        }  else if &des[0] == "."  {
+            eprintln!("{}", red(&format!("😸​ mv: '{}' and '{}/{}' are the same file", yellow(source), yellow(&des[0]), yellow(source))));
         } else {
-            let _ = move_file(source, des, is_dest_dir);
+            let _ = move_file(source, &des[0], is_dest_dir);
         }
     }
 }

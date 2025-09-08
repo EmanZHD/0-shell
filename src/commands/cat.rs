@@ -1,6 +1,6 @@
 use std::fs;
 use crate::Params;
-use crate::colors::{bold_red, cyan};
+use crate::colors::{ bold_red, cyan };
 
 //  🥳
 pub fn cat(params: &mut Params) {
@@ -10,40 +10,52 @@ pub fn cat(params: &mut Params) {
         }
     } else {
         for filename in &params.args {
-            if let Err(e) = cat_file(filename) {
-                eprintln!("{}", bold_red(&format!("☹️ cat: '{}': {} ", filename, e)));
+            // println!("heere == > {:?}", filename.len());
+            if params.args.len() == 1 && filename == "-s" {
+                let _ = only_cat();
+            } else if filename == "-s" {
+                continue;
+            } else {
+                if let Err(e) = cat_file(filename) {
+                    eprintln!("{}", bold_red(&format!("☹️ cat: '{}': {} ", filename, e)));
+                }
             }
         }
     }
 }
 
 // 💁‍♀️​ handle only cat 💁‍♀️​
-    fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
-        println!("{}", cyan("☺️​ Reading from stdin (Ctrl+D to end) :"));
-            let mut rl = rustyline::DefaultEditor::new().expect("Failed to create editor");
-            loop {
-                let input = rl.readline(&cyan("🌸 "));
-                match input  {
-                    Ok(ref content) => {
-                        println!("🌸 {}", content);
-                    }
-                    Err(rustyline::error::ReadlineError::Interrupted) => {
-                       break;
-                    }
-                    Err(rustyline::error::ReadlineError::Eof) => {
-                        break;
-                    }
-                    Err(e) => return Err(Box::new(e)),
-
-                }
+fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
+    println!("{}", cyan("☺️​ Reading from stdin (Ctrl+D to end) :"));
+    let mut rl = match rustyline::DefaultEditor::new() {
+        Ok(editor) => editor,
+        Err(e) => {
+            return Err(Box::new(e));
+        }
+    };
+    loop {
+        let input = rl.readline(&cyan("🌸 "));
+        match input {
+            Ok(ref content) => {
+                println!("🌸 {}", content);
             }
-        Ok(())
+            Err(rustyline::error::ReadlineError::Interrupted) => {
+                break;
+            }
+            Err(rustyline::error::ReadlineError::Eof) => {
+                break;
+            }
+            Err(e) => {
+                return Err(Box::new(e));
+            }
+        }
     }
-
+    Ok(())
+}
 
 // 💁‍♀️​ handle cat + plusieurs arg(files) 💁‍♀️​
 fn cat_file(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
-    if filename == "-" || filename == "--" || (filename.starts_with("$") && filename.len() > 1) {
+    if filename == "-" || filename == "--" {
         return only_cat();
     }
     match fs::read(filename) {
@@ -53,9 +65,9 @@ fn cat_file(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
         }
         Err(e) => {
             if e.kind() == std::io::ErrorKind::PermissionDenied {
-                 return Err(("Permission denied").into());
+                return Err("Permission denied".into());
             } else if e.kind() == std::io::ErrorKind::NotFound {
-                return Err(("No such file or directory").into());
+                return Err("No such file or directory".into());
             } else {
                 eprintln!("cat: {}: {}", filename, e);
             }

@@ -8,7 +8,7 @@ pub fn exit(parameters: &mut Params) {
         process::exit(0);
     }
     if parameters.args.len() > 1 {
-        println!("⛔ 0-shell: exit: {}: numeric argument required", parameters.args[0]);
+        eprintln!("⛔ 0-shell: exit: {}: numeric argument required", parameters.args[0]);
         process::exit(2);
     }
     if parameters.args.len() == 1 {
@@ -18,7 +18,7 @@ pub fn exit(parameters: &mut Params) {
                 Err(_) => process::exit(2),
             }
         }else {
-            println!("⛔ 0-shell: exit: {}: numeric argument required", parameters.args[0]);
+            eprintln!("⛔ 0-shell: exit: {}: numeric argument required", parameters.args[0]);
             process::exit(2);
         }
     }
