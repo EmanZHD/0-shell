@@ -6,7 +6,7 @@ pub fn mkdir(path: &mut Params) {
         // Create a Path object from the directory path string
         let dir_path = Path::new(&arg);
         if dir_path.exists() {
-            eprintln!("Directory '{}' already exists.", arg);
+            eprintln!("Directory '{}' already exists. 🐧", arg);
         } else {
             match fs::create_dir(&arg) {
                 Ok(_) => {}

@@ -206,7 +206,7 @@ fn copy_file(source: &str, destination: &str) {
         Ok(f) => f,
         Err(e) => {
             if e.kind() == ErrorKind::PermissionDenied {
-                eprintln!("cp: cannot open '{}' for reading: Permission denied", source);
+                eprintln!("cp: cannot open '{}' for reading: Permission denied 🔒", source);
             } else {
                 eprintln!("cp: cannot open '{}' for reading", source);
             }
@@ -219,7 +219,7 @@ fn copy_file(source: &str, destination: &str) {
         Ok(f) => f,
         Err(e) => {
             if e.kind() == ErrorKind::PermissionDenied {
-                eprintln!("cp: cannot create regular file '{}': Permission denied", destination);
+                eprintln!("cp: cannot create regular file '{}': Permission denied 🔒", destination);
             } else {
                 eprintln!("cp: cannot create regular file '{}': {}", destination, e);
             }
@@ -233,7 +233,7 @@ fn copy_file(source: &str, destination: &str) {
         destination == format!("{}/{}", path.expect("REASON").to_string_lossy(), source) ||
         destination == format!("./{}", source)
     {
-        eprintln!("cp: '{}' and '{}' are the same file", source, &destination);
+        eprintln!("cp: '{}' and '{}' are the same file.", source, &destination);
         return;
     }
 
