@@ -43,7 +43,6 @@ pub fn cp_algo(input: &mut Params) {
                 return;
             }
         };
-
         if metadata.file_type().is_symlink() {
             copy_file(&input.args[0], &input.args[1]);
             return;

@@ -1,14 +1,13 @@
-pub mod rm;        // Declares rm.rs as a module
-pub use rm::rm;    // Re-exports the rm function
-pub mod  mkdir;
-pub use mkdir::mkdir;
-pub mod  cp;
-pub use cp::cp;
-// pub mod echo; in progress
+pub mod rm; 
+pub mod mv;
+pub mod cp;
+pub mod ls;
 pub mod cd;
+pub mod cat;
 pub mod pwd;
+pub mod echo;
 pub mod exit;
-pub mod ls; //in progress
+pub mod help;
+pub mod mkdir;
 pub mod clear;
-pub mod guide;
 pub mod history;

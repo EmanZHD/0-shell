@@ -7,23 +7,37 @@ use std::io::Write;
 use crate::Params;
 pub fn rm(params: &mut Params) {
     match params.args.len() {
-        0 => println!("rm: missing operand"),
+        0 => eprintln!("rm: missing operand"),
         _ => {
             match params.args[0].as_str() {
                 "-r" => {
                     for arg in &params.args[1..] {
                         let path = Path::new(arg);
+                         let metadata = match std::fs::symlink_metadata(&path) {
+                            Ok(r) => r,
+                            Err(_err) => { eprintln!("Failed to read metadata for '{}'", path.display()) ;continue}
+                        };
+
+                        if metadata.file_type().is_symlink() {
+                            match std::fs::remove_file(&path) {
+                                Ok(_) => {
+                                }
+                                Err(_err) => eprintln!("rm: can't remove '{}': No such file or directory " , path.display()),
+                                
+                            }
+                        }
+
                         if path.exists() {
                             if path.is_file() {
                                 is_file(path);
                             } else {
-                                match fs::remove_dir(path) {
+                                match fs::remove_dir_all(path) {
                                     Ok(_) => {}
-                                    Err(_) => println!("err {}", path.display()),
+                                    Err(_) => eprintln!("Failed to remove {}", path.display()),
                                 }
                             }
                         } else {
-                            println!(
+                            eprintln!(
                                 "rm: cannot remove '{}': No such file or directory",
                                 path.display()
                             );
@@ -33,14 +47,30 @@ pub fn rm(params: &mut Params) {
                 _ => {
                     for arg in &params.args {
                         let path = Path::new(arg);
+                        let metadata = match std::fs::symlink_metadata(&path) {
+                            Ok(r) => r,
+                            Err(_err) => { eprintln!("Failed to read metadata for '{}'", path.display()) ;continue}
+                        };
+
+                        if metadata.file_type().is_symlink() {
+                            match std::fs::remove_file(&path) {
+                                Ok(_) => {
+                                    continue;
+                                }
+                                Err(_err) => {
+                                    eprintln!("rm: can't remove '{}': No such file or directory " , path.display());
+                                }
+                            }
+                        }
+
                         if path.exists() {
                             if path.is_file() {
                                 is_file(path);
                             } else {
-                                println!("rm: cannot remove '{}': Is a directory", path.display());
+                                eprintln!("rm: cannot remove '{}': Is a directory", path.display());
                             }
                         } else {
-                            println!(
+                            eprintln!(
                                 "rm: cannot remove '{}': No such file or directory",
                                 path.display()
                             );
@@ -60,19 +90,19 @@ fn is_file(path: &Path) {
     if is_writable(path) {
         match fs::remove_file(path) {
             Ok(_) => {}
-            Err(_) => println!("err {}", path.display()),
+            Err(_) => eprintln!("Failed to remove {}", path.display()),
         }
     } else {
-        println!("rm: remove write-protected regular empty file '{}'? ", path.display());
+        eprintln!("rm: remove write-protected regular empty file '{}'? ", path.display());
         io::stdout().flush().unwrap(); // printed befor waiting for input
 
         let mut response = String::new();
         if let Ok(_) = io::stdin().read_line(&mut response) {
             let resp = response.trim().to_lowercase();
-            if resp == "y" || resp == "yes" {
+            if resp.starts_with('y')  {
                 match fs::remove_file(path) {
                     Ok(_) => {}
-                    Err(_) => println!("err {}", path.display()),
+                    Err(_) => eprintln!("Failed to remove {}", path.display()),
                 }
             }
         }
