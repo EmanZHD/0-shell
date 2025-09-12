@@ -20,12 +20,26 @@ pub fn cp(input: &mut Params) {
         let dis_is_file = Path::new(&input.args[1]).is_file();
         let mut star = false;
         let mut same = false;
+
         if input.args[0] == input.args[1] {
             same = true;
         }
         if input.args[0].chars().nth(0) == Some('*') {
             star = true;
         }
+
+        let metadata = match std::fs::symlink_metadata(&Path::new(&input.args[1])) {
+            Ok(r) => r,
+            Err(_err) => {
+                eprintln!("Failed to read metadata for '{}'", Path::new(&input.args[1]).display());
+                return;
+            }
+        };
+        if metadata.file_type().is_symlink() {
+            copy_file(&input.args[0], &input.args[1]);
+            return;
+        }
+
         match (star, same, exists_source, exists_dist, source_is_file, dis_is_file) {
             (false, true, _, _, _, _) =>
                 eprintln!("cp: '{}' and '{}' are the same file", input.args[0], input.args[1]),
@@ -51,10 +65,8 @@ pub fn cp(input: &mut Params) {
             }
 
             (false, false, true, true, true, false) => {
-          
                 let finle_dis = Path::new(&input.args[1]).join(&input.args[0]);
                 copy_file(&input.args[0], finle_dis.to_str().expect("Err in convert"));
-                
             }
 
             (false, false, true, true, true, true) => {
@@ -91,6 +103,27 @@ pub fn multiple_source(files: Vec<String>) {
         if i == files.len() - 1 {
         } else {
             let tomp = Path::new(element);
+            let metadata = match std::fs::symlink_metadata(&tomp) {
+                Ok(r) => r,
+                Err(_err) => {
+                    eprintln!("Failed to read metadata for '{}'", tomp.display());
+                    continue;
+                }
+            };
+
+            if metadata.file_type().is_symlink() {
+                match std::fs::remove_file(&tomp) {
+                    Ok(_) => {
+                        continue;
+                    }
+                    Err(_err) => {
+                        eprintln!(
+                            "rm: can't remove '{}': No such file or directory ",
+                            tomp.display()
+                        );
+                    }
+                }
+            }
             if !tomp.exists() && element.chars().nth(0) != Some('*') {
                 eprintln!("cp: cannot stat '{}': No such file or directory", element);
             } else if tomp.is_dir() {
@@ -189,7 +222,10 @@ fn copy_file(source: &str, destination: &str) {
 
     let path = env::current_dir();
 
-    if destination == format!("{}/{}",path.expect("REASON").to_string_lossy(), source) || destination == format!("./{}", source) {
+    if
+        destination == format!("{}/{}", path.expect("REASON").to_string_lossy(), source) ||
+        destination == format!("./{}", source)
+    {
         eprintln!("cp: '{}' and '{}' are the same file", source, &destination);
         return;
     }
