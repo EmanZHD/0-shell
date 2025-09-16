@@ -21,6 +21,7 @@ pub fn cat(params: &mut Params) {
                 }
             }
         }
+        println!();
     }
 }
 
@@ -60,7 +61,13 @@ fn cat_file(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
     }
     match fs::read(filename) {
         Ok(contents) => {
-            println!("{}", String::from_utf8_lossy(&contents));
+            let content = String::from_utf8_lossy(&contents);
+            if content.ends_with('\n') {
+                let trimmed = &content[..content.len()-1];
+                print!("{}", trimmed);
+            } else {
+                print!("{}", content);
+            }
             Ok(())
         }
         Err(e) => {
