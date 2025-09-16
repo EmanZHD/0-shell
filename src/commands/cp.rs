@@ -7,93 +7,85 @@ use std::env;
 use std::fs::{ File, OpenOptions };
 
 pub fn cp(input: &mut Params) {
-    if input.args.len() == 0 {
-        eprintln!("cp: missing file operand");
-    } else if input.args.len() == 1 {
-        eprintln!("cp: missing destination file operand after {}", input.args[0])
-    } else if input.args.len() >= 2 {
-        cp_algo(input)
+    match input.args.len() {
+        0 => eprintln!("cp: missing file operand"),
+        1 => eprintln!("cp: missing destination file operand after '{}'", input.args[0]),
+        _ => cp_algo(input),
     }
 }
 
 // to copy multiple sources
 pub fn cp_algo(input: &mut Params) {
-    if input.args.len() > 2 {
-        multiple_source(input.args.clone());
-    } else {
-        let exists_source = Path::new(&input.args[0]).exists();
-        let exists_dist = Path::new(&input.args[1]).exists();
-        let source_is_file = Path::new(&input.args[0]).is_file();
-        let dis_is_file = Path::new(&input.args[1]).is_file();
-        let mut star = false;
-        let mut same = false;
+    let args = &input.args;
 
-        if input.args[0] == input.args[1] {
-            same = true;
-        }
+    if args.len() > 2 {
+        multiple_source(args.clone());
+        return;
+    }
 
-        if input.args[0].chars().nth(0) == Some('*') {
-            star = true;
-        }
+    let src = Path::new(&args[0]);
+    let dst = Path::new(&args[1]);
 
-        let metadata = match std::fs::symlink_metadata(&Path::new(&input.args[1])) {
-            Ok(r) => r,
-            Err(_err) => {
-                eprintln!("Failed to read metadata for '{}'", Path::new(&input.args[1]).display());
-                return;
-            }
-        };
-        
-        if metadata.file_type().is_symlink() {
-            copy_file(&input.args[0], &input.args[1]);
+    let exists_source = src.exists();
+    let exists_dist = dst.exists();
+    let source_is_file = src.is_file();
+    let dis_is_file = dst.is_file();
+
+    if args[0] == args[1] {
+        eprintln!("cp: '{}' and '{}' are the same file", args[0], args[1]);
+        return;
+    }
+
+    if args[0].chars().nth(0) == Some('*') {
+        star_source(&args[0], dst, dis_is_file);
+        return;
+    }
+
+    let metadata = match std::fs::symlink_metadata(&dst) {
+        Ok(r) => r,
+        Err(_err) => {
+            eprintln!("Failed to read metadata for '{}'", dst.display());
             return;
         }
+    };
 
-        match (star, same, exists_source, exists_dist, source_is_file, dis_is_file) {
-            (false, true, _, _, _, _) =>
-                eprintln!("cp: '{}' and '{}' are the same file", input.args[0], input.args[1]),
-            (false, false, false, _, _, _) =>
-                eprintln!("cp: cannot stat '{}': No such file or directory", input.args[0]),
-            (false, false, true, _, false, _) =>
-                eprintln!("cp: -r not specified; omitting directory '{}'", input.args[0]),
+    if metadata.file_type().is_symlink() {
+        copy_file(&args[0], &args[1]);
+        return;
+    }
 
-            (false, false, true, false, true, _) => {
-                let _source = Path::new(&input.args[0]);
-                let destination = Path::new(&input.args[1]);
-                if let Some(parent) = destination.parent() {
-                    if !parent.exists() {
-                        eprintln!(
-                            "cp: cannot create regular file '{}': No such file or directory",
-                            destination.display()
-                        );
-                    } else {
-                        copy_file(&input.args[0], &input.args[1]);
-                    }
+    match (exists_source, exists_dist, source_is_file, dis_is_file) {
+        (false, _, _, _) => eprintln!("cp: cannot stat '{}': No such file or directory", args[0]),
+        (true, _, false, _) => eprintln!("cp: -r not specified; omitting directory '{}'", args[0]),
+
+        (true, false, true, _) => {
+            let _source = src;
+            let destination = dst;
+            if let Some(parent) = destination.parent() {
+                if !parent.exists() {
+                    eprintln!(
+                        "cp: cannot create regular file '{}': No such file or directory",
+                        destination.display()
+                    );
+                } else {
+                    copy_file(&args[0], &args[1]);
                 }
-                copy_file(&input.args[0], &input.args[1]);
             }
-
-            (false, false, true, true, true, false) => {
-                let finle_dis = Path::new(&input.args[1]).join(&input.args[0]);
-                copy_file(&input.args[0], finle_dis.to_str().expect("Err in convert"));
-            }
-
-            (false, false, true, true, true, true) => {
-                let _source = Path::new(&input.args[0]);
-                let _destination = Path::new(&input.args[1]);
-                copy_file(&input.args[0], &input.args[1]);
-            }
-
-            (true, false, false, true, false, false) => {
-                star_source(&input.args[0], Path::new(&input.args[1]), false);
-            }
-
-            (true, false, false, true, false, true) => {
-                star_source(&input.args[0], Path::new(&input.args[1]), true);
-            }
-
-            (_, _, _, _, _, _) => {}
+            copy_file(&args[0], &args[1]);
         }
+
+        (true, true, true, false) => {
+            let finle_dis = dst.join(&args[0]);
+            copy_file(&args[0], finle_dis.to_str().expect("Err in convert"));
+        }
+
+        (true, true, true, true) => {
+            let _source = src;
+            let _destination = dst;
+            copy_file(&args[0], &args[1]);
+        }
+
+        (_, _, _, _) => {}
     }
 }
 
@@ -101,6 +93,7 @@ pub fn multiple_source(files: Vec<String>) {
     let destination = Path::new(&files[files.len() - 1]);
     if !destination.exists() {
         eprintln!("cp: target '{}': No such file or directory", destination.display());
+        return;
     }
     if destination.exists() && destination.is_file() {
         eprintln!("cp: target '{}': Not a directory", destination.display());
