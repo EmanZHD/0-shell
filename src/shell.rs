@@ -20,6 +20,12 @@ use commands::history::history;
 
 /*********🌟 handle_cmds 🌟********/
 pub fn handle_cmds(params: &mut Params, keyword: String) {
+    // Verifier si la commande est vide (cas de "")
+    if keyword.is_empty() {
+        println!("0-shell: permission denied:");
+        return;
+    }
+
     let mut dispatcher: HashMap<&str, fn(&mut Params)> = HashMap::new();
     dispatcher.insert("ls", ls as fn(&mut Params));
     dispatcher.insert("cd", cd as fn(&mut Params));

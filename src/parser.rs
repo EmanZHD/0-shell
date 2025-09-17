@@ -52,8 +52,9 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
     let mut in_quotes = false;
     let mut new = Vec::new();
     let mut new_input = String::new();
-    let mut quote = ' '; // pour memoriser le quote
+    let mut quote = ' '; // pour memoriser les guillemets
     let mut peek_input = input.chars().peekable();
+    let mut found_quotes = false; // Pour savoir si on a trouvé des guillemets
     while let Some(c) = peek_input.next() {
         match c {
             '\\' if peek_input.peek() == Some(&'\"') || peek_input.peek() == Some(&'\'') => {
@@ -64,15 +65,21 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
             '\'' | '"' if !in_quotes => {
                 in_quotes = true;
                 quote = c;
+                found_quotes = true;
             }
 
             '\'' | '\"' if in_quotes && c == quote => {
-                in_quotes = false; // fermeture de la quote du m type
+                in_quotes = false; // fermeture des guillemets du m type
+                // Ajouter le token même s'il est vide (cas des "")
+                new.push(new_input.clone());
+                new_input = String::new();
+                found_quotes = false;
             }
             ' ' | '\t' if !in_quotes => {
-                if !new_input.is_empty() {
+                if !new_input.is_empty() || found_quotes {
                     new.push(new_input);
                     new_input = String::new();
+                    found_quotes = false;
                 }
             }
             _ => {
@@ -85,7 +92,7 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
         return Err("unclosed quotes 😓".to_string());
     }
 
-    if !new_input.is_empty() {
+    if !new_input.is_empty() || found_quotes {
         new.push(new_input);
     }
     Ok(new)
@@ -243,8 +250,3 @@ fn env_variable(args: Vec<String>) -> Vec<String> {
     new_args
     
 }
-
-// "" => comm = "" 
-// switch "" ==> default command not found
-// ["", "ls"]
-// 
