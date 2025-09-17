@@ -10,22 +10,7 @@ use console::measure_text_width;
 use std::fs::Metadata;
 use chrono::{ DateTime, Duration, Local, Datelike };
 
-//-------------------------col_width FUNC
-// pub fn col_width(lines: &Vec<String>) -> Vec<usize> {
-//     let mut col_width = Vec::new();
-//     // for line in lines {
-//     for (i, elem) in lines.iter().enumerate() {
-//         if col_width.len() <= i {
-//             col_width.push(elem.len());
-//         } else if elem.len() > col_width[i] {
-//             col_width[i] = elem.len();
-//         }
-//     }
-//     // }
-//     col_width
-// }
-
-//-------------------------col_width FUNC
+//-------------------------total_blocks FUNC
 pub fn total_blocks(dir_path: &Path, flag_a: bool) -> u64 {
     let mut total: u64 = 0;
     if flag_a {
@@ -53,7 +38,7 @@ pub fn total_blocks(dir_path: &Path, flag_a: bool) -> u64 {
     total / 2
 }
 
-//-------------------------col_width FUNC
+//-------------------------find_major_minor FUNC
 pub fn find_major_minor(path: &Path) -> Option<(u64, u64)> {
     let meta = fs::metadata(path).ok()?;
     if !(meta.file_type().is_block_device() || meta.file_type().is_char_device()) {
@@ -65,7 +50,7 @@ pub fn find_major_minor(path: &Path) -> Option<(u64, u64)> {
     Some((major, minor))
 }
 
-//-------------------------col_width FUNC
+//-------------------------find_group_owner FUNC
 pub fn find_group_owner(info: (uid_t, bool)) -> String {
     let name = if info.1 {
         get_user_by_uid(info.0).map(|u| u.name().to_owned())
@@ -83,7 +68,7 @@ pub fn find_group_owner(info: (uid_t, bool)) -> String {
     }
 }
 
-//-------------------------col_width FUNC
+//-------------------------format_time FUNC
 pub fn format_time(meta: &Metadata) -> String {
     if let Ok(modified) = meta.modified() {
         let mut date: DateTime<Local> = modified.into();
@@ -100,7 +85,7 @@ pub fn format_time(meta: &Metadata) -> String {
     }
 }
 
-//-------------------------col_width FUNC
+//-------------------------padding FUNC
 pub fn padding(file: FileData, width: usize, is_last: bool, flags: &Flags) -> String {
     // lines[i].ftype.file_color(files_name[i].clone())
     if is_last {
@@ -112,6 +97,7 @@ pub fn padding(file: FileData, width: usize, is_last: bool, flags: &Flags) -> St
     }
 }
 
+//-------------------------padding FUNC
 pub fn sort_files(mut files: Vec<FileData>, flag: &Flags) -> Vec<FileData> {
     files.sort_by(|f1, f2| {
         let s1 = f1.name.as_str();
@@ -134,12 +120,12 @@ pub fn sort_files(mut files: Vec<FileData>, flag: &Flags) -> Vec<FileData> {
     new_files
 }
 
-//-------------------------col_width FUNC
+//-------------------------is_executable FUNC
 pub fn is_executable(metadata: &Metadata) -> bool {
     (metadata.mode() & 0o111) != 0
 }
 
-//-------------------------col_width FUNC
+//-------------------------parse_args FUNC
 pub fn parse_args(args: Vec<String>) -> Result<(Flags, Vec<String>), ()> {
     let mut flags = Flags::new();
     let mut paths = Vec::new();
@@ -182,24 +168,22 @@ pub fn process_dirs(path: &str, flags: &Flags) {
     };
     let mut files: Vec<FileData> = dir_data
         .filter_map(Result::ok)
-        .filter_map(|entry| FileData::from_path(&entry.path()))
+        .filter_map(|entry| FileData::file_meta(&entry.path()))
         .collect();
     if flags.a_flag {
-        if let Some(dot) = FileData::from_path(&Path::new(path).join(".")) {
+        if let Some(dot) = FileData::file_meta(&Path::new(path).join(".")) {
             let mut dot = dot;
             dot.name = ".".to_string();
             files.push(dot);
         }
 
-        if let Some(parent) = FileData::from_path(&Path::new(path).join("..")) {
+        if let Some(parent) = FileData::file_meta(&Path::new(path).join("..")) {
             let mut parent = parent;
             parent.name = "..".to_string();
             files.push(parent);
         }
     }
-    // println!("")
-    list_directory(&sort_files(files, flags), flags, Path::new(path));
-    // println!("FILES--> {:?}", files)
+    list_dirs(&sort_files(files, flags), flags, Path::new(path));
 }
 
 //-------------------------process_files FUNC
@@ -207,7 +191,7 @@ pub fn process_files(files: &[String], flags: &Flags) {
     let mut files_arr = Vec::new();
 
     for path in files {
-        if let Some(file) = FileData::from_path(Path::new(path)) {
+        if let Some(file) = FileData::file_meta(Path::new(path)) {
             files_arr.push(file);
         } else {
             eprintln!("ls: cannot access '{}'", path);
@@ -246,7 +230,6 @@ pub fn print_now(lines: &Vec<FileData>, flags: &Flags) {
     let cols = (term_width / col_width).max(1);
 
     if files_name.len() <= cols {
-        // println!("{}", files_name.join("  "));
         for i in 0..lines.len() {
             print!("{} ", Files::format_file(&lines[i], flags));
         }
@@ -332,8 +315,8 @@ pub fn display_line(lines: Vec<(Vec<String>, FileData)>, flag: &Flags) {
     }
 }
 
-//-------------------------list_directory FUNC
-pub fn list_directory(list_path: &Vec<FileData>, flags: &Flags, path: &Path) {
+//-------------------------list_dirs FUNC
+pub fn list_dirs(list_path: &Vec<FileData>, flags: &Flags, path: &Path) {
     if !flags.l_flag {
         print_now(list_path, flags)
     } else {
@@ -378,6 +361,7 @@ pub fn build_permissions(meta: &Metadata, has_extra_attrs: bool) -> String {
     perm_string
 }
 
+//-------------------------handle_glob FUNC
 pub fn handle_glob(paths: &mut Vec<String>) {
     let mut i = 0;
     while i < paths.len() {

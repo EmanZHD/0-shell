@@ -1,4 +1,4 @@
-use crate::commands::ls::ls_models::{ Flags };
+use crate::commands::ls::ls_models::{ Flags, FileInfo };
 use crate::commands::ls::ls_tools::{ parse_args, process_dirs, process_files, handle_glob };
 use std::{ fs };
 use crate::Params;
@@ -9,6 +9,10 @@ pub fn handle_path(paths: Vec<String>, flags: &Flags) -> (Vec<String>, Vec<Strin
     let mut dirs = Vec::new();
 
     for path in paths {
+        let name = FileInfo::base_name(&path);
+        if !flags.hidden_file(name) {
+            continue;
+        }
         match fs::symlink_metadata(&path) {
             Ok(metadata) => {
                 let symlink_cond =
@@ -41,7 +45,7 @@ pub fn ls(params: &mut Params) {
 
     handle_glob(&mut paths);
     let (files, dirs) = handle_path(paths, &flags);
-    
+
     process_files(&files, &flags);
     for (i, dir) in dirs.iter().enumerate() {
         if dirs.len() > 1 {

@@ -32,7 +32,7 @@ impl FileInfo {
         let num_links = meta.nlink();
 
         if meta.file_type().is_char_device() || meta.file_type().is_block_device() {
-            if let Some((major, minor)) = find_major_minor(&file.full_path) {
+            if let Some((major, minor)) = find_major_minor(&file.fpath) {
                 f_major.push_str(&format!("{},", major));
                 f_minor.push_str(&minor.to_string());
             }
@@ -43,7 +43,7 @@ impl FileInfo {
         let owner_id = find_group_owner((meta.uid(), true));
         let group_id = find_group_owner((meta.gid(), false));
         let format_time = format_time(meta);
-        let f_permission = build_permissions(meta, Files::has_extra_attrs(&file.full_path));
+        let f_permission = build_permissions(meta, Files::has_extra_attrs(&file.fpath));
         Self {
             f_permission,
             num_links,
@@ -53,6 +53,12 @@ impl FileInfo {
             f_minor,
             format_time,
         }
+    }
+    pub fn base_name(path: &str) -> &str {
+        Path::new(path)
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("")
     }
 }
 
@@ -164,7 +170,7 @@ impl Flags {
 #[derive(Debug, Clone)]
 pub struct FileData {
     pub name: String,
-    pub full_path: PathBuf,
+    pub fpath: PathBuf,
     pub metadata: Metadata,
     pub ftype: Files,
     pub sym_path: Option<PathBuf>,
@@ -172,7 +178,7 @@ pub struct FileData {
 }
 
 impl FileData {
-    pub fn from_path(path: &Path) -> Option<Self> {
+    pub fn file_meta(path: &Path) -> Option<Self> {
         let metadata = fs::symlink_metadata(path).ok()?;
         let name = path
             .file_name()
@@ -205,7 +211,7 @@ impl FileData {
 
         Some(FileData {
             name,
-            full_path: path.to_path_buf(),
+            fpath: path.to_path_buf(),
             metadata,
             ftype,
             sym_path,
