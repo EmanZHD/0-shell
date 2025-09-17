@@ -1,58 +1,20 @@
+use std::path::{ Path, PathBuf };
+use std::fs::{ Metadata };
+use std::{ fs };
+use std::os::unix::fs::{ MetadataExt, FileTypeExt };
 use crate::commands::ls::ls_tools::{
-    find_symlink,
-    col_width,
-    find_major_minor,
+    is_executable,
     find_group_owner,
+    find_major_minor,
     format_time,
-    padding,
+    build_permissions,
 };
 use colored::{ ColoredString, Colorize };
-use is_executable::is_executable;
-use std::path::Path;
-use std::{ fs, os::unix::fs::FileTypeExt };
 use xattr::list;
-use std::fs::{ Metadata };
-use std::os::unix::fs::MetadataExt;
-use terminal_size::{ terminal_size, Width };
-use console::measure_text_width;
 
-#[derive(Debug, Default)]
-pub struct Flags {
-    pub f_flag: bool,
-    pub a_flag: bool,
-    pub l_flag: bool,
-}
-
-impl Flags {
-    pub fn hidden_file(&self, name: &str) -> bool {
-        self.a_flag || !name.starts_with('.')
-    }
-
-    pub fn line_data(&self, file_name: &str, path_name: &str) -> Vec<String> {
-        let mut line = Vec::new();
-        let file_data = FileData::extarct_data(file_name, path_name);
-        if self.l_flag {
-            line.extend(
-                vec![
-                    file_data.f_permission,
-                    file_data.num_links.to_string(),
-                    file_data.owner_id,
-                    file_data.group_id,
-                    file_data.f_major,
-                    file_data.f_minor,
-                    file_data.format_time
-                ]
-            );
-            line.push(file_name.to_string());
-        } else {
-            line.push(file_name.to_string());
-        }
-        line
-    }
-}
-
+//-------------------------FileInfo STRUCT
 #[derive(Debug)]
-pub struct FileData {
+pub struct FileInfo {
     pub f_permission: String,
     pub num_links: u64,
     pub owner_id: String,
@@ -62,18 +24,15 @@ pub struct FileData {
     pub format_time: String,
 }
 
-impl FileData {
-    pub fn extarct_data(file_name: &str, path_name: &str) -> Self {
-        let path = format!("{}/{}", path_name, file_name);
+impl FileInfo {
+    pub fn extract_data(file: &FileData) -> Self {
         let mut f_major = String::new();
         let mut f_minor = String::new();
-        let meta: Metadata = fs
-            ::symlink_metadata(Path::new(&path))
-            .or_else(|_| fs::symlink_metadata(Path::new(file_name)))
-            .expect("can't read data");
+        let meta: &Metadata = &file.metadata;
         let num_links = meta.nlink();
+
         if meta.file_type().is_char_device() || meta.file_type().is_block_device() {
-            if let Some((major, minor)) = find_major_minor(&path) {
+            if let Some((major, minor)) = find_major_minor(&file.fpath) {
                 f_major.push_str(&format!("{},", major));
                 f_minor.push_str(&minor.to_string());
             }
@@ -83,16 +42,8 @@ impl FileData {
 
         let owner_id = find_group_owner((meta.uid(), true));
         let group_id = find_group_owner((meta.gid(), false));
-        let format_time = format_time(&meta);
-        let mut f_permission = format!("{:?}", meta.permissions())
-            .split_whitespace()
-            .collect::<Vec<&str>>()[4]
-            .trim_matches(|e| (e == '(' || e == ')'))
-            .to_string();
-
-        if Files::has_extra_attrs(&path) {
-            f_permission.push('+');
-        }
+        let format_time = format_time(meta);
+        let f_permission = build_permissions(meta, Files::has_extra_attrs(&file.fpath));
         Self {
             f_permission,
             num_links,
@@ -103,9 +54,16 @@ impl FileData {
             format_time,
         }
     }
+    pub fn base_name(path: &str) -> &str {
+        Path::new(path)
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("")
+    }
 }
 
-#[derive(Debug, PartialEq)]
+//-------------------------Files STRUCT
+#[derive(Debug, PartialEq, Clone)]
 pub enum Files {
     Symlink,
     Dir,
@@ -113,40 +71,50 @@ pub enum Files {
     Exec,
     Fifo,
     Reg,
-    Dev,
+    BlockDev,
+    CharDev,
 }
 
 impl Files {
-    pub fn new_file(p_: &Path) -> Self {
-        if let Ok(path) = fs::symlink_metadata(p_) {
-            if path.file_type().is_socket() {
-                return Files::Socket;
-            }
-            if path.file_type().is_fifo() {
-                return Files::Fifo;
-            }
-            if path.file_type().is_block_device() || path.file_type().is_char_device() {
-                return Files::Dev;
-            }
-            if p_.is_file() && is_executable(p_) {
-                return Files::Exec;
-            }
+    pub fn file_type(metadata: &Metadata) -> Files {
+        let ft = metadata.file_type();
+        if ft.is_symlink() {
+            Files::Symlink
+        } else if ft.is_dir() {
+            Files::Dir
+        } else if ft.is_socket() {
+            Files::Socket
+        } else if ft.is_fifo() {
+            Files::Fifo
+        } else if ft.is_block_device() {
+            Files::BlockDev
+        } else if ft.is_char_device() {
+            Files::CharDev
+        } else if is_executable(metadata) {
+            Files::Exec
+        } else {
+            Files::Reg
         }
-        if p_.is_symlink() {
-            return Files::Symlink;
-        }
-        if p_.is_dir() {
-            return Files::Dir;
-        }
-        Files::Reg
     }
 
+    pub fn file_char(&self) -> char {
+        match self {
+            Files::Dir => 'd',
+            Files::Symlink => 'l',
+            Files::Socket => 's',
+            Files::Fifo => 'p',
+            Files::BlockDev => 'b',
+            Files::CharDev => 'c',
+            Files::Exec => '-',
+            Files::Reg => '-',
+        }
+    }
     pub fn file_color(&self, path_str: &str) -> ColoredString {
         match self {
             Files::Dir => path_str.bold().blue(),
             Files::Exec => path_str.bold().green(),
             Files::Socket => path_str.bold().magenta(),
-            Files::Fifo | Files::Dev => path_str.bold().yellow().on_black(),
+            Files::Fifo | Files::BlockDev | Files::CharDev => path_str.bold().yellow().on_black(),
             Files::Symlink => path_str.bold().cyan(),
             _ => path_str.white(),
         }
@@ -165,101 +133,89 @@ impl Files {
         s
     }
 
-    pub fn file_format(file_name: &str, path: &str, flag: &Flags) -> String {
-        let new_path = Path::new(&path).join(file_name);
-        if let Ok(meta) = fs::symlink_metadata(&new_path) {
-            if meta.file_type().is_symlink() {
-                let sym_file = find_symlink(&new_path);
-                if !sym_file.is_empty() {
-                    let sym_type = Files::new_file(Path::new(&format!("/{}", sym_file)));
-                    if flag.l_flag {
-                        return format!("{} -> {}", Files::Symlink.file_color(file_name), if
-                            flag.f_flag
-                        {
-                            sym_type.file_symbol(&sym_type.file_color(&sym_file))
-                        } else {
-                            sym_type.file_color(&sym_file).to_string()
-                        });
-                    }
-
-                    if flag.f_flag {
-                        return Files::Symlink.file_symbol(&Files::Symlink.file_color(file_name));
-                    }
-
-                    return Files::Symlink.file_color(file_name).to_string();
-                }
-            }
-        }
-
-        let f_type = Files::new_file(&new_path);
-        if flag.f_flag {
-            return f_type.file_symbol(&f_type.file_color(file_name));
-        }
-        f_type.file_color(file_name).to_string()
-    }
-
-    pub fn display_line(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
-        let col_width = col_width(&lines);
-        for line in &lines {
-            for (i, elem) in line.iter().enumerate() {
-                let file_name = i == line.len() - 1;
-                let is_num: bool = elem.chars().all(|e| (e.is_ascii_digit() || e == ','));
-                if file_name {
-                    print!("{:<w$} ", Files::file_format(elem, path, flag), w = col_width[i]);
-                } else if is_num {
-                    print!("{:>w$} ", elem, w = col_width[i]);
-                } else {
-                    print!("{:<w$} ", elem, w = col_width[i]);
-                }
-            }
-            println!();
-        }
-    }
-
-    pub fn has_extra_attrs(path: &str) -> bool {
+    pub fn has_extra_attrs(path: &Path) -> bool {
         match list(path) {
             Ok(mut attrs) => attrs.next().is_some(),
             Err(_) => false,
         }
     }
 
-    pub fn display_file(lines: Vec<Vec<String>>, path: &str, flag: &Flags) {
-        // println!("TEST -> {:?}", lines);
-        let files_name: Vec<String> = lines
-            .iter()
-            .flatten()
-            .map(|s| {
-                // println!("COLORE IT -> {}", Files::file_format(s, path, flag).to_string());
-                return Files::file_format(s, path, flag).to_string();
-            })
-            .collect();
-
-        let max_len = files_name
-            .iter()
-            .map(|s| measure_text_width(s))
-            .max()
-            .unwrap_or(0);
-        let col_width = max_len + 2;
-        let term_width = terminal_size()
-            .map(|(Width(w), _)| w as usize)
-            .unwrap_or(80);
-        let cols = (term_width / col_width).max(1);
-
-        if files_name.len() <= cols {
-            println!("{}", files_name.join("  "));
-            return;
+    pub fn format_file(file: &FileData, flags: &Flags) -> String {
+        if flags.f_flag {
+            return file.ftype.file_symbol(&file.ftype.file_color(&file.name));
+        } else {
+            return file.ftype.file_color(&file.name).to_string();
         }
+    }
+}
 
-        let rows = (files_name.len() + cols - 1) / cols;
-        for row in 0..rows {
-            for col in 0..cols {
-                let i = col * rows + row;
-                if i < files_name.len() {
-                    let is_last = col == cols - 1 || i + rows >= files_name.len();
-                    print!("{}", padding(files_name[i].clone(), col_width, is_last));
-                }
+//-------------------------FLAGS STRUCT
+#[derive(Debug, Default)]
+pub struct Flags {
+    pub f_flag: bool,
+    pub a_flag: bool,
+    pub l_flag: bool,
+}
+
+impl Flags {
+    pub fn new() -> Self {
+        Flags { l_flag: false, a_flag: false, f_flag: false }
+    }
+    pub fn hidden_file(&self, name: &str) -> bool {
+        self.a_flag || !name.starts_with('.')
+    }
+}
+
+//-------------------------FileData STRUCT
+#[derive(Debug, Clone)]
+pub struct FileData {
+    pub name: String,
+    pub fpath: PathBuf,
+    pub metadata: Metadata,
+    pub ftype: Files,
+    pub sym_path: Option<PathBuf>,
+    pub sym_type: Option<Files>,
+}
+
+impl FileData {
+    pub fn file_meta(path: &Path) -> Option<Self> {
+        let metadata = fs::symlink_metadata(path).ok()?;
+        let name = path
+            .file_name()
+            .map(|s| s.to_string_lossy().into_owned())
+            .unwrap_or_else(|| path.to_string_lossy().into_owned());
+        let ftype = Files::file_type(&metadata);
+
+        let (sym_path, sym_type) = if ftype == Files::Symlink {
+            if let Ok(target) = fs::read_link(path) {
+                let abs_target = if target.is_absolute() {
+                    target.clone()
+                } else {
+                    path.parent()
+                        .unwrap_or_else(|| Path::new("/"))
+                        .join(&target)
+                };
+
+                let target_type = fs
+                    ::metadata(&abs_target)
+                    .ok()
+                    .map(|m| Files::file_type(&m));
+
+                (Some(abs_target), target_type)
+            } else {
+                (None, None)
             }
-            println!();
-        }
+        } else {
+            (None, None)
+        };
+
+        Some(FileData {
+            name,
+            fpath: path.to_path_buf(),
+            metadata,
+            ftype,
+            sym_path,
+            sym_type,
+        })
     }
 }

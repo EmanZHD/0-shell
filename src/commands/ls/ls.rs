@@ -1,95 +1,58 @@
-use crate::commands::ls::ls_tools::{ parse_args, total_blocks, format_lines };
-use crate::commands::ls::ls_models::{ Files, Flags };
-use std::path::Path;
-use std::{ env, fs, io };
-use std::io::ErrorKind;
+use crate::commands::ls::ls_models::{ Flags, FileInfo };
+use crate::commands::ls::ls_tools::{ parse_args, process_dirs, process_files, handle_glob };
+use std::{ fs };
 use crate::Params;
 
-// ls_helper fn
-fn ls_helper(path_str: &str, path_name: &str, flag: &Flags) -> Result<Vec<Vec<String>>, io::Error> {
-    let mut content: Vec<String> = vec![];
-    let path = Path::new(path_name);
-    if (path.is_symlink() && flag.l_flag) || (path.is_symlink() && flag.f_flag) {
-        let data = flag.line_data(path_str, path_name);
-        if flag.l_flag {
-            println!(
-                "{} {}",
-                data[0..data.len() - 1].join(" "),
-                Files::file_format(path_name, path_str, &flag)
-            );
-        } else {
-            println!("{}", Files::Symlink.file_symbol(&Files::Symlink.file_color(&path_str)));
+//-------------------------handle_path FUNC
+pub fn handle_path(paths: Vec<String>, flags: &Flags) -> (Vec<String>, Vec<String>) {
+    let mut files = Vec::new();
+    let mut dirs = Vec::new();
+
+    for path in paths {
+        let name = FileInfo::base_name(&path);
+        if !flags.hidden_file(name) {
+            continue;
         }
-        return Ok(vec![]);
-    }
-    match fs::read_dir(path_str) {
-        Ok(dir_entries) => {
-            for entry in dir_entries.flatten() {
-                if let Some(file_name) = entry.file_name().to_str() {
-                    content.push(file_name.to_owned());
+        match fs::symlink_metadata(&path) {
+            Ok(metadata) => {
+                let symlink_cond =
+                    metadata.file_type().is_symlink() && !flags.l_flag && !flags.f_flag;
+                if metadata.is_dir() || symlink_cond {
+                    dirs.push(path);
+                } else {
+                    files.push(path);
                 }
             }
-            if flag.a_flag {
-                content.insert(0, ".".to_owned());
-                content.insert(1, "..".to_owned());
-            }
-        }
-        Err(e) => {
-            if e.kind() == ErrorKind::PermissionDenied {
-                eprintln!("ls: cannot open directory '{}': Permission denied", path_str);
-                return Err(e);
-            } else {
-                content.push(path_str.to_owned());
+            Err(_) => {
+                eprintln!("ls: cannot access this dir'{}'", path);
             }
         }
     }
-    Ok(format_lines(&mut content, flag, path_str))
+    files.sort();
+    dirs.sort();
+
+    (files, dirs)
 }
 
-//ls fn
+//-------------------------ls FUNC
 pub fn ls(params: &mut Params) {
-    let (flags, mut new_args) = match parse_args(params.args.clone()) {
-        Ok((flags, new_args)) => (flags, new_args),
+    let (flags, mut paths) = match parse_args(params.args.clone()) {
+        Ok((flags, paths)) => (flags, paths),
         Err(()) => {
             return;
         }
     };
- 
-    new_args.sort();
-    for (i, path_str) in new_args.iter().enumerate() {
-        let mut path: String = path_str.to_string();
-        if let Ok(curr_dir) = env::current_dir() {
-            if let Some(s) = curr_dir.to_str() {
-                if s == "/" {
-                    path = s.to_string();
-                }
-            }
-        }
-        let path_name = Path::new(&path);
-        match path_name.symlink_metadata() {
-            Ok(path_data) => {
-                if new_args.len() > 1 && path_data.is_dir() {
-                    println!("{}:", path_str);
-                }
-                if let Ok(lines) = ls_helper(&path, path_str, &flags) {
-                    if
-                        !path_name.is_symlink() &&
-                        flags.l_flag &&
-                        Files::new_file(path_name) != Files::Reg
-                    {
-                        println!("total {}", total_blocks(path_name, flags.a_flag));
-                    }
-                    if flags.l_flag {
-                        Files::display_line(lines, &path, &flags);
-                    } else {
-                        Files::display_file(lines, &path, &flags);
-                    }
-                }
-            }
-            Err(_) => eprintln!("ls: cannot access '{}': No such file or directory", path),
-        }
 
-        if i != new_args.len() - 1 && !new_args.is_empty() {
+    handle_glob(&mut paths);
+    let (files, dirs) = handle_path(paths, &flags);
+
+    process_files(&files, &flags);
+    for (i, dir) in dirs.iter().enumerate() {
+        if dirs.len() > 1 {
+            println!("{}:", dir);
+        }
+        process_dirs(&dir, &flags);
+        if i < dirs.len() - 1 {
             println!();
         }
     }
