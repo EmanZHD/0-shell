@@ -29,116 +29,109 @@ pub fn cp_algo(input: &mut Params) {
     let exists_source = src.exists();
     let exists_dist = dst.exists();
     let source_is_file = src.is_file();
-    let dis_is_file = dst.is_file();
+    let dst_is_file = dst.is_file();
 
-    if args[0] == args[1] {
-        eprintln!("cp: '{}' and '{}' are the same file", args[0], args[1]);
-        return;
-    }
+    let _dir = env::current_dir();
 
     if args[0].chars().nth(0) == Some('*') {
-        star_source(&args[0], dst, dis_is_file);
+        star_source(&args[0], dst, dst_is_file);
         return;
     }
 
-    let metadata = match std::fs::symlink_metadata(&dst) {
-        Ok(r) => r,
-        Err(_err) => {
-            eprintln!("Failed to read metadata for '{}'", dst.display());
-            return;
-        }
-    };
-
-    if metadata.file_type().is_symlink() {
+    if is_smylink(&dst) || is_smylink(&src) {
         copy_file(&args[0], &args[1]);
         return;
     }
 
-    match (exists_source, exists_dist, source_is_file, dis_is_file) {
-        (false, _, _, _) => eprintln!("cp: cannot stat '{}': No such file or directory", args[0]),
-        (true, _, false, _) => eprintln!("cp: -r not specified; omitting directory '{}'", args[0]),
+    if !exists_source {
+        eprintln!("cp: cannot stat '{}': No such file or directory", args[0]);
+        return;
+    }
 
-        (true, false, true, _) => {
-            let _source = src;
-            let destination = dst;
-            if let Some(parent) = destination.parent() {
-                if !parent.exists() {
-                    eprintln!(
-                        "cp: cannot create regular file '{}': No such file or directory",
-                        destination.display()
-                    );
-                } else {
-                    copy_file(&args[0], &args[1]);
+    if !source_is_file {
+        eprintln!("cp: '{}' is a directory — sorry recursive copy isn’t supported!", args[0]);
+        return;
+    }
+
+    match (exists_dist, dst_is_file) {
+        (false, _) => {
+            if args[1].contains("/") {
+                if let Some(parent) = dst.parent() {
+                    if !parent.exists() {
+                        eprintln!(
+                            "cp: cannot create regular file '{}': No such file or directory",
+                            dst.display()
+                        );
+                        return;
+                    }
                 }
             }
+
             copy_file(&args[0], &args[1]);
         }
 
-        (true, true, true, false) => {
+        (true, false) => {
             let finle_dis = dst.join(&args[0]);
             copy_file(&args[0], finle_dis.to_str().expect("Err in convert"));
         }
 
-        (true, true, true, true) => {
-            let _source = src;
-            let _destination = dst;
+        (true, true) => {
             copy_file(&args[0], &args[1]);
         }
-
-        (_, _, _, _) => {}
     }
 }
 
-pub fn multiple_source(files: Vec<String>) {
-    let destination = Path::new(&files[files.len() - 1]);
-    if !destination.exists() {
-        eprintln!("cp: target '{}': No such file or directory", destination.display());
-        return;
-    }
-    if destination.exists() && destination.is_file() {
-        eprintln!("cp: target '{}': Not a directory", destination.display());
-        return;
-    }
-    for (i, element) in files.iter().enumerate() {
-        if i == files.len() - 1 {
-        } else {
-            let tomp = Path::new(element);
-            let metadata = match std::fs::symlink_metadata(&tomp) {
-                Ok(r) => r,
-                Err(_err) => {
-                    eprintln!("Failed to read metadata for '{}'", tomp.display());
-                    continue;
-                }
-            };
-
-            if metadata.file_type().is_symlink() {
-                match std::fs::remove_file(&tomp) {
-                    Ok(_) => {
-                        continue;
-                    }
-                    Err(_err) => {
-                        eprintln!(
-                            "rm: can't remove '{}': No such file or directory",
-                            tomp.display()
-                        );
-                    }
-                }
-            }
-            if !tomp.exists() && element.chars().nth(0) != Some('*') {
-                eprintln!("cp: cannot stat '{}': No such file or directory", element);
-            } else if tomp.is_dir() {
-                eprintln!("cp: -r not specified; omitting directory '{}'", element);
-            } else if element.chars().nth(0) == Some('*') {
-                star_source(element, destination, false);
-            } else {
-                let source = Path::new(element);
-                let dis_path = destination.join(source);
-                copy_file(
-                    source.to_str().expect("Err in convert"),
-                    dis_path.to_str().expect("Err in convert")
-                );
-            }
+pub fn is_smylink(element: &Path) -> bool {
+    if let Ok(metadata) = std::fs::symlink_metadata(&element) {
+        if metadata.file_type().is_symlink() {
+            return true;
         }
+    }
+    return false;
+}
+
+// For copying multiple sources to a destination
+
+pub fn multiple_source(files: Vec<String>) {
+    let des = &files[files.len() - 1];
+    let destination_path = Path::new(&files[files.len() - 1]);
+    if !destination_path.exists() {
+        eprintln!("cp: target '{}': No such file or directory", destination_path.display());
+        return;
+    }
+    if destination_path.exists() && destination_path.is_file() {
+        eprintln!("cp: target '{}': Not a directory", destination_path.display());
+        return;
+    }
+
+    for element in &files[..files.len() - 1] {
+        let tomp = Path::new(element);
+
+        if is_smylink(&destination_path) || is_smylink(&tomp) {
+            copy_file(element, des);
+            return;
+        }
+
+        if !tomp.exists() && element.chars().nth(0) != Some('*') {
+            eprintln!("cp: cannot stat '{}': No such file or directory", element);
+            continue;
+        }
+        if tomp.is_dir() {
+            eprintln!("cp: '{}' is a directory — sorry recursive copy isn’t supported!", element);
+            continue;
+        }
+
+        if element.chars().nth(0) == Some('*') {
+            star_source(element, destination_path, false);
+            continue;
+        }
+
+        let source = Path::new(element);
+        let dis_path = destination_path.join(source);
+        copy_file(
+            source.to_str().expect("Err in convert"),
+            dis_path.to_str().expect("Err in convert")
+        );
     }
 }
 
@@ -154,18 +147,17 @@ pub fn star_source(element: &str, destination: &Path, if_file: bool) {
                 let path = item.expect("expected at least one file entry").path();
                 if path.is_file() {
                     if let Some(_file_name) = path.file_name() {
-                        let file_name = path.file_name().unwrap();
-                        if file_name.to_string_lossy().ends_with(suffix) {
+                        if _file_name.to_string_lossy().ends_with(suffix) {
                             found_file = true;
 
-                            let source = Path::new(file_name);
+                            let source = Path::new(_file_name);
                             if if_file {
                                 copy_file(
                                     source.to_str().expect("Err in convert"),
                                     destination.to_str().expect("Err in convert")
                                 );
                             } else {
-                                let dis_path = destination.join(file_name);
+                                let dis_path = destination.join(_file_name);
                                 copy_file(
                                     source.to_str().expect("Err in convert"),
                                     dis_path.to_str().expect("Err in convert")
@@ -178,7 +170,7 @@ pub fn star_source(element: &str, destination: &Path, if_file: bool) {
                         let file_name = path.file_name().unwrap();
                         if file_name.to_string_lossy().ends_with(suffix) {
                             eprintln!(
-                                "cp: -r not specified; omitting directory '{}'",
+                                "cp: '{}' is a directory — sorry recursive copy isn’t supported!",
                                 file_name.display()
                             );
                         }
@@ -213,8 +205,6 @@ fn copy_file(source: &str, destination: &str) {
         Err(e) => {
             if e.kind() == ErrorKind::PermissionDenied {
                 eprintln!("cp: cannot create regular file '{}': Permission denied 🔒", destination);
-            } else {
-                eprintln!("cp: cannot create regular file '{}': {}", destination, e);
             }
             return;
         }
@@ -224,7 +214,8 @@ fn copy_file(source: &str, destination: &str) {
 
     if
         destination == format!("{}/{}", path.expect("REASON").to_string_lossy(), source) ||
-        destination == format!("./{}", source)
+        destination == format!("./{}", source) ||
+        source == destination
     {
         eprintln!("cp: '{}' and '{}' are the same file.", source, &destination);
         return;
