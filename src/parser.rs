@@ -37,7 +37,7 @@ pub fn print_prompt(params: &Params) {
         Ok(()) => {
             return;
         }
-        _ => println!("broken pipe"),
+        _ => println!("⛔ broken pipe"),
     }
 }
 
@@ -70,7 +70,7 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
 
             '\'' | '\"' if in_quotes && c == quote => {
                 in_quotes = false; // fermeture des guillemets du m type
-                // Ajouter le token même s'il est vide (cas des "")
+                // Ajouter new_input même s'il est vide (cas des "")
                 new.push(new_input.clone());
                 new_input = String::new();
                 found_quotes = false;

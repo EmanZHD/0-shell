@@ -20,7 +20,7 @@ use commands::history::history;
 
 /*********🌟 handle_cmds 🌟********/
 pub fn handle_cmds(params: &mut Params, keyword: String) {
-    // Verifier si la commande est vide (cas de "")
+    // cas de "" keyword
     if keyword.is_empty() {
         println!("0-shell: permission denied:");
         return;

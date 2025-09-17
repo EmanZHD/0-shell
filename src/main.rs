@@ -27,7 +27,7 @@ impl Params {
 
 fn main() {
     if !atty::is(atty::Stream::Stdout) || !atty::is(atty::Stream::Stderr) {
-        eprintln!("Error: Avoid broken pipe");
+        eprintln!("⛔ Error: Avoid broken pipe");
         std::process::exit(1);
     }
 
