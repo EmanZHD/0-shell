@@ -51,11 +51,6 @@ fn move_file(source: &str, des: &str, dest_is_dir: bool) -> Result<(), Box<dyn s
         Path::new(des).to_path_buf()
     };
 
-    if dest_path.exists(){
-        eprintln!("{}", red(&format!("😸​ mv: sourse and distination are the same file")));
-        return Ok(());
-    }
-
     match fs::rename(source, &dest_path) {
         Ok(_) => {
             println!("{}", green(&format!("✓ Moved '{}' to '{}'", 
