@@ -67,7 +67,7 @@ fn parsing(input: &str) -> Result<Vec<String>, String> {
                 quote = c;
                 found_quotes = true;
             }
-
+            
             '\'' | '\"' if in_quotes && c == quote => {
                 in_quotes = false; // fermeture des guillemets du m type
                 // Ajouter new_input même s'il est vide (cas des "")
