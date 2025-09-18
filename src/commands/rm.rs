@@ -7,7 +7,7 @@ use std::io::Write;
 use crate::Params;
 pub fn rm(params: &mut Params) {
     match params.args.len() {
-        0 => eprintln!("rm: missing operand"),
+        0 => eprintln!("rm: 😌 missing operand"),
         _ => {
             match params.args[0].as_str() {
                 "-r" => {
@@ -22,8 +22,7 @@ pub fn rm(params: &mut Params) {
                             match std::fs::remove_file(&path) {
                                 Ok(_) => {
                                 }
-                                Err(_err) => eprintln!("rm: can't remove '{}': No such file or directory " , path.display()),
-                                
+                                Err(_err) => eprintln!("rm: 🙂 can't remove '{}': No such file or directory " , path.display()),
                             }
                         }
 
@@ -38,7 +37,7 @@ pub fn rm(params: &mut Params) {
                             }
                         } else {
                             eprintln!(
-                                "rm: cannot remove '{}': No such file or directory",
+                                "rm: 🙂 cannot remove '{}': No such file or directory",
                                 path.display()
                             );
                         }
@@ -58,7 +57,7 @@ pub fn rm(params: &mut Params) {
                                     continue;
                                 }
                                 Err(_err) => {
-                                    eprintln!("rm: can't remove '{}': No such file or directory " , path.display());
+                                    eprintln!("rm: 🙂 can't remove '{}': No such file or directory " , path.display());
                                 }
                             }
                         }
@@ -67,11 +66,11 @@ pub fn rm(params: &mut Params) {
                             if path.is_file() {
                                 is_file(path);
                             } else {
-                                eprintln!("rm: cannot remove '{}': Is a directory", path.display());
+                                eprintln!("rm: 🙂 cannot remove '{}': Is a directory", path.display());
                             }
                         } else {
                             eprintln!(
-                                "rm: cannot remove '{}': No such file or directory",
+                                "rm: 🙂 cannot remove '{}': No such file or directory",
                                 path.display()
                             );
                         }
@@ -93,7 +92,7 @@ fn is_file(path: &Path) {
             Err(_) => eprintln!("Failed to remove {}", path.display()),
         }
     } else {
-        eprintln!("rm: remove write-protected regular empty file '{}'? ", path.display());
+        eprintln!("rm: ✋ remove write-protected regular empty file '{}'? ", path.display());
         io::stdout().flush().unwrap(); // printed befor waiting for input
 
         let mut response = String::new();
