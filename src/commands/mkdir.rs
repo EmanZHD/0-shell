@@ -13,7 +13,7 @@ pub fn mkdir(path: &mut Params) {
         } else {
             match fs::create_dir(&arg) {
                 Ok(_) => {}
-                Err(e) => eprintln!("Error creating directory '{}': {}", arg, e),
+                Err(_) => eprintln!("Error creating directory '{}'", arg),
             }
         }
     }

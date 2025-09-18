@@ -20,6 +20,7 @@ pub fn clear(parameters: &mut Params) {
 }
 
 /* note :
-\x1B[2J : Efface tout l'ecran
-\x1B[1;1H : Place le curseur en position 1,1
+\x1B[2J :  "Erase Display" efface tout le contenu visible de l'ecran
+\x1B[1;1H :  "Cursor Position" deplace le curseur à la ligne 1, colonne 1 
+        (le coin superieur gauche du terminal).
 */
