@@ -9,7 +9,6 @@ pub const TITLE: &str =
                                                 𝔟𝔬𝔬𝔱𝔦𝔫𝔤 𝔲𝔭..."#;
 
 pub const GREEN: &str = "\x1b[32m";
-// pub const GREEN : &str = "\x1b[38;5;218m";
 pub const RESET: &str = "\x1b[0m";
 
 
