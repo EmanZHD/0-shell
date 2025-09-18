@@ -15,7 +15,7 @@ pub fn rm(params: &mut Params) {
                         let path = Path::new(arg);
                          let metadata = match std::fs::symlink_metadata(&path) {
                             Ok(r) => r,
-                            Err(_err) => { eprintln!("Failed to read metadata for '{}'", path.display()) ;continue}
+                            Err(_err) => { continue}
                         };
 
                         if metadata.file_type().is_symlink() {
@@ -32,7 +32,7 @@ pub fn rm(params: &mut Params) {
                             } else {
                                 match fs::remove_dir_all(path) {
                                     Ok(_) => {}
-                                    Err(_) => eprintln!("Failed to remove {}", path.display()),
+                                    Err(_) => {},
                                 }
                             }
                         } else {
@@ -48,7 +48,7 @@ pub fn rm(params: &mut Params) {
                         let path = Path::new(arg);
                         let metadata = match std::fs::symlink_metadata(&path) {
                             Ok(r) => r,
-                            Err(_err) => { eprintln!("Failed to read metadata for '{}'", path.display()) ;continue}
+                            Err(_err) => { continue}
                         };
 
                         if metadata.file_type().is_symlink() {
@@ -89,7 +89,7 @@ fn is_file(path: &Path) {
     if is_writable(path) {
         match fs::remove_file(path) {
             Ok(_) => {}
-            Err(_) => eprintln!("Failed to remove {}", path.display()),
+            Err(_) => {},
         }
     } else {
         eprintln!("rm: ✋ remove write-protected regular empty file '{}'? ", path.display());
@@ -101,7 +101,7 @@ fn is_file(path: &Path) {
             if resp.starts_with('y')  {
                 match fs::remove_file(path) {
                     Ok(_) => {}
-                    Err(_) => eprintln!("Failed to remove {}", path.display()),
+                    Err(_) => {},
                 }
             }
         }
