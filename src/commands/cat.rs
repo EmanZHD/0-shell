@@ -10,10 +10,18 @@ pub fn cat(params: &mut Params) {
         }
     } else {
         for filename in &params.args {
-            if let Err(e) = cat_file(filename) {
-                eprintln!("{}", bold_red(&format!("☹️ cat: '{}': {} ", filename, e)));
+            // println!("heere == > {:?}", filename.len());
+            if params.args.len() == 1 && filename == "-s" {
+                let _ = only_cat();
+            } else if filename == "-s" {
+                continue;
+            } else {
+                if let Err(e) = cat_file(filename) {
+                    eprintln!("{}", bold_red(&format!("☹️ cat: '{}': {} ", filename, e)));
+                }
             }
         }
+        println!();
     }
 }
 
@@ -48,12 +56,18 @@ fn only_cat() -> Result<(), Box<dyn std::error::Error>> {
 
 // 💁‍♀️​ handle cat + plusieurs arg(files) 💁‍♀️​
 fn cat_file(filename: &str) -> Result<(), Box<dyn std::error::Error>> {
-    if filename == "-" || filename == "--" || (filename.starts_with("$") && filename.len() > 1) {
+    if filename == "-" || filename == "--" {
         return only_cat();
     }
     match fs::read(filename) {
         Ok(contents) => {
-            println!("{}", String::from_utf8_lossy(&contents));
+            let content = String::from_utf8_lossy(&contents);
+            if content.ends_with('\n') {
+                let trimmed = &content[..content.len()-1];
+                print!("{}", trimmed);
+            } else {
+                print!("{}", content);
+            }
             Ok(())
         }
         Err(e) => {
