@@ -8,7 +8,7 @@ pub fn mkdir(path: &mut Params) {
         let dir_path = Path::new(&arg);
         if dir_path.exists() {
             eprintln!("Directory '{}' already exists. 🐧", arg);
-        } else if arg.contains("-") {
+        } else if arg.starts_with("-") {
             eprintln!("Invalid name '{}': please avoid using '-' 🐧", arg);
         } else {
             match fs::create_dir(&arg) {
