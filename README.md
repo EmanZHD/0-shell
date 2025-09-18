@@ -111,10 +111,43 @@
 
 ---
 
-### 🔘 Bonus (if time allows)
-- Handle Ctrl+C (ignore interrupt without exiting)
-- Show prompt with current directory (`~/path $`)
-- Command history (store in Vec, navigate with up arrow)
-- Colorized output (directories blue, errors red, executables green)
+### 🔘 Usage
+
+### Install Rust (latest version)
+
+Follow the official installation guide:  
+https://www.rust-lang.org/tools/install
+
+Or run:
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+Then restart your terminal and verify with:
+
+```bash
+rustc --version
+```
+
+---
+
+### Build and Run
+
+```bash
+cargo build --release
+./target/release/0-shell
+```
+
+You will see the shell prompt:
+
+```text
+0-shell$ 
+```
+<div align="center">
+    <a href="https://github.com/EmanZHD/0-shell">
+        <img src="./docs/my_shella.png" height="" width="500px"/>
+    </a>
+</div>
+
 
 ---
