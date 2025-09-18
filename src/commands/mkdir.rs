@@ -4,7 +4,7 @@ use crate::Params;
 
 pub fn mkdir(path: &mut Params) {
     if path.args.len() == 0 {
-             eprintln!("mkdir: missing operand 🐧");
+        eprintln!("mkdir: missing operand 🐧");
         return;
     }
     for arg in path.args.clone() {
