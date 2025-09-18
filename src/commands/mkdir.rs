@@ -3,6 +3,10 @@ use std::path::Path;
 use crate::Params;
 
 pub fn mkdir(path: &mut Params) {
+    if path.args.len() == 0 {
+             eprintln!("mkdir: missing operand 🐧");
+        return;
+    }
     for arg in path.args.clone() {
         // Create a Path object from the directory path string
         let dir_path = Path::new(&arg);
